@@ -310,7 +310,7 @@ public class Message {
      *
      * @param sender user
      * @param recipient person their message file is with
-     * @param storeName potential store name, same "nil" rule
+     * @param storeName potential store name, if null, does not count
      * @param isBuyer if buyer or not
      * @return returnContents arrayList that contains file contents
      *
@@ -321,7 +321,7 @@ public class Message {
         String line = "";
         ArrayList<String> returnContents = new ArrayList<>();
 
-        if (storeName.equals("nil")) {
+        if (storeName == null) {
             if (isBuyer)
                 path = "data/buyers/" + sender + "/" + sender + recipient + ".txt";
             else

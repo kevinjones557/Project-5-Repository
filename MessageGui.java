@@ -1,21 +1,37 @@
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
-
-public class MessageGui extends JFrame implements Runnable{
-    private JLabel heading = new JLabel("Messaging System");
-    private JTextArea messageArea = new JTextArea();
-    private JTextField messageInput = new JTextField();
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+/**
+ * This class sets up the GUI for the Client
+ * A child class of Client it will use Client method calls to send and recieve message from server
+ *
+ * @author Kevin Jones
+ * @version 11/20
+ */
+public class MessageGui extends Client implements Runnable{
+    JFrame myFrame = new JFrame();
+    private String recipient;
+    private String username;
+    private String storeName;
+    private boolean isRecipientStore;
+    private boolean isUserSeller;
+    private boolean isUserStore;
+    LinkedHashMap<String, String> storeMap;
 
     private void createLeftPanel() {
-        this.setTitle("Messaging System");
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setLayout(null);
+        myFrame.setTitle("Messaging System");
+        myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        myFrame.setLayout(null);
         //setting the bounds for the JFrame
-        this.setBounds(300,10,1000,800);
+        myFrame.setBounds(300,10,1000,800);
+        myFrame.setResizable(false);
         Border br = BorderFactory.createLineBorder(Color.black);
-        Container c = getContentPane();
+        Container c = myFrame.getContentPane();
         // creating box with buttons
         Box sellerPanel = Box.createVerticalBox();
         String[] allMessages = {"seller1", "seller2", "thisIsLongSllerNae", "seller2", "seller2", "seller2",
@@ -24,6 +40,16 @@ public class MessageGui extends JFrame implements Runnable{
                 "seller2", "seller2", "seller2", "seller2"};
         for (String s : allMessages) {
             JButton tempButton = new JButton(s);
+            ActionListener tempListener = new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (e.getSource() == tempButton) {
+                        chooseRecipient(s);
+                        sendMessage();
+                    }
+                }
+            };
+            tempButton.addActionListener(tempListener);
             tempButton.setMinimumSize(new Dimension(150,50));
             tempButton.setMaximumSize(new Dimension(150,50));
             sellerPanel.add(tempButton);
@@ -82,12 +108,12 @@ public class MessageGui extends JFrame implements Runnable{
         c.add(topTextPanel);
         c.add(bottomButtonPanel);
 
-        setVisible(true);
+        myFrame.setVisible(true);
 
     }
 
     public void createMessageBox() {
-        Container c = this.getContentPane();
+        Container c = myFrame.getContentPane();
         Border br = BorderFactory.createLineBorder(Color.BLACK);
 
         //crete panel for the text area
@@ -117,7 +143,7 @@ public class MessageGui extends JFrame implements Runnable{
     }
 
     public void createTopPanel() {
-        Container c = this.getContentPane();
+        Container c = myFrame.getContentPane();
         Border br = BorderFactory.createLineBorder(Color.BLACK);
 
         JPanel topPanel = new JPanel();
@@ -145,43 +171,15 @@ public class MessageGui extends JFrame implements Runnable{
     }
 
     public void createMessageGUI() {
-        Container c = this.getContentPane();
+        Container c = myFrame.getContentPane();
+        chooseRecipient("Seller");
 
         // creating box for labels
 
         Box labelBox = Box.createVerticalBox();
 
-        String[] messages = {"lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now?",
-                "lucas 10/23 06:15:56- hello how are you", "lucas 10/23 06:15:56- how are you doing now hello how are you hello how are you hello how are you hello how are you hello how are you hello how are you hello how are you hello how are you hello how are you?"};
+        String storeName = null;
+        ArrayList<String> messages = Message.displayMessage(username, recipient, storeName, !isUserSeller);
 
         for (String s : messages) {
             JTextArea tempLabel = new JTextArea(s);
@@ -189,6 +187,7 @@ public class MessageGui extends JFrame implements Runnable{
             tempLabel.setEditable(false);
             tempLabel.setLineWrap(true);
             tempLabel.setLocation(10, 0);
+            tempLabel.setBackground(myFrame.getBackground());
             labelBox.add(tempLabel);
         }
 
@@ -202,15 +201,38 @@ public class MessageGui extends JFrame implements Runnable{
     public void getImportFile() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-        int result = fileChooser.showOpenDialog(this);
+        int result = fileChooser.showOpenDialog(myFrame);
         if (result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
             System.out.println("Selected file: " + selectedFile.getAbsolutePath());
         }
     }
 
-    public MessageGui() {
+    public void chooseRecipient(String recipient) {
+        if (isRecipientStore) {
+            this.recipient = storeMap.get(recipient);
+            storeName = recipient;
+        } else {
+            this.recipient = recipient;
+        }
+    }
 
+    public MessageGui(String username, boolean isRecipientStore, boolean isUserSeller, boolean isUserStore) {
+        super(username);
+        if (isUserStore) {
+            this.username = storeMap.get(username);
+            this.storeName = username;
+        } else {
+            this.username = username;
+        }
+        this.isRecipientStore = isRecipientStore;
+        this.isUserSeller = isUserSeller;
+        this.isUserStore = isUserStore;
+        storeMap = FileManager.mapStoresToSellers();
+        // at end of constructor, if the recipient is a seller, recipient is seller name and store is null
+        // if recipient is a store, recipient is seller name and storeName is store's name
+        // if user is store, then username is seller name and storeName is store's name
+        // if not username is seller's name and storeName = null
     }
 
     public void run() {
@@ -220,10 +242,5 @@ public class MessageGui extends JFrame implements Runnable{
         createMessageGUI();
 
     }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new MessageGui());
-    }
-
 
 }
