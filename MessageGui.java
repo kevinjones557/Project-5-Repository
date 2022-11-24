@@ -1,8 +1,7 @@
 import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -16,12 +15,17 @@ import java.util.LinkedHashMap;
 public class MessageGui extends Client implements Runnable{
     JFrame myFrame = new JFrame();
     private String recipient;
-    private String username;
+    private final String username;
     private String storeName;
     private boolean isRecipientStore;
-    private boolean isUserSeller;
-    private boolean isUserStore;
-    LinkedHashMap<String, String> storeMap;
+    private final boolean isUserSeller;
+    private final boolean isUserStore;
+    private final JPopupMenu popupMenu = new JPopupMenu();
+    private final JButton editOption = new JButton("Edit");
+    private final JButton deleteOption = new JButton("Delete");
+    private final JButton cancelOption = new JButton("Cancel");
+
+    private LinkedHashMap<String, String> storeMap;
 
     private void createLeftPanel() {
         myFrame.setTitle("Messaging System");
@@ -47,6 +51,7 @@ public class MessageGui extends Client implements Runnable{
                         chooseRecipient(s);
                         sendMessage();
                     }
+                    //TODO call client function with recipient to get message info
                 }
             };
             tempButton.addActionListener(tempListener);
@@ -136,6 +141,18 @@ public class MessageGui extends Client implements Runnable{
         JButton sendButton = new JButton("Send Message");
         sendButton.setLayout(null);
         sendButton.setBounds(610, 10, 200, 150);
+        sendButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (e.getSource() == sendButton) {
+                    if (!textField.getText().isBlank()) {
+                        System.out.println(textField.getText().trim());
+                        //TODO call client function to append message
+                    }
+                    textField.setText("");
+                }
+            }
+        });
 
         textPanel.add(sendButton);
 
@@ -160,11 +177,41 @@ public class MessageGui extends Client implements Runnable{
         JButton importFileButton = new JButton("Import a File");
         importFileButton.setLayout(null);
         importFileButton.setBounds(0, 45, 410, 45);
+        importFileButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (e.getSource() == importFileButton) {
+                    String filename = getImportFile();
+                    if (!(filename == null) && !filename.endsWith(".txt")) {
+                        JOptionPane.showMessageDialog(null, "File must be a text file",
+                                "Invalid File", JOptionPane.ERROR_MESSAGE);
+                    } else if (filename != null) {
+                        System.out.println(filename);
+                    }
+                }
+                //TODO call client to import file
+            }
+        });
         topPanel.add(importFileButton);
 
-        JButton exportFileButton = new JButton("Export Entire Conversation as CSV File");
+        JButton exportFileButton = new JButton("Choose directory to export conversation as CSV File");
         exportFileButton.setLayout(null);
         exportFileButton.setBounds(410, 45, 410, 45);
+        exportFileButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (e.getSource() == exportFileButton) {
+                    JFileChooser directoryChooser = new JFileChooser();
+                    directoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                    directoryChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+                    int result = directoryChooser.showOpenDialog(myFrame);
+                    if (result == JFileChooser.APPROVE_OPTION) {
+                        String directory = directoryChooser.getSelectedFile().getAbsolutePath();
+                    }
+                    //TODO call export file function in client with directory + other info
+                }
+            }
+        });
         topPanel.add(exportFileButton);
 
         c.add(topPanel);
@@ -173,21 +220,81 @@ public class MessageGui extends Client implements Runnable{
     public void createMessageGUI() {
         Container c = myFrame.getContentPane();
         chooseRecipient("Seller");
+        //TODO delete this ^^^
 
         // creating box for labels
-
         Box labelBox = Box.createVerticalBox();
 
-        String storeName = null;
         ArrayList<String> messages = Message.displayMessage(username, recipient, storeName, !isUserSeller);
+        //TODO call client version of this
 
         for (String s : messages) {
+            int numLines = 1 + s.length() / 160; // sets a factor for how many lines are needed
             JTextArea tempLabel = new JTextArea(s);
-            tempLabel.setMaximumSize(new Dimension(820, 20));
+            tempLabel.setMaximumSize(new Dimension(820, numLines*18));
             tempLabel.setEditable(false);
             tempLabel.setLineWrap(true);
             tempLabel.setLocation(10, 0);
             tempLabel.setBackground(myFrame.getBackground());
+            tempLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    boolean rightClick = SwingUtilities.isRightMouseButton(e);
+                    if (rightClick) {
+                        deleteOption.setMaximumSize(new Dimension(74, 28));
+
+                        for (ActionListener al : deleteOption.getActionListeners()) {
+                            deleteOption.removeActionListener(al);
+                        }
+                        deleteOption.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                if (e.getSource() == deleteOption) {
+                                    popupMenu.setVisible(false);
+                                    //TODO call delete message on the selected message
+                                }
+                            }
+                        });
+
+                        editOption.setLayout(null);
+                        editOption.setMaximumSize(new Dimension(74, 28));
+                        for (ActionListener al : editOption.getActionListeners()) {
+                            editOption.removeActionListener(al);
+                        }
+                        editOption.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                if (e.getSource() == editOption) {
+                                    popupMenu.setVisible(false);
+                                    String newMessage = JOptionPane.showInputDialog("Current Message: " +
+                                            s.substring(s.indexOf("-") + 2) +
+                                            "\nWhat would you like the new " +
+                                            "message to say?");
+                                    if (newMessage != null) {
+                                        //TODO call edit message with new message and original and recipient
+                                    }
+                                }
+                            }
+                        });
+
+                        cancelOption.setLayout(null);
+                        cancelOption.setMaximumSize(new Dimension(74, 28));
+                        cancelOption.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                if (e.getSource() == cancelOption) {
+                                    popupMenu.setVisible(false);
+                                }
+                            }
+                        });
+                        popupMenu.add(deleteOption);
+                        popupMenu.add(editOption);
+                        popupMenu.add(cancelOption);
+                        popupMenu.setVisible(true);
+                        popupMenu.setLocation(e.getLocationOnScreen());
+                    }
+                }
+            });
             labelBox.add(tempLabel);
         }
 
@@ -198,17 +305,18 @@ public class MessageGui extends Client implements Runnable{
 
     }
 
-    public void getImportFile() {
+    public String getImportFile() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
         int result = fileChooser.showOpenDialog(myFrame);
         if (result == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-            System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+            return fileChooser.getSelectedFile().getAbsolutePath();
         }
+        return null;
     }
 
     public void chooseRecipient(String recipient) {
+        isRecipientStore = FileManager.checkStore(recipient);
         if (isRecipientStore) {
             this.recipient = storeMap.get(recipient);
             storeName = recipient;
@@ -217,7 +325,7 @@ public class MessageGui extends Client implements Runnable{
         }
     }
 
-    public MessageGui(String username, boolean isRecipientStore, boolean isUserSeller, boolean isUserStore) {
+    public MessageGui(String username, boolean isUserSeller, boolean isUserStore) {
         super(username);
         if (isUserStore) {
             this.username = storeMap.get(username);
@@ -225,7 +333,6 @@ public class MessageGui extends Client implements Runnable{
         } else {
             this.username = username;
         }
-        this.isRecipientStore = isRecipientStore;
         this.isUserSeller = isUserSeller;
         this.isUserStore = isUserStore;
         storeMap = FileManager.mapStoresToSellers();

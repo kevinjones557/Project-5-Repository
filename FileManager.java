@@ -1,13 +1,11 @@
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.stream.Stream;
 
 /**
  * Handles various file management methods for the program
@@ -173,5 +171,24 @@ public class FileManager {
             }
         }
         return storesMapped;
+    }
+
+    /**
+     * A method to check if the recipient is a store or not
+     * @param storeName name of possible store
+     * @return true or false if the storeName is a store
+     * @author Kevin Jones
+     */
+    public static boolean checkStore(String storeName) {
+        String[] sellers = (new File("data/sellers")).list();
+        for (String seller : sellers) {
+            String[] possibleStores = (new File("data/sellers/" + seller)).list();
+            for (String store : possibleStores) {
+                if (store.equals(storeName)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
