@@ -514,6 +514,10 @@ public class MessageGui extends Client implements Runnable{
         myFrame.setVisible(true);
     }
 
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new MessageGui("Server", true));
+    }
+
 }
 /*
 Possible Interactions:

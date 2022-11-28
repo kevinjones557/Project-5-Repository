@@ -12,38 +12,65 @@ import java.util.LinkedHashMap;
  * @author Kevin Jones
  * @version 11/20
  */
-public class Server {
+public class Server extends Thread {
+    private static ServerSocket serverSocket;
+    private final Socket socket;
+
+    static {
+        try {
+            serverSocket = new ServerSocket(2000);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Server(Socket mySocket) {
+        this.socket = mySocket;
+    }
+
     public static void main(String[] args) throws IOException {
-        LinkedHashMap<String, String> storeNameMap = FileManager.mapStoresToSellers();
-
-        ServerSocket serverSocket = new ServerSocket(2000); // port 2000
-        Socket socket = serverSocket.accept();
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        PrintWriter writer = new PrintWriter(socket.getOutputStream());
-
         while (true) {
-            String line = reader.readLine();
-            String instruction = line.substring(0, line.indexOf(';'));
-            String contents = line.substring(line.indexOf(";") + 1);
-            if (instruction.equals("GetSeller")) {
-                // line format: GetSeller;<StoreName> without surrounding carrots
-                writer.println(storeNameMap.get(contents));
-                writer.flush();
-            } else if (instruction.equals("CheckIfMessageExists")) {
-                // line format: CheckIfMessageExists;<recipient>;<isRecipientStore>;<isSeller>;<username>;<isUserStore>
-                // without surrounding carrots
-                String recipient = contents.substring(0, contents.indexOf(";"));
-                contents = contents.substring(contents.indexOf(";") + 1);
-                boolean isRecipientStore = Boolean.parseBoolean(contents.substring(0, contents.indexOf(";")));
-                contents = contents.substring(contents.indexOf(";") + 1);
-                boolean isSeller = Boolean.parseBoolean(contents.substring(0, contents.indexOf(";")));
-                contents = contents.substring(contents.indexOf(";") + 1);
-                String username = (contents.substring(0, contents.indexOf(";")));
-                contents = contents.substring(contents.indexOf(";") + 1);
-                boolean isUserStore = Boolean.parseBoolean(contents);
-                checkIfMessageExists(recipient, isRecipientStore, isSeller, username, isUserStore, storeNameMap);
+            Server server = new Server(serverSocket.accept());
+            server.start();
+        }
+    }
+    public void run() {
+        try {
+            LinkedHashMap<String, String> storeNameMap = FileManager.mapStoresToSellers();
+
+            BufferedReader reader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
+            PrintWriter writer = new PrintWriter(this.socket.getOutputStream());
+
+            while (true) {
+                String line = reader.readLine();
+                String instruction = line.substring(0, line.indexOf(';'));
+                String contents = "";
+                try {
+                    contents = line.substring(line.indexOf(";") + 1);
+                } catch (IndexOutOfBoundsException e) {
+                    continue;
+                }
+                if (instruction.equals("GetSeller")) {
+                    // line format: GetSeller;<StoreName> without surrounding carrots
+                    writer.println(storeNameMap.get(contents));
+                    writer.flush();
+                } else if (instruction.equals("CheckIfMessageExists")) {
+                    // line format: CheckIfMessageExists;<recipient>;<isRecipientStore>;<isSeller>;<username>;<isUserStore>
+                    // without surrounding carrots
+                    String recipient = contents.substring(0, contents.indexOf(";"));
+                    contents = contents.substring(contents.indexOf(";") + 1);
+                    boolean isRecipientStore = Boolean.parseBoolean(contents.substring(0, contents.indexOf(";")));
+                    contents = contents.substring(contents.indexOf(";") + 1);
+                    boolean isSeller = Boolean.parseBoolean(contents.substring(0, contents.indexOf(";")));
+                    contents = contents.substring(contents.indexOf(";") + 1);
+                    String username = (contents.substring(0, contents.indexOf(";")));
+                    contents = contents.substring(contents.indexOf(";") + 1);
+                    boolean isUserStore = Boolean.parseBoolean(contents);
+                    checkIfMessageExists(recipient, isRecipientStore, isSeller, username, isUserStore, storeNameMap);
+                }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
