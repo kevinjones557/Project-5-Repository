@@ -19,4 +19,62 @@ public class Client {
     public void sendMessage() {
         System.out.println(name);
     }
+    
+    
+    public static void appendOrDeleteSignal(boolean delete, String sender, String recipient, String storeName,
+                                    boolean isBuyer, String message, PrintWriter writer){
+        String buyer = "false";
+        if(isBuyer)
+            buyer = "true";
+
+        String sendData = "delete";
+        if (!delete)
+            sendData = "append";
+
+        String personData = sender + "," + recipient + "," +
+                storeName + "," + buyer;
+
+        writer.write(sendData);
+        writer.println();
+        writer.flush();
+
+        writer.write(personData);
+        writer.println();
+        writer.flush();
+
+        writer.write(message);
+        writer.println();
+        writer.flush();
+
+    }
+    
+    public static void editSignal(boolean delete, String sender, String recipient, String storeName,
+                                  boolean isBuyer, String messageToEdit, String edit, PrintWriter writer) {
+        String buyer = "false";
+        if(isBuyer)
+            buyer = "true";
+
+        String sendData = "delete";
+        if (!delete)
+            sendData = "append";
+
+        String personData = sender + "," + recipient + "," +
+                storeName + "," + buyer;
+
+        writer.write(sendData);
+        writer.println();
+        writer.flush();
+
+        writer.write(personData);
+        writer.println();
+        writer.flush();
+
+        writer.write(messageToEdit);
+        writer.println();
+        writer.flush();
+
+        writer.write(edit);
+        writer.println();
+        writer.flush();
+    }
 }
