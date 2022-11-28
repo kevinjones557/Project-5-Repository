@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -491,8 +492,8 @@ public class MessageGui extends Client implements Runnable{
 
     }
 
-    public MessageGui(String username, boolean isUserSeller) {
-        super(username);
+    public MessageGui(String username, boolean isUserSeller, Socket socket) {
+        super(username, socket);
         this.username = username;
         this.isUserSeller = isUserSeller;
         if (isUserSeller) {
@@ -514,8 +515,8 @@ public class MessageGui extends Client implements Runnable{
         myFrame.setVisible(true);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new MessageGui("Server", true));
+    public static void main(String[] args) throws IOException {
+        SwingUtilities.invokeLater(new MessageGui("Server", true, new Socket("localhost", 2000)));
     }
 
 }

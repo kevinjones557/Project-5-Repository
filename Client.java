@@ -18,12 +18,10 @@ public class Client {
     private BufferedReader reader;
     private PrintWriter writer;
 
-    public Client (String name) {
+    public Client (String name, Socket socket) {
         this.name = name;
 
         try {
-            Socket socket = new Socket("localhost", 2000); // Server's port is 2000
-
             this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.writer = new PrintWriter(socket.getOutputStream());
         } catch (IOException io) {
