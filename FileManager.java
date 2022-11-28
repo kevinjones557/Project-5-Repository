@@ -5,7 +5,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.stream.Stream;
 
 /**
  * Handles various file management methods for the program
@@ -179,7 +178,7 @@ public class FileManager {
      * @return true or false if the storeName is a store
      * @author Kevin Jones
      */
-    public static boolean checkStore(String storeName) {
+    public static boolean isRecipientStore(String storeName) {
         String[] sellers = (new File("data/sellers")).list();
         for (String seller : sellers) {
             String[] possibleStores = (new File("data/sellers/" + seller)).list();
@@ -190,5 +189,33 @@ public class FileManager {
             }
         }
         return false;
+    }
+
+    /**
+     * method returns an arrayList that contains the names of buyers that a given store has messaged
+     * @param sellerName is the store's seller's name
+     * @param storeName is the name of the store
+     * @return is the arrayList of buyer conversations
+     * @author Kevin Jones
+     */
+
+    public static ArrayList<String> getConversationsFromStore(String sellerName, String storeName) {
+        File storeFile = new File(getStoreDirectory(sellerName, storeName));
+        String[] conversations = storeFile.list();
+        ArrayList<String> buyerNames = new ArrayList<>();
+        if (conversations != null) {
+            for (String fileName : conversations) {
+                buyerNames.add(fileName.substring(storeName.length(), fileName.indexOf(".")));
+            }
+        }
+        return buyerNames;
+    }
+
+    /**
+     * @return an array of strings of all stores
+     * @author Kevin Jones
+     */
+    public static String[] getAllStores() {
+        return mapStoresToSellers().keySet().toArray(new String[0]);
     }
 }

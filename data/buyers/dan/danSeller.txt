@@ -1,5 +1,0 @@
-Buyer 11/19 10:50:56- hello there
-Seller 11/19 10:50:56- this is a test
-Buyer 11/19 10:50:56- no it is not
-Buyer 11/19 10:50:56- do you have 5 of the products available?
-Buyer 11/20 03:01:34- hello again haven't heard a response

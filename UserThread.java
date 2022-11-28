@@ -9,7 +9,7 @@ import javax.swing.*;
 public class UserThread extends Thread {
     private String name;
     public static void main(String[] args) {
-        UserThread myThread = new UserThread("Buyer");
+        UserThread myThread = new UserThread("Seller");
         myThread.start();
     }
 
@@ -19,6 +19,6 @@ public class UserThread extends Thread {
     }
 
     public synchronized void run() {
-        SwingUtilities.invokeLater(new MessageGui(this.name, false, false));
+        SwingUtilities.invokeLater(new MessageGui(this.name, true));
     }
 }

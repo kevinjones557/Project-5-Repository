@@ -3,8 +3,10 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Arrays;
+
 /**
  * This class sets up the GUI for the Client
  * A child class of Client it will use Client method calls to send and recieve message from server
@@ -13,19 +15,23 @@ import java.util.LinkedHashMap;
  * @version 11/20
  */
 public class MessageGui extends Client implements Runnable{
+    //Gui initializations
     JFrame myFrame = new JFrame();
-    private String recipient;
-    private final String username;
-    private String storeName;
-    private boolean isRecipientStore;
-    private final boolean isUserSeller;
-    private final boolean isUserStore;
     private final JPopupMenu popupMenu = new JPopupMenu();
     private final JButton editOption = new JButton("Edit");
     private final JButton deleteOption = new JButton("Delete");
     private final JButton cancelOption = new JButton("Cancel");
 
-    private LinkedHashMap<String, String> storeMap;
+    // characteristics of chat
+    private String recipient;
+    private final String username;
+    private String storeName;
+    private boolean isRecipientStore;
+    private final boolean isUserSeller;
+
+    private boolean isUserStore;
+
+
 
     private void createLeftPanel() {
         myFrame.setTitle("Messaging System");
@@ -38,28 +44,72 @@ public class MessageGui extends Client implements Runnable{
         Container c = myFrame.getContentPane();
         // creating box with buttons
         Box sellerPanel = Box.createVerticalBox();
-        String[] allMessages = {"seller1", "seller2", "thisIsLongSllerNae", "seller2", "seller2", "seller2",
-                "seller2", "seller2", "seller2", "seller2","seller2", "seller2", "seller2", "seller2",
-                "seller2", "seller2", "seller2", "seller2","seller2", "seller2", "seller2", "seller2",
-                "seller2", "seller2", "seller2", "seller2"};
-        for (String s : allMessages) {
-            JButton tempButton = new JButton(s);
+        sellerPanel.removeAll();
+        JLabel topLabel3 = new JLabel("Personal Chats:");
+        topLabel3.setFont(new Font("Times New Roman",Font.BOLD,22));
+        topLabel3.setHorizontalAlignment(JLabel.CENTER);
+        sellerPanel.add(topLabel3);
+        //TODO call client for all conversations and names of conversations
+        String[] allMessages = {"Buyer"};
+        // this is run for buyers and sellers, gets personal conversations
+        for (String user : allMessages) {
+            JButton tempButton = new JButton(user);
             ActionListener tempListener = new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     if (e.getSource() == tempButton) {
-                        chooseRecipient(s);
+                        // user could be a buyer, seller, or a store
+                        if (!isUserSeller) {
+                            isRecipientStore = FileManager.isRecipientStore(recipient);
+                            //TODO this should probably be a client call^^^^
+                        }
+                        isUserStore = false;
+                        chooseRecipient(user, null);
                         sendMessage();
                     }
                     //TODO call client function with recipient to get message info
                 }
             };
             tempButton.addActionListener(tempListener);
-            tempButton.setMinimumSize(new Dimension(150,50));
-            tempButton.setMaximumSize(new Dimension(150,50));
+            tempButton.setMinimumSize(new Dimension(165,50));
+            tempButton.setMaximumSize(new Dimension(165,50));
             sellerPanel.add(tempButton);
         }
 
+        if (isUserSeller) {
+            // TODO call this client function to get the stores
+            ArrayList<String> sellerStores = FileManager.getStoresFromSeller(this.username);
+            for (String store : sellerStores) {
+                ArrayList<String> buyerConversations = FileManager.getConversationsFromStore(this.username, store);
+                System.out.println(store + buyerConversations);
+                if (buyerConversations.size() != 0) {
+                    JLabel storeLabel = new JLabel(store + ":");
+                    storeLabel.setFont(new Font("Times New Roman", Font.BOLD, 25));
+                    storeLabel.setMaximumSize(new Dimension(165, 30));
+                    storeLabel.setHorizontalAlignment(JLabel.CENTER);
+                    sellerPanel.add(storeLabel);
+                    // TODO call a client method that returns buyer conversations with each store
+                    for (String buyer : buyerConversations) {
+                        JButton tempButton = new JButton(buyer);
+                        ActionListener tempListener = new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                if (e.getSource() == tempButton) {
+                                    isUserStore = true;
+                                    isRecipientStore = false;
+                                    chooseRecipient(buyer, store);
+                                }
+                                //TODO call client function with recipient to get message info
+                            }
+                        };
+                        tempButton.addActionListener(tempListener);
+                        tempButton.setMinimumSize(new Dimension(165, 50));
+                        tempButton.setMaximumSize(new Dimension(165, 50));
+                        sellerPanel.add(tempButton);
+                    }
+                }
+            }
+        }
 
         //Creating a JPanel for the JFrame
         JScrollPane scrollPane = new JScrollPane(sellerPanel);
@@ -72,32 +122,126 @@ public class MessageGui extends Client implements Runnable{
 
         JLabel topLabel1 = new JLabel("Right click on seller for");
         JLabel topLabel2 = new JLabel("block/invisible features.");
-        JLabel topLabel3 = new JLabel("Current Chats:");
-        topLabel3.setFont(new Font("Times New Roman",Font.BOLD,24));
 
         topLabel1.setBounds(12, 0, 165, 25);
         topLabel2.setBounds(12, 20, 165, 20);
-        topLabel3.setBounds(5, 45, 165, 45);
-
 
         topTextPanel.add(topLabel1);
         topTextPanel.add(topLabel2);
-        topTextPanel.add(topLabel3);
         // creating buttons for bottom panel
-        JButton createNewChatButton = new JButton("Start New Chat");
-        createNewChatButton.setMaximumSize(new Dimension(165,57));
-        bottomButtonPanel.add(createNewChatButton);
+        JButton searchForUserButton = new JButton("Search for a " + ((isUserSeller)? "buyer" : "seller"));
+        searchForUserButton.setMaximumSize(new Dimension(165,43));
+        bottomButtonPanel.add(searchForUserButton);
+        searchForUserButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    if (e.getSource() == searchForUserButton) {
+                        String user = username;
+                        // if user is a seller allow option to choose account to message from
+                        if (isUserSeller) {
+                            //first choose which account to start message from
+                            // TODO call this client function to get the stores
+                            ArrayList<String> sellerStores = FileManager.getStoresFromSeller(username);
+                            sellerStores.add(0, username);
+                            String[] accounts = sellerStores.toArray(new String[0]);
+                            user = (String) JOptionPane.showInputDialog(null, "Choose account " +
+                                            "to message from", "Select Account", JOptionPane.PLAIN_MESSAGE, null,
+                                    accounts, null);
+                            isUserStore = user != null && !user.equals(username);
+                        }
+                        if (user != null) {
+                            String[] options = Blocking.getMessageAbleUser(username, isUserSeller);
+                            //TODO issue ^^ rn this will return stores if it is a buyer, should make seperate
+                            //TODO call client version of this^^^^
+                            String newChatRecipient = (String) JOptionPane.showInputDialog(null,
+                                    "Enter the name of a " + ((isUserSeller) ? "buyer:" : "seller:"),
+                                    "Start New Chat", JOptionPane.PLAIN_MESSAGE);
+                            //TODO check if the name is in the array if not print error message
+                            //TODO make sure rest works, also thing still doesnt update
+                            if (newChatRecipient != null) {
+                                MessageGui.super.checkIfMessageExists(newChatRecipient, isRecipientStore, isUserSeller,
+                                        user, isUserStore);
+                                chooseRecipient(newChatRecipient, user);
+                                SwingUtilities.invokeLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        System.out.println("remaking");
+                                        createLeftPanel();
+                                    }
+                                });
+                            }
+                        }
+                    }
+                } catch (IOException io) {
+                    io.printStackTrace();
+                }
+            }
+        });
+
+        JButton seeListOfUsersButton = new JButton("See a list of " + ((isUserSeller)? "buyers" : "stores"));
+        seeListOfUsersButton.setMaximumSize(new Dimension(165,43));
+        bottomButtonPanel.add(seeListOfUsersButton);
+        seeListOfUsersButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (e.getSource() == seeListOfUsersButton) {
+                    try {
+                        String user = username;
+                        // if user is a seller allow option to choose account to message from
+                        if (isUserSeller) {
+                            //first choose which account to start message from
+                            // TODO call this client function to get the stores
+                            ArrayList<String> sellerStores = FileManager.getStoresFromSeller(username);
+                            sellerStores.add(0, username);
+                            String[] accounts = sellerStores.toArray(new String[0]);
+                            user = (String) JOptionPane.showInputDialog(null, "Choose account " +
+                                    "to message from", "Select Account", JOptionPane.PLAIN_MESSAGE, null,
+                                    accounts, null);
+                            isUserStore = user != null && !user.equals(username);
+                        }
+                        if (user != null) {
+                            String[] options = Blocking.getMessageAbleUser(username, isUserSeller);
+                            //TODO call client version of this
+                            String newChatRecipient = (String) JOptionPane.showInputDialog(null,
+                                    "Choose a " + ((isUserSeller) ? "buyer:" : "store:"), "Start New Chat",
+                                    JOptionPane.PLAIN_MESSAGE, null, options, null);
+                            if (!isUserSeller) {
+                                // here we know that the user is a buyer, so they must choose a store
+                                isRecipientStore = true;
+                            }
+                            if (newChatRecipient != null) {
+                                MessageGui.super.checkIfMessageExists(newChatRecipient, isRecipientStore, isUserSeller,
+                                        user, isUserStore);
+                                chooseRecipient(newChatRecipient, user);
+                                SwingUtilities.invokeLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        System.out.println("remaking");
+                                        createLeftPanel();
+                                    }
+                                });
+                            }
+                        }
+                    } catch (IOException io) {
+                        io.printStackTrace();
+                        JOptionPane.showMessageDialog(null, "Unable to collect info!");
+                    }
+                }
+            }
+        });
 
         JButton invisibleUserButton = new JButton("Invisible Users");
-        invisibleUserButton.setMaximumSize(new Dimension(165,57));
+        invisibleUserButton.setMaximumSize(new Dimension(165,43));
         bottomButtonPanel.add(invisibleUserButton);
 
         JButton metricsButton = new JButton("View Statistics");
-        metricsButton.setMaximumSize(new Dimension(165,57));
+        metricsButton.setMaximumSize(new Dimension(165,43));
         bottomButtonPanel.add(metricsButton);
-        //Panel 1
 
-        scrollPane.setBounds(0,90,165,500);
+        scrollPane.setBounds(0,45,165,545);
+        scrollPane.validate();
+
         //Panel 4
 
         //top text label
@@ -112,9 +256,6 @@ public class MessageGui extends Client implements Runnable{
         c.add(scrollPane);
         c.add(topTextPanel);
         c.add(bottomButtonPanel);
-
-        myFrame.setVisible(true);
-
     }
 
     public void createMessageBox() {
@@ -145,7 +286,7 @@ public class MessageGui extends Client implements Runnable{
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (e.getSource() == sendButton) {
-                    if (!textField.getText().isBlank()) {
+                    if (!textField.getText().isBlank() && recipient != null) {
                         System.out.println(textField.getText().trim());
                         //TODO call client function to append message
                     }
@@ -219,90 +360,88 @@ public class MessageGui extends Client implements Runnable{
 
     public void createMessageGUI() {
         Container c = myFrame.getContentPane();
-        chooseRecipient("Seller");
-        //TODO delete this ^^^
 
-        // creating box for labels
-        Box labelBox = Box.createVerticalBox();
+        if (recipient != null) {
+            Box labelBox = Box.createVerticalBox();
 
-        ArrayList<String> messages = Message.displayMessage(username, recipient, storeName, !isUserSeller);
-        //TODO call client version of this
+            ArrayList<String> messages = Message.displayMessage(username, recipient, storeName, !isUserSeller);
+            //TODO call client version of this
+            System.out.println(messages);
 
-        for (String s : messages) {
-            int numLines = 1 + s.length() / 160; // sets a factor for how many lines are needed
-            JTextArea tempLabel = new JTextArea(s);
-            tempLabel.setMaximumSize(new Dimension(820, numLines*18));
-            tempLabel.setEditable(false);
-            tempLabel.setLineWrap(true);
-            tempLabel.setLocation(10, 0);
-            tempLabel.setBackground(myFrame.getBackground());
-            tempLabel.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    boolean rightClick = SwingUtilities.isRightMouseButton(e);
-                    if (rightClick) {
-                        deleteOption.setMaximumSize(new Dimension(74, 28));
+            for (String s : messages) {
+                int numLines = 1 + s.length() / 160; // sets a factor for how many lines are needed
+                JTextArea tempLabel = new JTextArea(s);
+                tempLabel.setMaximumSize(new Dimension(820, numLines * 18));
+                tempLabel.setEditable(false);
+                tempLabel.setLineWrap(true);
+                tempLabel.setLocation(10, 0);
+                tempLabel.setBackground(myFrame.getBackground());
+                tempLabel.addMouseListener(new MouseAdapter() {
+                    @Override
+                    public void mouseClicked(MouseEvent e) {
+                        boolean rightClick = SwingUtilities.isRightMouseButton(e);
+                        if (rightClick) {
+                            deleteOption.setMaximumSize(new Dimension(74, 28));
 
-                        for (ActionListener al : deleteOption.getActionListeners()) {
-                            deleteOption.removeActionListener(al);
-                        }
-                        deleteOption.addActionListener(new ActionListener() {
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-                                if (e.getSource() == deleteOption) {
-                                    popupMenu.setVisible(false);
-                                    //TODO call delete message on the selected message
-                                }
+                            for (ActionListener al : deleteOption.getActionListeners()) {
+                                deleteOption.removeActionListener(al);
                             }
-                        });
-
-                        editOption.setLayout(null);
-                        editOption.setMaximumSize(new Dimension(74, 28));
-                        for (ActionListener al : editOption.getActionListeners()) {
-                            editOption.removeActionListener(al);
-                        }
-                        editOption.addActionListener(new ActionListener() {
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-                                if (e.getSource() == editOption) {
-                                    popupMenu.setVisible(false);
-                                    String newMessage = JOptionPane.showInputDialog("Current Message: " +
-                                            s.substring(s.indexOf("-") + 2) +
-                                            "\nWhat would you like the new " +
-                                            "message to say?");
-                                    if (newMessage != null) {
-                                        //TODO call edit message with new message and original and recipient
+                            deleteOption.addActionListener(new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    if (e.getSource() == deleteOption) {
+                                        popupMenu.setVisible(false);
+                                        //TODO call delete message on the selected message
                                     }
                                 }
-                            }
-                        });
+                            });
 
-                        cancelOption.setLayout(null);
-                        cancelOption.setMaximumSize(new Dimension(74, 28));
-                        cancelOption.addActionListener(new ActionListener() {
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-                                if (e.getSource() == cancelOption) {
-                                    popupMenu.setVisible(false);
+                            editOption.setLayout(null);
+                            editOption.setMaximumSize(new Dimension(74, 28));
+                            for (ActionListener al : editOption.getActionListeners()) {
+                                editOption.removeActionListener(al);
+                            }
+                            editOption.addActionListener(new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    if (e.getSource() == editOption) {
+                                        popupMenu.setVisible(false);
+                                        String newMessage = JOptionPane.showInputDialog("Current Message: " +
+                                                s.substring(s.indexOf("-") + 2) +
+                                                "\nWhat would you like the new " +
+                                                "message to say?");
+                                        if (newMessage != null) {
+                                            //TODO call edit message with new message and original and recipient
+                                        }
+                                    }
                                 }
-                            }
-                        });
-                        popupMenu.add(deleteOption);
-                        popupMenu.add(editOption);
-                        popupMenu.add(cancelOption);
-                        popupMenu.setVisible(true);
-                        popupMenu.setLocation(e.getLocationOnScreen());
+                            });
+
+                            cancelOption.setLayout(null);
+                            cancelOption.setMaximumSize(new Dimension(74, 28));
+                            cancelOption.addActionListener(new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    if (e.getSource() == cancelOption) {
+                                        popupMenu.setVisible(false);
+                                    }
+                                }
+                            });
+                            popupMenu.add(deleteOption);
+                            popupMenu.add(editOption);
+                            popupMenu.add(cancelOption);
+                            popupMenu.setVisible(true);
+                            popupMenu.setLocation(e.getLocationOnScreen());
+                        }
                     }
-                }
-            });
-            labelBox.add(tempLabel);
+                });
+                labelBox.add(tempLabel);
+            }
+            JScrollPane messagePanel = new JScrollPane(labelBox);
+            messagePanel.setBounds(170, 90, 820, 500);
+            messagePanel.setBorder(BorderFactory.createLineBorder(Color.white));
+            c.add(messagePanel);
         }
-
-        JScrollPane messagePanel = new JScrollPane(labelBox);
-        messagePanel.setBounds(170, 90, 820, 500);
-        messagePanel.setBorder(BorderFactory.createLineBorder(Color.white));
-        c.add(messagePanel);
-
     }
 
     public String getImportFile() {
@@ -315,27 +454,42 @@ public class MessageGui extends Client implements Runnable{
         return null;
     }
 
-    public void chooseRecipient(String recipient) {
-        isRecipientStore = FileManager.checkStore(recipient);
-        if (isRecipientStore) {
-            this.recipient = storeMap.get(recipient);
-            storeName = recipient;
-        } else {
+    public void chooseRecipient(String recipient, String storeName) {
+        if (isUserSeller) {
+            this.storeName = null;
+            if (isUserStore) {
+                this.storeName = storeName;
+            }
             this.recipient = recipient;
+        } else {
+            if (isRecipientStore) {
+                this.recipient = super.getSellerFromStore(storeName);
+                this.storeName = recipient;
+            } else {
+                this.storeName = null;
+                this.recipient = recipient;
+            }
         }
+        System.out.println(recipient);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                createMessageGUI();
+                myFrame.validate();
+            }
+        });
+
     }
 
-    public MessageGui(String username, boolean isUserSeller, boolean isUserStore) {
+    public MessageGui(String username, boolean isUserSeller) {
         super(username);
-        if (isUserStore) {
-            this.username = storeMap.get(username);
-            this.storeName = username;
-        } else {
-            this.username = username;
-        }
+        this.username = username;
         this.isUserSeller = isUserSeller;
-        this.isUserStore = isUserStore;
-        storeMap = FileManager.mapStoresToSellers();
+        if (isUserSeller) {
+            isRecipientStore = false;
+        } else {
+            isUserStore = false;
+        }
         // at end of constructor, if the recipient is a seller, recipient is seller name and store is null
         // if recipient is a store, recipient is seller name and storeName is store's name
         // if user is store, then username is seller name and storeName is store's name
@@ -347,7 +501,17 @@ public class MessageGui extends Client implements Runnable{
         createMessageBox();
         createTopPanel();
         createMessageGUI();
-
+        myFrame.setVisible(true);
     }
 
 }
+/*
+Possible Interactions:
+buyer -> store          for both of these, isUserSeller is false, isUserStore is false, isRecipientStore could be
+buyer -> seller         false or true. Username is always itself, recipient is always a seller name, storeName
+                        could be null or a storeName if the recipient is store
+
+store -> buyer          for both of these, isRecipientStore is false, isUserSeller is true, isUserStore could be
+seller -> buyer         false or true. Username is always itself, recipient is always a buyer name, storeName
+                        could be null or a storeName if seller is a store
+ */

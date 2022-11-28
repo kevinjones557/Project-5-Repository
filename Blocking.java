@@ -1,5 +1,8 @@
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class Blocking {
     /**
@@ -121,7 +124,11 @@ public class Blocking {
                 }
                 bfr.close();
                 if (!blocked) {
-                    available.add(seller);
+                    for (String store : Objects.requireNonNull((new File("data/sellers/" + seller)).list())) {
+                        if (Files.isDirectory(Paths.get("data/sellers/" + seller + "/" + store))) {
+                            available.add(store);
+                        }
+                    }
                 }
             }
         } else {
@@ -151,6 +158,5 @@ public class Blocking {
             messageAble[i] = available.get(i);
         }
         return messageAble;
-
     }
 }
