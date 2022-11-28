@@ -124,11 +124,7 @@ public class Blocking {
                 }
                 bfr.close();
                 if (!blocked) {
-                    for (String store : Objects.requireNonNull((new File("data/sellers/" + seller)).list())) {
-                        if (Files.isDirectory(Paths.get("data/sellers/" + seller + "/" + store))) {
-                            available.add(store);
-                        }
-                    }
+                    available.add(seller);
                 }
             }
         } else {

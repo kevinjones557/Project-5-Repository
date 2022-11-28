@@ -152,14 +152,15 @@ public class MessageGui extends Client implements Runnable{
                         }
                         if (user != null) {
                             String[] options = Blocking.getMessageAbleUser(username, isUserSeller);
-                            //TODO issue ^^ rn this will return stores if it is a buyer, should make seperate
                             //TODO call client version of this^^^^
                             String newChatRecipient = (String) JOptionPane.showInputDialog(null,
                                     "Enter the name of a " + ((isUserSeller) ? "buyer:" : "seller:"),
                                     "Start New Chat", JOptionPane.PLAIN_MESSAGE);
                             //TODO check if the name is in the array if not print error message
-                            //TODO make sure rest works, also thing still doesnt update
-                            if (newChatRecipient != null) {
+                            if (!Arrays.asList(options).contains(newChatRecipient)) {
+                                JOptionPane.showMessageDialog(null, "Sorry, no user found " +
+                                        "with this name!","Error",JOptionPane.ERROR_MESSAGE);
+                            } else {
                                 MessageGui.super.checkIfMessageExists(newChatRecipient, isRecipientStore, isUserSeller,
                                         user, isUserStore);
                                 chooseRecipient(newChatRecipient, user);
@@ -203,6 +204,15 @@ public class MessageGui extends Client implements Runnable{
                         if (user != null) {
                             String[] options = Blocking.getMessageAbleUser(username, isUserSeller);
                             //TODO call client version of this
+                            if (!isUserSeller) {
+                                // if it is a buyer get all the stores from the sellers
+                                ArrayList<String> allStores = new ArrayList<>();
+                                for (String seller : options) {
+                                    allStores.addAll(FileManager.getStoresFromSeller(seller));
+                                    //TODO call client version^^^
+                                }
+                                options = allStores.toArray(new String[0]);
+                            }
                             String newChatRecipient = (String) JOptionPane.showInputDialog(null,
                                     "Choose a " + ((isUserSeller) ? "buyer:" : "store:"), "Start New Chat",
                                     JOptionPane.PLAIN_MESSAGE, null, options, null);
