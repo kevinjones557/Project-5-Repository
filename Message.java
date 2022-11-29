@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 public class Message {
 
+    private static final Object SYNCH = new Object();
+
     /**
      * Method to set up appending with filepaths
      *
@@ -53,23 +55,24 @@ public class Message {
      */
     public static void appendMessageExecute(String sender, String recipient, boolean isBuyer, String fileSender,
                                      String fileRecipient, String message) {
-        String printFile;
 
         File senderF = new File(fileSender);
         File recipientF = new File(fileRecipient);
         if (senderF.exists() && recipientF.exists()) {
             try {
-                FileOutputStream fosSend = new FileOutputStream(senderF, true);
-                PrintWriter messageSenderWriter = new PrintWriter(fosSend);
-                FileOutputStream fosReceive = new FileOutputStream(recipientF, true);
-                PrintWriter messageReceiveWriter = new PrintWriter(fosReceive);
-                //write it on the end of each person's file
-                String timeStamp = new SimpleDateFormat(
-                        "MM/dd HH:mm:ss").format(new java.util.Date());
-                messageSenderWriter.println(sender + " " + timeStamp + "- " + message);
-                messageReceiveWriter.println(sender + " " + timeStamp + "- " + message);
-                messageSenderWriter.close();
-                messageReceiveWriter.close();
+                synchronized (SYNCH) {
+                    FileOutputStream fosSend = new FileOutputStream(senderF, true);
+                    PrintWriter messageSenderWriter = new PrintWriter(fosSend);
+                    FileOutputStream fosReceive = new FileOutputStream(recipientF, true);
+                    PrintWriter messageReceiveWriter = new PrintWriter(fosReceive);
+                    //write it on the end of each person's file
+                    String timeStamp = new SimpleDateFormat(
+                            "MM/dd HH:mm:ss").format(new java.util.Date());
+                    messageSenderWriter.println(sender + " " + timeStamp + "- " + message);
+                    messageReceiveWriter.println(sender + " " + timeStamp + "- " + message);
+                    messageSenderWriter.close();
+                    messageReceiveWriter.close();
+                }
                 if (isBuyer) {
                     String storePath;
                     if (FileManager.checkSellerExists(recipient)) {
@@ -146,52 +149,54 @@ public class Message {
         if (senderF.exists() && recipientF.exists()) {
             try {
                 //reading both files to list
-                BufferedReader buffSender = new BufferedReader(
-                        new FileReader(senderF));
-                BufferedReader buffReceiver = new BufferedReader(
-                        new FileReader(recipientF));
-                printFile = buffSender.readLine();
-                while (printFile != null) {
-                    readSenderFile.add(printFile);
+                synchronized (SYNCH) {
+                    BufferedReader buffSender = new BufferedReader(
+                            new FileReader(senderF));
+                    BufferedReader buffReceiver = new BufferedReader(
+                            new FileReader(recipientF));
                     printFile = buffSender.readLine();
-                }
-                String line2 = buffReceiver.readLine();
-                while (line2 != null) {
-                    readReceiverFile.add(line2);
-                    line2 = buffReceiver.readLine();
-                }
-
-                //writers
-                FileOutputStream fosSend = new FileOutputStream(senderF, false);
-                PrintWriter messageSenderWriter = new PrintWriter(fosSend);
-                FileOutputStream fosReceive = new FileOutputStream(recipientF, false);
-                PrintWriter messageReceiveWriter = new PrintWriter(fosReceive);
-
-                //read through list, when the message matches the index of the list, changes that index to the edit
-                for (int i = 0; i < readSenderFile.size(); i++) {
-                    if (readSenderFile.get(i).equals(message)) {
-                        editedMessage = extractNameAndTime + edit;
-                        readSenderFile.set(i, editedMessage);
+                    while (printFile != null) {
+                        readSenderFile.add(printFile);
+                        printFile = buffSender.readLine();
                     }
-                }
-                for (int i = 0; i < readReceiverFile.size(); i++) {
-                    if (readReceiverFile.get(i).equals(message)) {
-                        editedMessage = extractNameAndTime + edit;
-                        readReceiverFile.set(i, editedMessage);
+                    String line2 = buffReceiver.readLine();
+                    while (line2 != null) {
+                        readReceiverFile.add(line2);
+                        line2 = buffReceiver.readLine();
                     }
-                }
 
-                //write back to files
-                for (int i = 0; i < readSenderFile.size(); i++) {
-                    messageSenderWriter.println(readSenderFile.get(i));
-                }
-                for (int i = 0; i < readReceiverFile.size(); i++) {
-                    messageReceiveWriter.println(readReceiverFile.get(i));
-                }
+                    //writers
+                    FileOutputStream fosSend = new FileOutputStream(senderF, false);
+                    PrintWriter messageSenderWriter = new PrintWriter(fosSend);
+                    FileOutputStream fosReceive = new FileOutputStream(recipientF, false);
+                    PrintWriter messageReceiveWriter = new PrintWriter(fosReceive);
 
-                buffReceiver.close();
-                messageSenderWriter.close();
-                messageReceiveWriter.close();
+                    //read through list, when the message matches the index of the list, changes that index to the edit
+                    for (int i = 0; i < readSenderFile.size(); i++) {
+                        if (readSenderFile.get(i).equals(message)) {
+                            editedMessage = extractNameAndTime + edit;
+                            readSenderFile.set(i, editedMessage);
+                        }
+                    }
+                    for (int i = 0; i < readReceiverFile.size(); i++) {
+                        if (readReceiverFile.get(i).equals(message)) {
+                            editedMessage = extractNameAndTime + edit;
+                            readReceiverFile.set(i, editedMessage);
+                        }
+                    }
+
+                    //write back to files
+                    for (int i = 0; i < readSenderFile.size(); i++) {
+                        messageSenderWriter.println(readSenderFile.get(i));
+                    }
+                    for (int i = 0; i < readReceiverFile.size(); i++) {
+                        messageReceiveWriter.println(readReceiverFile.get(i));
+                    }
+                    buffSender.close();
+                    buffReceiver.close();
+                    messageSenderWriter.close();
+                    messageReceiveWriter.close();
+                }
                 if (isBuyer) {
                     String storePath;
                     if (FileManager.checkSellerExists(recipient)) {
@@ -270,24 +275,26 @@ public class Message {
         if (senderF.exists() && recipientF.exists()) {
             try {
                 //read file to list
-                BufferedReader readSend = new BufferedReader(new FileReader(senderF));
-                printFile = readSend.readLine();
-                while (printFile != null) {
-                    readSenderFile.add(printFile);
+                synchronized (SYNCH) {
+                    BufferedReader readSend = new BufferedReader(new FileReader(senderF));
                     printFile = readSend.readLine();
-                }
+                    while (printFile != null) {
+                        readSenderFile.add(printFile);
+                        printFile = readSend.readLine();
+                    }
 
-                //writers
-                FileOutputStream fosSend = new FileOutputStream(senderF, false);
-                PrintWriter messageSenderWriter = new PrintWriter(fosSend);
+                    //writers
+                    FileOutputStream fosSend = new FileOutputStream(senderF, false);
+                    PrintWriter messageSenderWriter = new PrintWriter(fosSend);
 
-                // read through list, write to file if it is not the deleted message
-                for (int i = 0; i < readSenderFile.size(); i++) {
-                    if (!(readSenderFile.get(i)).equals(message))
-                        messageSenderWriter.println(readSenderFile.get(i));
+                    // read through list, write to file if it is not the deleted message
+                    for (int i = 0; i < readSenderFile.size(); i++) {
+                        if (!(readSenderFile.get(i)).equals(message))
+                            messageSenderWriter.println(readSenderFile.get(i));
+                    }
+                    readSend.close();
+                    messageSenderWriter.close();
                 }
-                readSend.close();
-                messageSenderWriter.close();
                 if (isBuyer) {
                     String storePath;
                     if (FileManager.checkSellerExists(recipient)) {
@@ -333,12 +340,15 @@ public class Message {
                 path = "data/sellers/" + sender + "/" + storeName + "/" + storeName + recipient + ".txt";
         }
         try {
-            File toDisplay = new File(path);
-            BufferedReader readFile = new BufferedReader(new FileReader(toDisplay));
-            line = readFile.readLine();
-            while (line != null) {
-                returnContents.add(line);
+            synchronized (SYNCH) {
+                File toDisplay = new File(path);
+                BufferedReader readFile = new BufferedReader(new FileReader(toDisplay));
                 line = readFile.readLine();
+                while (line != null) {
+                    returnContents.add(line);
+                    line = readFile.readLine();
+                }
+                readFile.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
