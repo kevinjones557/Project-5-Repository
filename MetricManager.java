@@ -4,7 +4,7 @@ import java.util.*;
 
 /**
  * Handles various metric data for Sellers
- * To ensure files aren't files are accessed simultaneously, an object is used to synchronize all file access.
+ * To ensure files aren't files are accessed simultaneously, the class itself is used to lock.
  * @author Destin Groves
  * @version November 14th 2022
  */
