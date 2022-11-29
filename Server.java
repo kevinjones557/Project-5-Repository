@@ -121,6 +121,14 @@ public class Server extends Thread {
             }
         }
     }
+
+    /**
+     * Method to receive data from client for appending and call append
+     *
+     * @param reader buffered reader being used
+     *
+     * @author John Brooks
+     */
     public static void appendReceive(BufferedReader reader) {
         try {
             String personData = reader.readLine();
@@ -144,6 +152,13 @@ public class Server extends Thread {
         }
     }
 
+    /**
+     * Method to receive info for deleting and call delete
+     *
+     * @param reader buffered reader
+     *
+     * @author John Brooks
+     */
     public static void deleteReceive(BufferedReader reader) {
         try {
             String personData = reader.readLine();
@@ -167,6 +182,13 @@ public class Server extends Thread {
         }
     }
 
+    /**
+     * Method to receive info for editing a message and call edit
+     *
+     * @param reader buffered reader
+     *
+     * @author John Brooks
+     */
     public static void editReceive(BufferedReader reader) {
         try {
             String personData = reader.readLine();

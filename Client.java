@@ -49,8 +49,20 @@ public class Client {
                 username + ";" + isUserStore);
         writer.flush();
     }
-    
-    
+
+    /**
+     * Method to signal to the server for an append or delete
+     *
+     * @param delete true if delete, false if append
+     * @param sender sender
+     * @param recipient recipient
+     * @param storeName storeName is "nil" if not involved
+     * @param isBuyer if buyer
+     * @param message message to append, or message to delete
+     * @param writer writer being used throughout client
+     *
+     * @author John Brooks
+     */
     public static void appendOrDeleteSignal(boolean delete, String sender, String recipient, String storeName,
                                     boolean isBuyer, String message, PrintWriter writer){
         String buyer = "false";
@@ -77,16 +89,27 @@ public class Client {
         writer.flush();
 
     }
-    
-    public static void editSignal(boolean delete, String sender, String recipient, String storeName,
+
+    /**
+     * Method to signal server to make edit
+     *
+     * @param sender sender
+     * @param recipient recipient
+     * @param storeName storeName, "nil" if none
+     * @param isBuyer if buyer
+     * @param messageToEdit message to be changed
+     * @param edit changed message
+     * @param writer writer already being used
+     *
+     * @author John Brooks
+     */
+    public static void editSignal(String sender, String recipient, String storeName,
                                   boolean isBuyer, String messageToEdit, String edit, PrintWriter writer) {
         String buyer = "false";
         if(isBuyer)
             buyer = "true";
 
-        String sendData = "delete";
-        if (!delete)
-            sendData = "append";
+        String sendData = "edit";
 
         String personData = sender + "," + recipient + "," +
                 storeName + "," + buyer;
