@@ -67,6 +67,12 @@ public class Server extends Thread {
                     contents = contents.substring(contents.indexOf(";") + 1);
                     boolean isUserStore = Boolean.parseBoolean(contents);
                     checkIfMessageExists(recipient, isRecipientStore, isSeller, username, isUserStore, storeNameMap);
+                } else if (instruction.equals("append")) {
+                    appendReceive(reader);
+                } else if (instruction.equals("delete")) {
+                    deleteReceive(reader);
+                } else if (instruction.equals("edit")) {
+                    editReceive(reader);
                 }
             }
         } catch (IOException e) {
