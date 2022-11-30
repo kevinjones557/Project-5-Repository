@@ -48,12 +48,12 @@ public class Server extends Thread {
                 String instruction = line.substring(0, line.indexOf(';'));
                 System.out.println("instruction " + instruction);
                 String contents = "";
-                System.out.println("contents " + contents);
                 try {
                     contents = line.substring(line.indexOf(";") + 1);
                 } catch (IndexOutOfBoundsException e) {
                     continue;
                 }
+                System.out.println("contents " + contents);
                 if (instruction.equals("GetSeller")) {
                     // line format: GetSeller;<StoreName> without surrounding carrots
                     writer.println(storeNameMap.get(contents));
@@ -90,6 +90,27 @@ public class Server extends Thread {
                     contents = contents.substring(contents.indexOf(";") + 1);
                     boolean isRecipientStore = Boolean.parseBoolean(contents);
                     importFile(path, recipient, username, isSeller, isUserStore, isRecipientStore, storeNameMap);
+                } else if (instruction.equals("exportFile")) {
+                    String recipient = contents.substring(0, contents.indexOf(";"));
+                    contents = contents.substring(contents.indexOf(";") + 1);
+                    String username = contents.substring(0, contents.indexOf(";"));
+                    contents = contents.substring(contents.indexOf(";") + 1);
+                    boolean isSeller = Boolean.parseBoolean(contents.substring(0, contents.indexOf(";")));
+                    contents = contents.substring(contents.indexOf(";") + 1);
+                    boolean isUserStore = Boolean.parseBoolean(contents.substring(0, contents.indexOf(";")));
+                    contents = contents.substring(contents.indexOf(";") + 1);
+                    exportFile(recipient, username, isSeller, isUserStore, contents, storeNameMap);
+                } else if (instruction.equals("getConversationsFromStore")) {
+                    System.out.println("hi");
+                    String username = contents.substring(0, contents.indexOf(";"));
+                    contents = contents.substring(contents.indexOf(";") + 1);
+                    writer.println(String.join(";", FileManager.getConversationsFromStore(username,
+                            contents)));
+                    writer.flush();
+                } else if (instruction.equals("getConversationsFromUser")) {
+                    System.out.println("hello");
+                    writer.println(String.join(";", FileManager.getConversationsFromUser(contents)));
+                    writer.flush();
                 }
             }
         } catch (IOException e) {
@@ -275,6 +296,45 @@ public class Server extends Thread {
             System.out.println("Error reading file!");
         }
 
+    }
+
+    public void exportFile(String recipient, String username, boolean isSeller, boolean isUserStore,
+                         String path, LinkedHashMap<String, String> storeNameMap) {
+        if (!path.endsWith("/")) {
+            path += "/";
+        }
+        String filepath;
+        File f = new File(path + username + ".csv");
+        if (isUserStore) {
+            filepath = FileManager.getStoreDirectory(storeNameMap.get(username),
+                    username);
+        } else if (isSeller) {
+            filepath = "data/sellers/" + username + "/";
+        } else {
+            filepath = "data/buyers/" + username + "/";
+        }
+        try {
+            f.createNewFile();
+            PrintWriter pw = new PrintWriter(new FileWriter(f, false));
+            pw.println("Name:,Date:,Time:,Message:");
+            BufferedReader bfr = new BufferedReader(new FileReader(filepath
+                    + username + recipient + ".txt"));
+            String line = bfr.readLine();
+            while (line != null) {
+                String name = line.substring(0, line.indexOf(" "));
+                line = line.substring(line.indexOf(" ") + 1);
+                String date = line.substring(0, line.indexOf(" "));
+                line = line.substring(line.indexOf(" ") + 1);
+                String time = line.substring(0, line.indexOf(" ") - 1);
+                String message = line.substring(line.indexOf(" ") + 1);
+                pw.println(name + "," + date + "," + time + "," + message);
+                line = bfr.readLine();
+            }
+            pw.close();
+            bfr.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
