@@ -55,10 +55,14 @@ public class MessageGui extends Client implements Runnable{
         JLabel topLabel3 = new JLabel("Personal Chats:");
         topLabel3.setFont(new Font("Times New Roman",Font.BOLD,22));
         topLabel3.setHorizontalAlignment(JLabel.CENTER);
+        topLabel3.setMaximumSize(new Dimension(165, 45));
         sellerPanel.add(topLabel3);
         ArrayList<String> allMessages = super.getConversationsFromUser(this.username);
         // this is run for buyers and sellers, gets personal conversations
         for (String user : allMessages) {
+            if (user.length() == 0) {
+                break;
+            }
             JButton tempButton = new JButton(user);
             MouseListener tempListener = new MouseAdapter() {
                 @Override
@@ -89,6 +93,9 @@ public class MessageGui extends Client implements Runnable{
             ArrayList<String> sellerStores = super.getStoresFromSeller(this.username);
             System.out.println(sellerStores);
             for (String store : sellerStores) {
+                if (store.length() == 0) {
+                    break;
+                }
                 ArrayList<String> buyerConversations = super.getConversationsFromStore(this.username, store);
                 System.out.println(store + buyerConversations);
                 if (buyerConversations.size() != 0) {
