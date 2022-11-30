@@ -18,10 +18,14 @@ import java.util.Arrays;
 public class MessageGui extends Client implements Runnable{
     //Gui initializations
     JFrame myFrame = new JFrame();
-    private final JPopupMenu popupMenu = new JPopupMenu();
+    private final JPopupMenu popupMenu1 = new JPopupMenu();
+    private final JPopupMenu popupMenu2 =  new JPopupMenu();
     private final JButton editOption = new JButton("Edit");
     private final JButton deleteOption = new JButton("Delete");
     private final JButton cancelOption = new JButton("Cancel");
+    private final JButton invisibleOption = new JButton("Become Invisible to User");
+    private final JButton blockOption = new JButton("Block User");
+    private final JButton unblockOption = new JButton("Unblock User");
 
     // characteristics of chat
     private String recipient;
@@ -35,6 +39,8 @@ public class MessageGui extends Client implements Runnable{
 
 
     private void createLeftPanel() {
+        popupMenu1.setVisible(false);
+        popupMenu2.setVisible(false);
         myFrame.setTitle("Messaging System");
         myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         myFrame.setLayout(null);
@@ -50,27 +56,30 @@ public class MessageGui extends Client implements Runnable{
         topLabel3.setFont(new Font("Times New Roman",Font.BOLD,22));
         topLabel3.setHorizontalAlignment(JLabel.CENTER);
         sellerPanel.add(topLabel3);
-        //TODO call client for all conversations and names of conversations
-        String[] allMessages = {"Buyer"};
+        ArrayList<String> allMessages = super.getConversationsFromUser(this.username);
         // this is run for buyers and sellers, gets personal conversations
         for (String user : allMessages) {
             JButton tempButton = new JButton(user);
-            ActionListener tempListener = new ActionListener() {
+            MouseListener tempListener = new MouseAdapter() {
                 @Override
-                public void actionPerformed(ActionEvent e) {
+                public void mouseClicked(MouseEvent e) {
                     if (e.getSource() == tempButton) {
-                        // user could be a buyer, seller, or a store
-                        if (!isUserSeller) {
-                            isRecipientStore = MessageGui.super.isRecipientStore(recipient);
+                        if (SwingUtilities.isLeftMouseButton(e)) {
+                            // user could be a buyer, seller, or a store
+                            if (!isUserSeller) {
+                                isRecipientStore = MessageGui.super.isRecipientStore(recipient);
+                            }
+                            isUserStore = false;
+                            chooseRecipient(user, null);
+                            sendMessage();
+                        } else if (SwingUtilities.isRightMouseButton(e)) {
+                            createPopUpBlockInvisible(e);
                         }
-                        isUserStore = false;
-                        chooseRecipient(user, null);
-                        sendMessage();
                     }
-                    //TODO call client function with recipient to get message info
+                    // TODO call client function with recipient to get message info
                 }
             };
-            tempButton.addActionListener(tempListener);
+            tempButton.addMouseListener(tempListener);
             tempButton.setMinimumSize(new Dimension(165,50));
             tempButton.setMaximumSize(new Dimension(165,50));
             sellerPanel.add(tempButton);
@@ -80,8 +89,7 @@ public class MessageGui extends Client implements Runnable{
             ArrayList<String> sellerStores = super.getStoresFromSeller(this.username);
             System.out.println(sellerStores);
             for (String store : sellerStores) {
-                // TODO call a client method that returns buyer conversations with each store
-                ArrayList<String> buyerConversations = FileManager.getConversationsFromStore(this.username, store);
+                ArrayList<String> buyerConversations = super.getConversationsFromStore(this.username, store);
                 System.out.println(store + buyerConversations);
                 if (buyerConversations.size() != 0) {
                     JLabel storeLabel = new JLabel(store + ":");
@@ -99,7 +107,7 @@ public class MessageGui extends Client implements Runnable{
                                     isRecipientStore = false;
                                     chooseRecipient(buyer, store);
                                 }
-                                //TODO call client function with recipient to get message info
+                                // TODO call client function with recipient to get message info
                             }
                         };
                         tempButton.addActionListener(tempListener);
@@ -151,7 +159,7 @@ public class MessageGui extends Client implements Runnable{
                         }
                         if (user != null) {
                             String[] options = Blocking.getMessageAbleUser(username, isUserSeller);
-                            //TODO call client version of this^^^^
+                            // TODO call client version of this^^^^
                             String newChatRecipient = (String) JOptionPane.showInputDialog(null,
                                     "Enter the name of a " + ((isUserSeller) ? "buyer:" : "seller:"),
                                     "Start New Chat", JOptionPane.PLAIN_MESSAGE);
@@ -201,7 +209,7 @@ public class MessageGui extends Client implements Runnable{
                         }
                         if (user != null) {
                             String[] options = Blocking.getMessageAbleUser(username, isUserSeller);
-                            //TODO call client version of this
+                            // TODO call client version of this
                             if (!isUserSeller) {
                                 // if it is a buyer get all the stores from the sellers
                                 ArrayList<String> allStores = new ArrayList<>();
@@ -266,6 +274,7 @@ public class MessageGui extends Client implements Runnable{
     }
 
     public void createMessageBox() {
+        popupMenu1.setVisible(false);
         Container c = myFrame.getContentPane();
         Border br = BorderFactory.createLineBorder(Color.BLACK);
 
@@ -295,7 +304,7 @@ public class MessageGui extends Client implements Runnable{
                 if (e.getSource() == sendButton) {
                     if (!textField.getText().isBlank() && recipient != null) {
                         System.out.println(textField.getText().trim());
-                        //TODO call client function to append message
+                        // TODO call client function to append message
                     }
                     textField.setText("");
                 }
@@ -308,6 +317,8 @@ public class MessageGui extends Client implements Runnable{
     }
 
     public void createTopPanel() {
+        popupMenu1.setVisible(false);
+        popupMenu2.setVisible(false);
         Container c = myFrame.getContentPane();
         Border br = BorderFactory.createLineBorder(Color.BLACK);
 
@@ -368,7 +379,13 @@ public class MessageGui extends Client implements Runnable{
                     int result = directoryChooser.showOpenDialog(myFrame);
                     if (result == JFileChooser.APPROVE_OPTION) {
                         String directory = directoryChooser.getSelectedFile().getAbsolutePath();
-                        MessageGui.super.exportFile(recipient, username, isUserSeller, isUserStore, directory);
+                        if (recipient != null) {
+                            MessageGui.super.exportFile(recipient, username, isUserSeller, isUserStore, directory);
+                            JOptionPane.showMessageDialog(null, "Export Successful");
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Please choose a recipient first"
+                                    , "Error", JOptionPane.ERROR_MESSAGE);
+                        }
                     }
 
                 }
@@ -380,13 +397,15 @@ public class MessageGui extends Client implements Runnable{
     }
 
     public void createMessageGUI() {
+        popupMenu1.setVisible(false);
+        popupMenu2.setVisible(false);
         Container c = myFrame.getContentPane();
 
         if (recipient != null) {
             Box labelBox = Box.createVerticalBox();
 
             ArrayList<String> messages = Message.displayMessage(username, recipient, storeName, !isUserSeller);
-            //TODO call client version of this
+            // TODO call client version of this
             System.out.println(messages);
 
             for (String s : messages) {
@@ -411,8 +430,8 @@ public class MessageGui extends Client implements Runnable{
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
                                     if (e.getSource() == deleteOption) {
-                                        popupMenu.setVisible(false);
-                                        //TODO call delete message on the selected message
+                                        popupMenu1.setVisible(false);
+                                        // TODO call delete message on the selected message
                                     }
                                 }
                             });
@@ -426,13 +445,13 @@ public class MessageGui extends Client implements Runnable{
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
                                     if (e.getSource() == editOption) {
-                                        popupMenu.setVisible(false);
+                                        popupMenu1.setVisible(false);
                                         String newMessage = JOptionPane.showInputDialog("Current Message: " +
                                                 s.substring(s.indexOf("-") + 2) +
                                                 "\nWhat would you like the new " +
                                                 "message to say?");
                                         if (newMessage != null) {
-                                            //TODO call edit message with new message and original and recipient
+                                            // TODO call edit message with new message and original and recipient
                                         }
                                     }
                                 }
@@ -444,15 +463,15 @@ public class MessageGui extends Client implements Runnable{
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
                                     if (e.getSource() == cancelOption) {
-                                        popupMenu.setVisible(false);
+                                        popupMenu1.setVisible(false);
                                     }
                                 }
                             });
-                            popupMenu.add(deleteOption);
-                            popupMenu.add(editOption);
-                            popupMenu.add(cancelOption);
-                            popupMenu.setVisible(true);
-                            popupMenu.setLocation(e.getLocationOnScreen());
+                            popupMenu1.add(deleteOption);
+                            popupMenu1.add(editOption);
+                            popupMenu1.add(cancelOption);
+                            popupMenu1.setVisible(true);
+                            popupMenu1.setLocation(e.getLocationOnScreen());
                         }
                     }
                 });
@@ -517,6 +536,74 @@ public class MessageGui extends Client implements Runnable{
         // if recipient is a store, recipient is seller name and storeName is store's name
         // if user is store, then username is seller name and storeName is store's name
         // if not username is seller's name and storeName = null
+    }
+
+    public void createPopUpBlockInvisible(MouseEvent e) {
+        popupMenu1.setVisible(false);
+        invisibleOption.setMaximumSize(new Dimension(200, 28));
+
+        for (ActionListener al : invisibleOption.getActionListeners()) {
+            invisibleOption.removeActionListener(al);
+        }
+        invisibleOption.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (e.getSource() == invisibleOption) {
+                    popupMenu2.setVisible(false);
+                    System.out.println("invisible");
+                    // TODO call make invisible
+                }
+            }
+        });
+
+        blockOption.setLayout(null);
+        blockOption.setMaximumSize(new Dimension(200, 28));
+        for (ActionListener al : blockOption.getActionListeners()) {
+            blockOption.removeActionListener(al);
+        }
+        blockOption.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (e.getSource() == blockOption) {
+                    popupMenu2.setVisible(false);
+                    System.out.println("blocking");
+                    // TODO block the user
+                }
+            }
+        });
+
+        unblockOption.setLayout(null);
+        unblockOption.setMaximumSize(new Dimension(200, 28));
+        for (ActionListener al : unblockOption.getActionListeners()) {
+            unblockOption.removeActionListener(al);
+        }
+        unblockOption.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (e.getSource() == unblockOption) {
+                    popupMenu2.setVisible(false);
+                    System.out.println("unblocking");
+                    // TODO block the user
+                }
+            }
+        });
+
+        cancelOption.setLayout(null);
+        cancelOption.setMaximumSize(new Dimension(200, 28));
+        cancelOption.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (e.getSource() == cancelOption) {
+                    popupMenu2.setVisible(false);
+                }
+            }
+        });
+        popupMenu2.add(blockOption);
+        popupMenu2.add(unblockOption);
+        popupMenu2.add(invisibleOption);
+        popupMenu2.add(cancelOption);
+        popupMenu2.setVisible(true);
+        popupMenu2.setLocation(e.getLocationOnScreen());
     }
 
     public void run() {

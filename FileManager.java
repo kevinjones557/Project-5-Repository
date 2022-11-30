@@ -211,6 +211,33 @@ public class FileManager {
         return buyerNames;
     }
 
+    /** method returns an arrayList that contains the names of buyers that a given store has messaged
+     * @param username is the store's seller's name
+     * @return is the arrayList of buyer conversations
+     * @author Kevin Jones
+     */
+
+    public static ArrayList<String> getConversationsFromUser(String username) {
+        try {
+            File storeFile = new File(getDirectoryFromUsername(username));
+            String[] conversations = storeFile.list();
+            ArrayList<String> names = new ArrayList<>();
+            if (conversations != null) {
+                for (String fileName : conversations) {
+
+                    if (!fileName.equals("hasBlocked.txt") && !fileName.equals("metrics.txt") &&
+                            !fileName.equals("isInvisible.txt") &&
+                            !(new  File(getStoreDirectory(username, fileName))).isDirectory()) {
+                        names.add(fileName.substring(username.length(), fileName.indexOf(".")));
+                    }
+                }
+            }
+            return names;
+        } catch (UserNotFoundException u) {
+            return new ArrayList<>();
+        }
+    }
+
     /**
      * @return an array of strings of all stores
      * @author Kevin Jones

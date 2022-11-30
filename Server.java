@@ -48,12 +48,12 @@ public class Server extends Thread {
                 String instruction = line.substring(0, line.indexOf(';'));
                 System.out.println("instruction " + instruction);
                 String contents = "";
-                System.out.println("contents " + contents);
                 try {
                     contents = line.substring(line.indexOf(";") + 1);
                 } catch (IndexOutOfBoundsException e) {
                     continue;
                 }
+                System.out.println("contents " + contents);
                 if (instruction.equals("GetSeller")) {
                     // line format: GetSeller;<StoreName> without surrounding carrots
                     writer.println(storeNameMap.get(contents));
@@ -99,8 +99,18 @@ public class Server extends Thread {
                     contents = contents.substring(contents.indexOf(";") + 1);
                     boolean isUserStore = Boolean.parseBoolean(contents.substring(0, contents.indexOf(";")));
                     contents = contents.substring(contents.indexOf(";") + 1);
-                    String path = contents.substring(0, contents.indexOf(";"));
-                    exportFile(recipient, username, isSeller, isUserStore, path, storeNameMap);
+                    exportFile(recipient, username, isSeller, isUserStore, contents, storeNameMap);
+                } else if (instruction.equals("getConversationsFromStore")) {
+                    System.out.println("hi");
+                    String username = contents.substring(0, contents.indexOf(";"));
+                    contents = contents.substring(contents.indexOf(";") + 1);
+                    writer.println(String.join(";", FileManager.getConversationsFromStore(username,
+                            contents)));
+                    writer.flush();
+                } else if (instruction.equals("getConversationsFromUser")) {
+                    System.out.println("hello");
+                    writer.println(String.join(";", FileManager.getConversationsFromUser(contents)));
+                    writer.flush();
                 }
             }
         } catch (IOException e) {
