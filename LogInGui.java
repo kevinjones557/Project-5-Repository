@@ -302,9 +302,6 @@ public class LogInGui {
                     return ("invalid");
                 }
                 dir.delete();
-                Files.createDirectory(Paths.get("users/" + user));
-                f = new File("users/" + user + "/" + user);
-                writeFile(user);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -323,6 +320,16 @@ public class LogInGui {
         userInfo.delete();
         File userDirectory = new File("users/" + user);
         userDirectory.delete();
+    }
+
+    public static void createUser (String user) {
+        try {
+            Files.createDirectory(Paths.get("users/" + user));
+            File f = new File("users/" + user + "/" + user);
+            writeFile(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     //checks the password that the user selects to be their password
@@ -564,6 +571,7 @@ public class LogInGui {
                         }
                         nameCheck = checkName(user, false, user);
                     }
+                    createUser(user);
                     String password = JOptionPane.showInputDialog(null,
                             "Please enter a password between 8 and 16 characters.",
                             "Messaging program", JOptionPane.PLAIN_MESSAGE);
