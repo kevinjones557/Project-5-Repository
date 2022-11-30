@@ -43,17 +43,18 @@ public class Server extends Thread {
             PrintWriter writer = new PrintWriter(this.socket.getOutputStream());
 
             while (true) {
-                String line = reader.readLine();
-                System.out.println("all " + line);
-                String instruction = line.substring(0, line.indexOf(';'));
+                String request = reader.readLine();
+                System.out.println("all " + request);
+                String instruction = request.substring(0, request.indexOf(';'));
                 System.out.println("instruction " + instruction);
                 String contents = "";
                 try {
-                    contents = line.substring(line.indexOf(";") + 1);
+                    contents = request.substring(request.indexOf(";") + 1);
                 } catch (IndexOutOfBoundsException e) {
                     continue;
                 }
                 System.out.println("contents " + contents);
+                // TODO: convert this to a switch and make logic into individual methods to improve readability
                 if (instruction.equals("GetSeller")) {
                     // line format: GetSeller;<StoreName> without surrounding carrots
                     writer.println(storeNameMap.get(contents));
@@ -111,11 +112,113 @@ public class Server extends Thread {
                     System.out.println("hello");
                     writer.println(String.join(";", FileManager.getConversationsFromUser(contents)));
                     writer.flush();
+                } else if (instruction.equals("removeNamedStore")) {
+                    handleRemoveNamedStore(request, socket);
+                } else if (instruction.equals("isSeller")) {
+                    handleIsSeller(request, socket);
+                } else if (instruction.equals("getUserStores")) {
+                    handleGetUserStores(request, socket);
+                } else if (instruction.equals("appendStoreList")) {
+                    handleAppendStoreList(request, socket);
+                } else if (instruction.equals("readPassword")) {
+                    handleReadPassword(request, socket);
+                } else if (instruction.equals("writeFile1")) { // without append param
+                    handleWriteFileNoAppend(request, socket);
+                } else if (instruction.equals("writeFile2")) { // with append param
+                    handleWriteFileAppend(request, socket);
+                } else if (instruction.equals("encryptFile")) {
+                    handleEncryptFile(request, socket);
+                } else if (instruction.equals("checkStoreList")) {
+                    handleCheckStoreList(request, socket);
+                } else if (instruction.equals("checkName")) {
+                    handleCheckName(request, socket);
+                } else if (instruction.equals("deleteUserInProgress")) {
+                    handleDeleteUserInProgress(request, socket);
+                } else if (instruction.equals("createUser")) {
+                    handleCreateUser(request, socket);
+                } else if (instruction.equals("checkPassword")) {
+                    handleCheckPassword(request, socket);
+                } else if (instruction.equals("moveUsername")) {
+                    handleMoveUsername(request, socket);
+                } else if (instruction.equals("changeStoreName")) {
+                    handleChangeStoreName(request, socket);
+                } else if (instruction.equals("checkUserExists")) {
+                    handleCheckUserExists(request, socket);
+                } else if (instruction.equals("updateStoreList")) {
+                    handleUpdateStoreList(request, socket);
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void handleUpdateStoreList(String request, Socket socket) {
+
+    }
+
+    private static void handleCheckUserExists(String request, Socket socket) {
+
+    }
+
+    private static void handleChangeStoreName(String request, Socket socket) {
+
+    }
+
+    private static void handleMoveUsername(String request, Socket socket) {
+
+    }
+
+    private static void handleCheckPassword(String request, Socket socket) {
+
+    }
+
+    private static void handleCreateUser(String request, Socket socket) {
+
+    }
+
+    private static void handleDeleteUserInProgress(String request, Socket socket) {
+
+    }
+
+    private static void handleCheckName(String request, Socket socket) {
+
+    }
+
+    private static void handleCheckStoreList(String request, Socket socket) {
+
+    }
+
+    private static void handleEncryptFile(String request, Socket socket) {
+
+    }
+
+    private static void handleWriteFileAppend(String request, Socket socket) {
+
+    }
+
+    private static void handleWriteFileNoAppend(String request, Socket socket) {
+
+    }
+
+    private static void handleReadPassword(String request, Socket socket) {
+
+    }
+
+    private static void handleAppendStoreList(String request, Socket socket) {
+
+    }
+
+    private static void handleGetUserStores(String request, Socket socket) {
+
+    }
+
+    private static void handleIsSeller(String request, Socket socket) {
+
+    }
+
+    private static void handleRemoveNamedStore(String request, Socket socket) {
+
     }
 
     public static void checkIfMessageExists(String recipient, boolean isRecipientStore, boolean isSeller,
@@ -234,10 +337,12 @@ public class Server extends Thread {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
+    
 
     public synchronized void importFile(String path, String recipient, String username, boolean isSeller,
                                         boolean isUserStore, boolean isRecipientStore,
                                         LinkedHashMap<String, String> storeNameMap) {
+        // Destin: don't synchronize this entire method later.
         // set up paths to correct files
         String fileSender;
         String fileReceiver;
