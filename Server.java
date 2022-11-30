@@ -75,13 +75,8 @@ public class Server extends Thread {
                     writer.println(FileManager.isRecipientStore(contents));
                     writer.flush();
                 } else if (instruction.equals("getStoresFromSellers")) {
-                    if (FileManager.getStoresFromSeller(contents).size() > 0) {
-                        writer.println(String.join(";", FileManager.getStoresFromSeller(contents)));
-                        writer.flush();
-                    } else {
-                        writer.println();
-                        writer.flush();
-                    }
+                    writer.println(String.join(";", FileManager.getStoresFromSeller(contents)));
+                    writer.flush();
                 } else if (instruction.equals("importFile")) {
                     String path = contents.substring(0, contents.indexOf(";"));
                     contents = contents.substring(contents.indexOf(";") + 1);
