@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
+//Creates socket, connects to server, communicate with server, call methods there
+
 public class LogInGui {
 
     /**
@@ -261,6 +263,152 @@ public class LogInGui {
         return (true);
     }
 
+    //checks either store names or usernames to see if they're valid
+    public static String checkName(String name, boolean isStore, String user) {
+        if (name == null) {
+            return (null);
+        }
+        //if the name is store name, check to see if it's in use
+        if (isStore) {
+            boolean nameChecked = checkStoreList(name);
+            if (!nameChecked) {
+                return ("inUse");
+            }
+            if (name == null) {
+                File userInfo = new File("users/" + user + "/" + user);
+                userInfo.delete();
+                File userDirectory = new File("users/" + user);
+                userDirectory.delete();
+                return (null);
+            }
+            if (name.equals("") || name.length() < 4
+                    || name.length() > 16) {
+                return ("invalid");
+            }
+            //TODO finish for stores
+        } else {
+            //this is for if it's a username
+            try {
+                File f;
+                File dir = new File("users/" + user);
+                if (!dir.createNewFile()) {
+                    dir.delete();
+                    return ("inUse");
+                }
+                //checking other criteria
+                if (user.equals("") || user.length() < 6 ||
+                        user.length() > 16 || user.contains(" ")) {
+                    dir.delete();
+                    return ("invalid");
+                }
+                dir.delete();
+                Files.createDirectory(Paths.get("users/" + user));
+                f = new File("users/" + user + "/" + user);
+                writeFile(user);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        String notAllowed = "`~!@#$%^&*()+-=[]{}\\|;:\"\'>.<,?/";
+        for (int i = 0; i < notAllowed.length(); i++) {
+            if (name.indexOf(notAllowed.charAt(i)) != -1) {
+                return ("invalid");
+            }
+        }
+        return ("valid");
+    }
+
+    public static void deleteUserInProgress(String user) {
+        File userInfo = new File("users/" + user + "/" + user);
+        userInfo.delete();
+        File userDirectory = new File("users/" + user);
+        userDirectory.delete();
+    }
+
+    //checks the password that the user selects to be their password
+    //TODO with time, reinstate password confirmation
+    public static String checkPassword(String password, String user) {
+        if (password == null) {
+            File userInfo = new File("users/" + user + "/" + user);
+            userInfo.delete();
+            File userDirectory = new File("users/" + user);
+            userDirectory.delete();
+            return (null);
+        }
+        if (password.length() < 8 || password.length() > 16
+                || password.contains(";")) {
+            return ("invalid");
+        }
+        encryptFile(user, password);
+        return ("valid");
+    }
+
+    //move username to new location after name change
+    public static void moveUsername(String user, String newUser) {
+        try {
+            //this method was retrieved with help from StackOverflow user @kr37
+            Path source = Paths.get("users/" + user + "/" + user);
+            Files.move(source, source.resolveSibling(newUser));
+            source = Paths.get("users/" + user);
+            Files.move(source, source.resolveSibling(newUser));
+            BufferedReader br = new BufferedReader(new FileReader("users/" + newUser + "/" + newUser));
+            ArrayList<String> fileContents = new ArrayList<>();
+            String line = br.readLine();
+            while (line != null) {
+                fileContents.add(line);
+                line = br.readLine();
+            }
+            writeFile(newUser);
+            fileContents.remove(0);
+            for (String s : fileContents) {
+                writeFile(newUser, s);
+            }
+            br.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void changeStoreName(List<String> storesArray, String storeToChange, String storeName, String user) {
+        storesArray.set(storesArray.indexOf(storeToChange), storeName);
+        try (BufferedReader br = new BufferedReader(new FileReader("users/" + user + "/" + user))) {
+            ArrayList<String> fileContents = new ArrayList<>();
+            String line = br.readLine();
+            while (line != null) {
+                fileContents.add(line);
+                line = br.readLine();
+            }
+            fileContents.set(3, storesArray.toString());
+            writeFile(user);
+            for (int i = 0; i < fileContents.size(); i++) {
+                if (i != 0) {
+                    writeFile(user, fileContents.get(i));
+                }
+            }
+            removeRenamedStore(storeToChange, storeName);
+            //TODO MarketUser calls
+            //MarketUser.changeStoreName(storeToChange, newName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //check if the user exists
+    public static boolean checkUserExists(String user) {
+        File f = new File("users/" + user);
+        try {
+            if (f.createNewFile()) {
+                f.delete();
+                return (false);
+            } else {
+                return (true);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return (false);
+    }
+
     /**
      * Updates the store list by adding a store name that has been confirmed to not be in use already
      *
@@ -312,27 +460,22 @@ public class LogInGui {
                             }
                         }
                     }
-                    try {
-                        File f = new File("users/" + user);
-                        if (f.createNewFile()) {
-                            f.delete();
-                            String[] userOptions = {"Yes", "No"};
-                            String continueUser = (String) JOptionPane.showInputDialog(null,
-                                    "User doesn't exist! Would you like to try again?",
-                                    "Messaging program", JOptionPane.QUESTION_MESSAGE,
-                                    null, userOptions, null);
-                            if (continueUser == null) {
-                                return;
-                            }
-                            if (continueUser.equals("No")) {
-                                return;
-                            }
-                        } else {
-                            userFound = true;
-                            done = true;
+                    boolean checkUser = checkUserExists(user);
+                    if (!checkUser) {
+                        String[] userOptions = {"Yes", "No"};
+                        String continueUser = (String) JOptionPane.showInputDialog(null,
+                                "User doesn't exist! Would you like to try again?",
+                                "Messaging program", JOptionPane.QUESTION_MESSAGE,
+                                null, userOptions, null);
+                        if (continueUser == null) {
+                            return;
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                        if (continueUser.equals("No")) {
+                            return;
+                        }
+                    } else {
+                        userFound = true;
+                        done = true;
                     }
                 }
                 if (userFound) {
@@ -390,31 +533,24 @@ public class LogInGui {
                 user = JOptionPane.showInputDialog(null,
                         "Enter your username.",
                         "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                File f;
-                File dir = new File("users/" + user);
+                //if the user hits the x
+                if (user == null) {
+                    return;
+                }
                 try {
-                    done = false;
-                    while (!done) {
-                        if (user == null) {
-                            dir.delete();
+                    String nameCheck = checkName(user, false, user);
+                    while (!nameCheck.equals("valid")) {
+                        if (nameCheck == null) {
                             return;
                         }
-                        if (!dir.createNewFile()) {
-                            dir.delete();
+                        if (nameCheck.equals("inUse")) {
                             JOptionPane.showMessageDialog(null,
                                     "Username already exists! Please enter another username.",
                                     "Messaging program", JOptionPane.ERROR_MESSAGE);
                             user = JOptionPane.showInputDialog(null,
                                     "Enter your username.",
                                     "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                            if (user == null) {
-                                dir.delete();
-                                return;
-                            }
-                            dir = new File("users/" + user);
-                            //TODO make sure they can't enter quotations or characters
-                        } else if (user.equals("") || user.length() < 6 || user.length() > 16 || user.contains(" ")) {
-                            dir.delete();
+                        } else if (nameCheck.equals("invalid")) {
                             JOptionPane.showMessageDialog(null,
                                     "Username constraints: " +
                                             "\n- Cannot be blank " +
@@ -425,112 +561,63 @@ public class LogInGui {
                             user = JOptionPane.showInputDialog(null,
                                     "Enter your username.",
                                     "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                            if (user == null) {
-                                dir.delete();
-                                return;
-                            }
-                            dir = new File("users/" + user);
-                        } else {
-                            done = true;
                         }
+                        nameCheck = checkName(user, false, user);
                     }
-                    dir.delete();
-                    Files.createDirectory(Paths.get("users/" + user));
-                    System.out.println(user);
-                    f = new File("users/" + user + "/" + user);
-                    writeFile(user);
-                    done = false;
+                    String password = JOptionPane.showInputDialog(null,
+                            "Please enter a password between 8 and 16 characters.",
+                            "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                    String passwordCheck = checkPassword(password, user);
                     try {
-                        while (!done) {
-                            String password = JOptionPane.showInputDialog(null,
-                                    "Please enter a password between 8 and 16 characters.",
-                                    "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                            if (password == null) {
-                                File userInfo = new File("users/" + user + "/" + user);
-                                userInfo.delete();
-                                File userDirectory = new File("users/" + user);
-                                userDirectory.delete();
+                        //checking the password
+                        while (!passwordCheck.equals("valid")) {
+                            if (passwordCheck == null) {
                                 return;
                             }
-                            if (password.length() < 8 || password.length() > 16) {
-                                while (password.length() < 8 || password.length() > 16) {
-                                    password = JOptionPane.showInputDialog(null,
-                                            "Password length must be between 8 and 16 characters!" +
-                                                    "Please enter a valid password.",
-                                            "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                    if (password == null) {
-                                        File userInfo = new File("users/" + user + "/" + user);
-                                        userInfo.delete();
-                                        File userDirectory = new File("users/" + user);
-                                        userDirectory.delete();
-                                        return;
-                                    }
-                                }
+                            if (passwordCheck.equals("invalid")) {
+                                password = JOptionPane.showInputDialog(null,
+                                        "Password length must be between 8 and 16 characters" +
+                                                "Password may not contain a ';'" +
+                                                "Please enter a valid password.",
+                                        "Messaging program", JOptionPane.PLAIN_MESSAGE);
                             }
-                            String passwordToCheck = JOptionPane.showInputDialog(null,
-                                    "Please enter your password again to confirm it.",
-                                    "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                            if (passwordToCheck == null) {
-                                File userInfo = new File("users/" + user + "/" + user);
-                                userInfo.delete();
-                                File userDirectory = new File("users/" + user);
-                                userDirectory.delete();
-                                return;
-                            }
-                            if (passwordToCheck.equals(password)) {
-                                encryptFile(user, password);
-                                done = true;
-                            } else {
-                                JOptionPane.showMessageDialog(null,
-                                        "Passwords did not match! Please try again.",
-                                        "Messaging program", JOptionPane.ERROR_MESSAGE);
-                            }
+                            passwordCheck = checkPassword(password, user);
                         }
+                        //TODO do this if time
+                        /* String passwordToCheck = JOptionPane.showInputDialog(null,
+                                "Please enter your password again to confirm it.",
+                                "Messaging program", JOptionPane.PLAIN_MESSAGE); */
                         done = false;
                         while (!done) {
                             if (isSeller.equalsIgnoreCase("true")) {
-                                FileManager.generateDirectoryFromUsername(user, true);
+                                //TODO FileManager calls
+                                //FileManager.generateDirectoryFromUsername(user, true);
                                 boolean doneStores = false;
                                 ArrayList<String> storeNames = new ArrayList<>();
+                                String storeName = "";
                                 while (!doneStores) {
-                                    String storeName = JOptionPane.showInputDialog(null,
-                                            "Please enter your store name.",
-                                            "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                    if (storeName == null) {
-                                        File userInfo = new File("users/" + user + "/" + user);
-                                        userInfo.delete();
-                                        File userDirectory = new File("users/" + user);
-                                        userDirectory.delete();
-                                        return;
-                                    }
-                                    boolean nameChecked = checkStoreList(storeName);
-                                    if (storeName.equals("") || !nameChecked ||
-                                            storeName.length() < 4 || storeName.length() > 16) {
-                                        while (storeName.equals("") || !nameChecked ||
-                                                storeName.length() < 4 || storeName.length() > 16) {
-                                            if (nameChecked || storeName.equals("")) {
-                                                JOptionPane.showMessageDialog(null,
-                                                        "Store name constraints: " +
-                                                                "\n- Cannot be blank " +
-                                                                "\n- Must be in between 4 and 16 characters inclusive " +
-                                                                "\nPlease enter a valid store name.",
-                                                        "Messaging program", JOptionPane.ERROR_MESSAGE);
-                                            } else {
-                                                JOptionPane.showMessageDialog(null,
-                                                        "Name already in use! Please enter another name.",
-                                                        "Messaging program", JOptionPane.ERROR_MESSAGE);
-                                            }
-                                            storeName = JOptionPane.showInputDialog(null,
-                                                    "Please enter your store name.",
-                                                    "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                            if (storeName == null) {
-                                                File userInfo = new File("users/" + user + "/" + user);
-                                                userInfo.delete();
-                                                File userDirectory = new File("users/" + user);
-                                                userDirectory.delete();
-                                                return;
-                                            }
-                                            nameChecked = checkStoreList(storeName);
+                                    boolean storeCaptured = false;
+                                    while (!storeCaptured) {
+                                        storeName = JOptionPane.showInputDialog(null,
+                                                "Please enter your store name.",
+                                                "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                                        String storeStatus = checkName(storeName, true, user);
+                                        if (storeStatus == null) {
+                                            return;
+                                        } else if (storeStatus.equals("inUse")) {
+                                            JOptionPane.showMessageDialog(null,
+                                                    "Name already in use! Please enter another name.",
+                                                    "Messaging program", JOptionPane.ERROR_MESSAGE);
+                                        } else if (storeStatus.equals("invalid")) {
+                                            JOptionPane.showMessageDialog(null,
+                                                    "Store name constraints: " +
+                                                            "\n- Cannot be blank " +
+                                                            "\n- Must be in between 4 and 16 characters inclusive " +
+                                                            "\n- Must not include symbols " +
+                                                            "\nPlease enter a valid store name.",
+                                                    "Messaging program", JOptionPane.ERROR_MESSAGE);
+                                        } else {
+                                            storeCaptured = true;
                                         }
                                     }
                                     boolean storeInput = false;
@@ -542,17 +629,17 @@ public class LogInGui {
                                                 JOptionPane.YES_NO_OPTION);
                                         if (input == 0 || input == 1) {
                                             storeInput = true;
+                                        } else {
+                                            return;
                                         }
                                     }
                                     if (input == 0) {
                                         storeNames.add(storeName);
                                         updateStoreList(storeName);
-                                        FileManager.generateStoreForSeller(user, storeName);
+                                        //TODO FileManager calls
+                                        //FileManager.generateStoreForSeller(user, storeName);
                                     } else if (input == -1) {
-                                        File userInfo = new File("users/" + user + "/" + user);
-                                        userInfo.delete();
-                                        File userDirectory = new File("users/" + user);
-                                        userDirectory.delete();
+                                        deleteUserInProgress(user);
                                         return;
                                     }
                                     input = -1;
@@ -564,10 +651,7 @@ public class LogInGui {
                                         if (input == 0 || input == 1) {
                                             storeInputTaken = true;
                                         } else if (input == -1) {
-                                            File userInfo = new File("users/" + user + "/" + user);
-                                            userInfo.delete();
-                                            File userDirectory = new File("users/" + user);
-                                            userDirectory.delete();
+                                            deleteUserInProgress(user);
                                             String stores = getUsersStores(user);
                                             appendStoreList(stores);
                                             return;
@@ -585,7 +669,8 @@ public class LogInGui {
                                 writeFile(user, isSeller);
                                 writeFile(user, storeNames.toString());
                             } else {
-                                FileManager.generateDirectoryFromUsername(user, false);
+                                //TODO FileManager calls
+                                //FileManager.generateDirectoryFromUsername(user, false);
                                 writeFile(user, isSeller);
                             }
                             done = true;
@@ -597,10 +682,7 @@ public class LogInGui {
                                     "Please enter an email to be associated with your account.",
                                     "Messaging program", JOptionPane.PLAIN_MESSAGE);
                             if (email == null) {
-                                File userInfo = new File("users/" + user + "/" + user);
-                                userInfo.delete();
-                                File userDirectory = new File("users/" + user);
-                                userDirectory.delete();
+                                deleteUserInProgress(user);
                                 String stores = getUsersStores(user);
                                 appendStoreList(stores);
                                 return;
@@ -630,7 +712,7 @@ public class LogInGui {
             //TODO MarketUser calls
             //MarketUser currentUser = new MarketUser(user, isSeller);
             boolean running = true;
-            boolean userDeleted = false;
+            //boolean userDeleted = false;
             while (running) {
                 options[0] = "User Interaction";
                 options[1] = "Account Changes";
@@ -668,10 +750,7 @@ public class LogInGui {
                             }
                             //TODO MarketUser calls
                             //MarketUser.deleteUsername(user);
-                            File userInfo = new File("users/" + user + "/" + user);
-                            userInfo.delete();
-                            File userDirectory = new File("users/" + user);
-                            userDirectory.delete();
+                            deleteUserInProgress(user);
                             return;
                         } else if (deletionInput == -1) {
                             return;
@@ -684,86 +763,43 @@ public class LogInGui {
                         String newUser = JOptionPane.showInputDialog(null,
                                 "Please enter a new username.",
                                 "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                        String newNameStatus = "";
+                        //user hits the x
                         if (newUser == null) {
                             return;
+                        } else {
+                            newNameStatus = checkName(user, false, newUser);
                         }
-                        File dir = new File("users/" + newUser);
-                        try {
-                            done = false;
-                            while (!done) {
-                                if (user == null) {
-                                    dir.delete();
-                                    return;
-                                }
-                                if (!dir.createNewFile()) {
-                                    dir.delete();
-                                    JOptionPane.showMessageDialog(null,
-                                            "Username already exists! Please enter another username.",
-                                            "Messaging program", JOptionPane.ERROR_MESSAGE);
-                                    newUser = JOptionPane.showInputDialog(null,
-                                            "Please enter your new username.",
-                                            "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                    if (newUser == null) {
-                                        dir.delete();
-                                        return;
-                                    }
-                                    dir = new File("users/" + newUser);
-                                    //TODO make sure they can't enter quotations or characters
-                                } else if (user.equals("") || user.length() < 6 || user.length() > 16 || user.contains(" ")) {
-                                    dir.delete();
-                                    JOptionPane.showMessageDialog(null,
-                                            "Username constraints: " +
-                                                    "\n- Cannot be blank " +
-                                                    "\n- Must be in between 6 and 16 characters inclusive " +
-                                                    "\n- Cannot contain spaces " +
-                                                    "\nPlease enter a valid username.",
-                                            "Messaging program", JOptionPane.ERROR_MESSAGE);
-                                    newUser = JOptionPane.showInputDialog(null,
-                                            "Please enter your new username.",
-                                            "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                    if (newUser == null) {
-                                        dir.delete();
-                                        return;
-                                    }
-                                    dir = new File("users/" + newUser);
-                                } else {
-                                    done = true;
-                                }
+                        while (!newNameStatus.equals("valid")) {
+                            if (newNameStatus.equals("inUse")) {
+                                JOptionPane.showMessageDialog(null,
+                                        "Username already exists! Please enter another username.",
+                                        "Messaging program", JOptionPane.ERROR_MESSAGE);
+                            } else if (newNameStatus.equals("invalid")) {
+                                JOptionPane.showMessageDialog(null,
+                                        "Username constraints: " +
+                                                "\n- Cannot be blank " +
+                                                "\n- Must be in between 6 and 16 characters inclusive " +
+                                                "\n- Cannot contain spaces " +
+                                                "\nPlease enter a valid username.",
+                                        "Messaging program", JOptionPane.ERROR_MESSAGE);
                             }
-                            dir.delete();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        try {
-                            //this method was retrieved with help from StackOverflow user @kr37
-                            Path source = Paths.get("users/" + user + "/" + user);
-                            Files.move(source, source.resolveSibling(newUser));
-                            source = Paths.get("users/" + user);
-                            Files.move(source, source.resolveSibling(newUser));
-                            //MarketUser.changeUsername(user, newUser);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        try (BufferedReader br = new BufferedReader(new FileReader("users/" + newUser + "/" + newUser))) {
-                            ArrayList<String> fileContents = new ArrayList<>();
-                            String line = br.readLine();
-                            while (line != null) {
-                                fileContents.add(line);
-                                line = br.readLine();
-                            }
-                            writeFile(newUser);
-                            fileContents.remove(0);
-                            for (String s : fileContents) {
-                                writeFile(newUser, s);
-                            }
-                            JOptionPane.showMessageDialog(null,
-                                    "Name change successful! " +
-                                            "Enjoy your new username, " + newUser + "!",
+                            newUser = JOptionPane.showInputDialog(null,
+                                    "Please enter your new username.",
                                     "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                            user = newUser;
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                            if (newUser == null) {
+                                return;
+                            }
+                            newNameStatus = checkName(user, false, newUser);
                         }
+                        moveUsername(user, newUser);
+                        //TODO MarketUser calls
+                        //MarketUser.changeUsername(user, newUser);
+                        JOptionPane.showMessageDialog(null,
+                                "Name change successful! " +
+                                        "Enjoy your new username, " + newUser + "!",
+                                "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                        user = newUser;
                     } else if (input == 2) {
                         if (getUsersStores(user) != null) {
                             String stores = getUsersStores(user);
@@ -789,75 +825,52 @@ public class LogInGui {
                                 if (storeName == null) {
                                     return;
                                 }
-                                boolean nameChecked = checkStoreList(storeName);
-                                if (storeName.equals("") || !nameChecked ||
-                                        storeName.length() < 4 || storeName.length() > 16) {
-                                    while (storeName.equals("") || !nameChecked ||
-                                            storeName.length() < 4 || storeName.length() > 16) {
-                                        if (nameChecked || storeName.equals("")) {
-                                            JOptionPane.showMessageDialog(null,
-                                                    "Store name constraints: " +
-                                                            "\n- Cannot be blank " +
-                                                            "\n- Must be in between 4 and 16 characters inclusive " +
-                                                            "\nPlease enter a valid store name.",
-                                                    "Messaging program", JOptionPane.ERROR_MESSAGE);
-                                        } else {
-                                            JOptionPane.showMessageDialog(null,
-                                                    "Name already in use! Please enter another name.",
-                                                    "Messaging program", JOptionPane.ERROR_MESSAGE);
-                                        }
-                                        storeName = JOptionPane.showInputDialog(null,
-                                                "Please enter your store name.",
-                                                "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                        if (storeName == null) {
-                                            return;
-                                        }
-                                        nameChecked = checkStoreList(storeName);
-                                        removeRenamedStore(storeToChange, storeName);
+                                String storeStatus = checkName(storeName, true, user);
+                                while (!storeStatus.equals("valid")) {
+                                    if (storeStatus.equals("invalid")) {
+                                        JOptionPane.showMessageDialog(null,
+                                                "Store name constraints: " +
+                                                        "\n- Cannot be blank " +
+                                                        "\n- Must be in between 4 and 16 characters inclusive " +
+                                                        "\nPlease enter a valid store name.",
+                                                "Messaging program", JOptionPane.ERROR_MESSAGE);
+                                    } else if (storeStatus.equals("inUse")) {
+                                        JOptionPane.showMessageDialog(null,
+                                                "Name already in use! Please enter another name.",
+                                                "Messaging program", JOptionPane.ERROR_MESSAGE);
                                     }
-                                }
-                                storesArray.set(storesArray.indexOf(storeToChange), storeName);
-                                try (BufferedReader br = new BufferedReader(new FileReader("users/" + user + "/" + user))) {
-                                    ArrayList<String> fileContents = new ArrayList<>();
-                                    String line = br.readLine();
-                                    while (line != null) {
-                                        fileContents.add(line);
-                                        line = br.readLine();
-                                    }
-                                    fileContents.set(3, storesArray.toString());
-                                    writeFile(user);
-                                    for (int i = 0; i < fileContents.size(); i++) {
-                                        if (i != 0) {
-                                            writeFile(user, fileContents.get(i));
-                                        }
-                                    }
-                                    removeRenamedStore(storeToChange, storeName);
-                                    //TODO MarketUser calls
-                                    //MarketUser.changeStoreName(storeToChange, newName);
-                                    JOptionPane.showMessageDialog(null,
-                                            "Name change successful!",
+                                    storeName = JOptionPane.showInputDialog(null,
+                                            "Please enter your new store name.",
                                             "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
+                                    if (storeName == null) {
+                                        return;
+                                    }
+                                    storeStatus = checkName(storeName, true, user);
                                 }
+                                //TODO I don't think this is needed
+                                //removeRenamedStore(storeToChange, storeName);
+                                changeStoreName(storesArray, storeToChange, storeName, user);
+                                JOptionPane.showMessageDialog(null,
+                                        "Name change successful!",
+                                        "Messaging program", JOptionPane.PLAIN_MESSAGE);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-                        } else {
-                            JOptionPane.showMessageDialog(null,
-                                    "You are not a seller!",
-                                    "Messaging program", JOptionPane.ERROR_MESSAGE);
                         }
                     } else {
-                        return;
+                        JOptionPane.showMessageDialog(null,
+                                "You are not a seller!",
+                                "Messaging program", JOptionPane.ERROR_MESSAGE);
                     }
-                }
-                input = JOptionPane.showConfirmDialog(null,
-                        "Would you like to continue using the program?",
-                        "Messaging program", JOptionPane.YES_NO_OPTION);
-                if (input != 0) {
+                } else {
                     return;
                 }
+            }
+            input = JOptionPane.showConfirmDialog(null,
+                    "Would you like to continue using the program?",
+                    "Messaging program", JOptionPane.YES_NO_OPTION);
+            if (input != 0) {
+                return;
             }
         } finally {
             JOptionPane.showMessageDialog(null,
@@ -866,4 +879,3 @@ public class LogInGui {
         }
     }
 }
-
