@@ -1,8 +1,10 @@
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 
 /**
  * This is a class that sets up the client for each messenger, it is the parent class of the GUI and its functions
@@ -129,5 +131,59 @@ public class Client {
         writer.write(edit);
         writer.println();
         writer.flush();
+    }
+
+    /**
+     * Method to signal retrieval of message contents and return the servers response as an
+     * array list
+     *
+     * @param sender sender
+     * @param recipient recipient
+     * @param storeName storeName
+     * @param isBuyer if buyer
+     * @param writer writer being used
+     * @param reader reader being used
+     * @return array list of messages
+     *
+     * @author John Brooks
+     */
+    public static ArrayList<String> displaySignal(String sender, String recipient, String storeName,
+                                                   boolean isBuyer, PrintWriter writer, BufferedReader reader) {
+        String buyer = "false";
+        if(isBuyer)
+            buyer = "true";
+
+        String sendData = "display";
+
+        String personData = sender + "," + recipient + "," +
+                storeName + "," + buyer;
+
+        writer.write(sendData);
+        writer.println();
+        writer.flush();
+
+        writer.write(personData);
+        writer.println();
+        writer.flush();
+
+        String messages = "";
+        try {
+            messages = reader.readLine();
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Failed to retrieve message contents.", "Messaging System",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+
+        ArrayList<String> messageContents = new ArrayList<>();
+
+        int indexOfSeparator = messages.indexOf(": : : :");
+
+        while (indexOfSeparator != -1) {
+            messageContents.add(messages.substring(0, indexOfSeparator));
+            indexOfSeparator = messages.indexOf(": : : :");
+            messages = messages.substring(indexOfSeparator + 7);
+        }
+
+        return messageContents;
     }
 }
