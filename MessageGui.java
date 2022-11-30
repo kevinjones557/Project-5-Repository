@@ -55,6 +55,7 @@ public class MessageGui extends Client implements Runnable{
         JLabel topLabel3 = new JLabel("Personal Chats:");
         topLabel3.setFont(new Font("Times New Roman",Font.BOLD,22));
         topLabel3.setHorizontalAlignment(JLabel.CENTER);
+        topLabel3.setMaximumSize(new Dimension(165, 45));
         sellerPanel.add(topLabel3);
         ArrayList<String> allMessages = super.getConversationsFromUser(this.username);
         // this is run for buyers and sellers, gets personal conversations

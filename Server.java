@@ -75,8 +75,13 @@ public class Server extends Thread {
                     writer.println(FileManager.isRecipientStore(contents));
                     writer.flush();
                 } else if (instruction.equals("getStoresFromSellers")) {
-                    writer.println(String.join(";", FileManager.getStoresFromSeller(contents)));
-                    writer.flush();
+                    if (FileManager.getStoresFromSeller(contents).size() > 0) {
+                        writer.println(String.join(";", FileManager.getStoresFromSeller(contents)));
+                        writer.flush();
+                    } else {
+                        writer.println();
+                        writer.flush();
+                    }
                 } else if (instruction.equals("importFile")) {
                     String path = contents.substring(0, contents.indexOf(";"));
                     contents = contents.substring(contents.indexOf(";") + 1);
@@ -101,14 +106,12 @@ public class Server extends Thread {
                     contents = contents.substring(contents.indexOf(";") + 1);
                     exportFile(recipient, username, isSeller, isUserStore, contents, storeNameMap);
                 } else if (instruction.equals("getConversationsFromStore")) {
-                    System.out.println("hi");
                     String username = contents.substring(0, contents.indexOf(";"));
                     contents = contents.substring(contents.indexOf(";") + 1);
                     writer.println(String.join(";", FileManager.getConversationsFromStore(username,
                             contents)));
                     writer.flush();
                 } else if (instruction.equals("getConversationsFromUser")) {
-                    System.out.println("hello");
                     writer.println(String.join(";", FileManager.getConversationsFromUser(contents)));
                     writer.flush();
                 }
