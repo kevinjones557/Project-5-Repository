@@ -61,8 +61,7 @@ public class MessageGui extends Client implements Runnable{
                     if (e.getSource() == tempButton) {
                         // user could be a buyer, seller, or a store
                         if (!isUserSeller) {
-                            isRecipientStore = FileManager.isRecipientStore(recipient);
-                            //TODO this should probably be a client call^^^^
+                            isRecipientStore = MessageGui.super.isRecipientStore(recipient);
                         }
                         isUserStore = false;
                         chooseRecipient(user, null);
@@ -78,9 +77,10 @@ public class MessageGui extends Client implements Runnable{
         }
 
         if (isUserSeller) {
-            // TODO call this client function to get the stores
-            ArrayList<String> sellerStores = FileManager.getStoresFromSeller(this.username);
+            ArrayList<String> sellerStores = super.getStoresFromSeller(this.username);
+            System.out.println(sellerStores);
             for (String store : sellerStores) {
+                // TODO call a client method that returns buyer conversations with each store
                 ArrayList<String> buyerConversations = FileManager.getConversationsFromStore(this.username, store);
                 System.out.println(store + buyerConversations);
                 if (buyerConversations.size() != 0) {
@@ -89,7 +89,6 @@ public class MessageGui extends Client implements Runnable{
                     storeLabel.setMaximumSize(new Dimension(165, 30));
                     storeLabel.setHorizontalAlignment(JLabel.CENTER);
                     sellerPanel.add(storeLabel);
-                    // TODO call a client method that returns buyer conversations with each store
                     for (String buyer : buyerConversations) {
                         JButton tempButton = new JButton(buyer);
                         ActionListener tempListener = new ActionListener() {
@@ -142,8 +141,7 @@ public class MessageGui extends Client implements Runnable{
                         // if user is a seller allow option to choose account to message from
                         if (isUserSeller) {
                             //first choose which account to start message from
-                            // TODO call this client function to get the stores
-                            ArrayList<String> sellerStores = FileManager.getStoresFromSeller(username);
+                            ArrayList<String> sellerStores = MessageGui.super.getStoresFromSeller(username);
                             sellerStores.add(0, username);
                             String[] accounts = sellerStores.toArray(new String[0]);
                             user = (String) JOptionPane.showInputDialog(null, "Choose account " +
@@ -157,7 +155,6 @@ public class MessageGui extends Client implements Runnable{
                             String newChatRecipient = (String) JOptionPane.showInputDialog(null,
                                     "Enter the name of a " + ((isUserSeller) ? "buyer:" : "seller:"),
                                     "Start New Chat", JOptionPane.PLAIN_MESSAGE);
-                            //TODO check if the name is in the array if not print error message
                             if (!Arrays.asList(options).contains(newChatRecipient)) {
                                 JOptionPane.showMessageDialog(null, "Sorry, no user found " +
                                         "with this name!","Error",JOptionPane.ERROR_MESSAGE);
@@ -170,6 +167,7 @@ public class MessageGui extends Client implements Runnable{
                                     public void run() {
                                         System.out.println("remaking");
                                         createLeftPanel();
+                                        myFrame.revalidate();
                                     }
                                 });
                             }
@@ -193,12 +191,11 @@ public class MessageGui extends Client implements Runnable{
                         // if user is a seller allow option to choose account to message from
                         if (isUserSeller) {
                             //first choose which account to start message from
-                            // TODO call this client function to get the stores
-                            ArrayList<String> sellerStores = FileManager.getStoresFromSeller(username);
+                            ArrayList<String> sellerStores = MessageGui.super.getStoresFromSeller(username);
                             sellerStores.add(0, username);
                             String[] accounts = sellerStores.toArray(new String[0]);
                             user = (String) JOptionPane.showInputDialog(null, "Choose account " +
-                                    "to message from", "Select Account", JOptionPane.PLAIN_MESSAGE, null,
+                                            "to message from", "Select Account", JOptionPane.PLAIN_MESSAGE, null,
                                     accounts, null);
                             isUserStore = user != null && !user.equals(username);
                         }
@@ -209,8 +206,7 @@ public class MessageGui extends Client implements Runnable{
                                 // if it is a buyer get all the stores from the sellers
                                 ArrayList<String> allStores = new ArrayList<>();
                                 for (String seller : options) {
-                                    allStores.addAll(FileManager.getStoresFromSeller(seller));
-                                    //TODO call client version^^^
+                                    allStores.addAll(MessageGui.super.getStoresFromSeller(seller));
                                 }
                                 options = allStores.toArray(new String[0]);
                             }
@@ -332,16 +328,29 @@ public class MessageGui extends Client implements Runnable{
         importFileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (e.getSource() == importFileButton) {
-                    String filename = getImportFile();
-                    if (!(filename == null) && !filename.endsWith(".txt")) {
-                        JOptionPane.showMessageDialog(null, "File must be a text file",
-                                "Invalid File", JOptionPane.ERROR_MESSAGE);
-                    } else if (filename != null) {
-                        System.out.println(filename);
+                if (recipient != null) {
+                    if (e.getSource() == importFileButton) {
+                        String filename = getImportFile();
+                        if (!(filename == null) && !filename.endsWith(".txt")) {
+                            JOptionPane.showMessageDialog(null, "File must be a text file",
+                                    "Invalid File", JOptionPane.ERROR_MESSAGE);
+                        } else if (filename != null) {
+                            MessageGui.super.importFile(filename, recipient, username, isUserSeller,
+                                    isUserStore, isRecipientStore);
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    createMessageGUI();
+                                    myFrame.revalidate();
+                                }
+                            });
+                        }
                     }
+                } else {
+                    JOptionPane.showMessageDialog(null, "Please choose a recipient first"
+                            , "Error", JOptionPane.ERROR_MESSAGE);
                 }
-                //TODO call client to import file
+
             }
         });
         topPanel.add(importFileButton);
@@ -486,7 +495,7 @@ public class MessageGui extends Client implements Runnable{
             @Override
             public void run() {
                 createMessageGUI();
-                myFrame.validate();
+                myFrame.revalidate();
             }
         });
 
@@ -501,6 +510,8 @@ public class MessageGui extends Client implements Runnable{
         } else {
             isUserStore = false;
         }
+        this.recipient = null;
+        run();
         // at end of constructor, if the recipient is a seller, recipient is seller name and store is null
         // if recipient is a store, recipient is seller name and storeName is store's name
         // if user is store, then username is seller name and storeName is store's name
@@ -516,7 +527,7 @@ public class MessageGui extends Client implements Runnable{
     }
 
     public static void main(String[] args) throws IOException {
-        SwingUtilities.invokeLater(new MessageGui("Server", true, new Socket("localhost", 2000)));
+        SwingUtilities.invokeLater(new MessageGui("Seller", true, new Socket("localhost", 2000)));
     }
 
 }

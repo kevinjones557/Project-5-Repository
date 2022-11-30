@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
 import java.util.LinkedHashMap;
 
 /**
@@ -44,8 +44,11 @@ public class Server extends Thread {
 
             while (true) {
                 String line = reader.readLine();
+                System.out.println("all " + line);
                 String instruction = line.substring(0, line.indexOf(';'));
+                System.out.println("instruction " + instruction);
                 String contents = "";
+                System.out.println("contents " + contents);
                 try {
                     contents = line.substring(line.indexOf(";") + 1);
                 } catch (IndexOutOfBoundsException e) {
@@ -68,14 +71,25 @@ public class Server extends Thread {
                     contents = contents.substring(contents.indexOf(";") + 1);
                     boolean isUserStore = Boolean.parseBoolean(contents);
                     checkIfMessageExists(recipient, isRecipientStore, isSeller, username, isUserStore, storeNameMap);
-                } else if (instruction.equals("append")) {
-                    appendReceive(reader);
-                } else if (instruction.equals("delete")) {
-                    deleteReceive(reader);
-                } else if (instruction.equals("edit")) {
-                    editReceive(reader);
-                } else if (instruction.equals("display")) {
-                    displayReceive(reader, writer);
+                } else if (instruction.equals("isRecipientStore")) {
+                    writer.println(FileManager.isRecipientStore(contents));
+                    writer.flush();
+                } else if (instruction.equals("getStoresFromSellers")) {
+                    writer.println(String.join(";", FileManager.getStoresFromSeller(contents)));
+                    writer.flush();
+                } else if (instruction.equals("importFile")) {
+                    String path = contents.substring(0, contents.indexOf(";"));
+                    contents = contents.substring(contents.indexOf(";") + 1);
+                    String recipient = contents.substring(0, contents.indexOf(";"));
+                    contents = contents.substring(contents.indexOf(";") + 1);
+                    String username = contents.substring(0, contents.indexOf(";"));
+                    contents = contents.substring(contents.indexOf(";") + 1);
+                    boolean isSeller = Boolean.parseBoolean(contents.substring(0, contents.indexOf(";")));
+                    contents = contents.substring(contents.indexOf(";") + 1);
+                    boolean isUserStore = Boolean.parseBoolean(contents.substring(0, contents.indexOf(";")));
+                    contents = contents.substring(contents.indexOf(";") + 1);
+                    boolean isRecipientStore = Boolean.parseBoolean(contents);
+                    importFile(path, recipient, username, isSeller, isUserStore, isRecipientStore, storeNameMap);
                 }
             }
         } catch (IOException e) {
@@ -130,14 +144,6 @@ public class Server extends Thread {
             }
         }
     }
-
-    /**
-     * Method to receive data from client for appending and call append
-     *
-     * @param reader buffered reader being used
-     *
-     * @author John Brooks
-     */
     public static void appendReceive(BufferedReader reader) {
         try {
             String personData = reader.readLine();
@@ -161,13 +167,6 @@ public class Server extends Thread {
         }
     }
 
-    /**
-     * Method to receive info for deleting and call delete
-     *
-     * @param reader buffered reader
-     *
-     * @author John Brooks
-     */
     public static void deleteReceive(BufferedReader reader) {
         try {
             String personData = reader.readLine();
@@ -191,13 +190,6 @@ public class Server extends Thread {
         }
     }
 
-    /**
-     * Method to receive info for editing a message and call edit
-     *
-     * @param reader buffered reader
-     *
-     * @author John Brooks
-     */
     public static void editReceive(BufferedReader reader) {
         try {
             String personData = reader.readLine();
@@ -222,32 +214,67 @@ public class Server extends Thread {
         }
     }
 
-    public static void displayReceive(BufferedReader reader, PrintWriter writer) {
-        try {
-            String personData = reader.readLine();
-            String sender = personData.substring(0, personData.indexOf(","));
-            personData = personData.substring(personData.indexOf(",") + 1);
-            String recipient = personData.substring(0, personData.indexOf(","));
-            personData = personData.substring(personData.indexOf(",") + 1);
-            String storeName = personData.substring(0, personData.indexOf(","));
-            personData = personData.substring(personData.indexOf(",") + 1);
-            String buyer = personData.substring(0, personData.indexOf(","));
-            boolean isBuyer = false;
-            if (buyer.equals("true"))
-                isBuyer = true;
-
-            ArrayList<String> messageContents = Message.displayMessage(sender, recipient, storeName, isBuyer);
-            String returnedContents = "";
-            for (int i = 0; i < messageContents.size(); i++) {
-                returnedContents = returnedContents + messageContents.get(i) + ": : : :";
-            }
-            writer.write(returnedContents);
-            writer.println();
-            writer.flush();
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "The data could not be handled.", "Messaging System",
-                    JOptionPane.ERROR_MESSAGE);
+    public synchronized void importFile(String path, String recipient, String username, boolean isSeller,
+                                        boolean isUserStore, boolean isRecipientStore,
+                                        LinkedHashMap<String, String> storeNameMap) {
+        // set up paths to correct files
+        String fileSender;
+        String fileReceiver;
+        if (isUserStore) {
+            fileSender = FileManager.getStoreDirectory(
+                    storeNameMap.get(username), username);
+            fileReceiver = "data/buyers/" + recipient + "/";
+        } else if (isSeller) {
+            fileReceiver = "data/buyers/" + recipient + "/";
+            fileSender = "data/sellers/" + username + "/";
+        } else if (isRecipientStore) {
+            fileSender = "data/buyers/" + username + "/";
+            fileReceiver = FileManager.getStoreDirectory(
+                    storeNameMap.get(recipient), recipient);
+        } else {
+            fileReceiver = "data/sellers/" + recipient + "/";
+            fileSender = "data/buyers/" + username + "/";
         }
+
+        fileReceiver += recipient + username + ".txt";
+        fileSender += username + recipient + ".txt";
+
+        File senderFile = new File(fileSender);
+        File receiverFile = new File(fileReceiver);
+        File importFile = new File(path);
+        try (BufferedReader bfr = new BufferedReader(new FileReader(importFile))) {
+            PrintWriter pwReceiver = new PrintWriter(new FileWriter(receiverFile, true));
+            PrintWriter pwSender = new PrintWriter(new FileWriter(senderFile, true));
+
+
+            String timeStamp = new SimpleDateFormat(
+                    "MM/dd HH:mm:ss").format(new java.util.Date());
+
+            String line = bfr.readLine();
+            while (line != null) {
+                pwSender.print(username + " " + timeStamp + "- ");
+                pwReceiver.print(username + " " + timeStamp + "- ");
+                pwReceiver.println(line);
+                pwSender.println(line);
+                if (!isSeller) {
+                    String storePath;
+                    if (FileManager.checkSellerExists(recipient)) {
+                        storePath = null;
+                    } else {
+                        storePath = FileManager.getStoreDirectory(
+                                storeNameMap.get(recipient), recipient);
+                    }
+                    MetricManager.addDeleteMessageData(username, storePath,
+                            line, false);
+                }
+                line = bfr.readLine();
+            }
+            pwReceiver.close();
+            pwSender.close();
+        } catch (IOException e) {
+            System.out.println("Error reading file!");
+        }
+
     }
 
 }
