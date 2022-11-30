@@ -138,4 +138,33 @@ public class Client {
                 isUserStore + ";" + isRecipientStore);
         writer.flush();
     }
+
+    public void exportFile(String recipient, String username, boolean isSeller, boolean isUserStore,
+                           String path) {
+        writer.println("exportFile;" + recipient + ";" + username + ";" + isSeller + ";" + isUserStore
+                + ";" + path);
+        writer.flush();
+    }
+
+    public ArrayList<String> getConversationsFromStore(String seller, String storeName) {
+        writer.println("getConversationsFromStore;" + seller + ";" + storeName);
+        writer.flush();
+        try {
+            return new ArrayList<>(Arrays.asList((reader.readLine().split(";"))));
+        } catch (IOException io) {
+            io.printStackTrace();
+        }
+        return null;
+    }
+
+    public ArrayList<String> getConversationsFromUser(String username) {
+        writer.println("getConversationsFromUser;" + username);
+        writer.flush();
+        try {
+            return new ArrayList<>(Arrays.asList((reader.readLine().split(";"))));
+        } catch (IOException io) {
+            io.printStackTrace();
+        }
+        return null;
+    }
 }
