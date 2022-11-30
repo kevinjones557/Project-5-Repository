@@ -138,4 +138,11 @@ public class Client {
                 isUserStore + ";" + isRecipientStore);
         writer.flush();
     }
+
+    public void exportFile(String recipient, String username, boolean isSeller, boolean isUserStore,
+                           String path) {
+        writer.println("exportFile;" + recipient + ";" + username + ";" + isSeller + ";" + isUserStore
+                + ";" + path);
+        writer.flush();
+    }
 }

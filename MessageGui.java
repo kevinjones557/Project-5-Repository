@@ -368,8 +368,9 @@ public class MessageGui extends Client implements Runnable{
                     int result = directoryChooser.showOpenDialog(myFrame);
                     if (result == JFileChooser.APPROVE_OPTION) {
                         String directory = directoryChooser.getSelectedFile().getAbsolutePath();
+                        MessageGui.super.exportFile(recipient, username, isUserSeller, isUserStore, directory);
                     }
-                    //TODO call export file function in client with directory + other info
+
                 }
             }
         });
