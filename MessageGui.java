@@ -146,7 +146,7 @@ public class MessageGui extends Client implements Runnable{
         topTextPanel.add(topLabel2);
         // creating buttons for bottom panel
         JButton searchForUserButton = new JButton("Search for a " + ((isUserSeller)? "buyer" : "seller"));
-        searchForUserButton.setMaximumSize(new Dimension(165,43));
+        searchForUserButton.setMaximumSize(new Dimension(165,74));
         bottomButtonPanel.add(searchForUserButton);
         searchForUserButton.addActionListener(new ActionListener() {
             @Override
@@ -196,7 +196,7 @@ public class MessageGui extends Client implements Runnable{
         });
 
         JButton seeListOfUsersButton = new JButton("See a list of " + ((isUserSeller)? "buyers" : "stores"));
-        seeListOfUsersButton.setMaximumSize(new Dimension(165,43));
+        seeListOfUsersButton.setMaximumSize(new Dimension(165,74));
         bottomButtonPanel.add(seeListOfUsersButton);
         seeListOfUsersButton.addActionListener(new ActionListener() {
             @Override
@@ -254,12 +254,8 @@ public class MessageGui extends Client implements Runnable{
             }
         });
 
-        JButton invisibleUserButton = new JButton("Invisible Users");
-        invisibleUserButton.setMaximumSize(new Dimension(165,43));
-        bottomButtonPanel.add(invisibleUserButton);
-
         JButton metricsButton = new JButton("View Statistics");
-        metricsButton.setMaximumSize(new Dimension(165,43));
+        metricsButton.setMaximumSize(new Dimension(165,74));
         bottomButtonPanel.add(metricsButton);
 
         scrollPane.setBounds(0,45,165,545);
