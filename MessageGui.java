@@ -24,6 +24,7 @@ public class MessageGui extends Client implements Runnable{
     private final JButton deleteOption = new JButton("Delete");
     private final JButton cancelOption = new JButton("Cancel");
     private final JButton invisibleOption = new JButton("Become Invisible to User");
+    private final JButton becomeVisibleOption = new JButton("Become Visible to User");
     private final JButton blockOption = new JButton("Block User");
     private final JButton unblockOption = new JButton("Unblock User");
 
@@ -559,6 +560,24 @@ public class MessageGui extends Client implements Runnable{
                     popupMenu2.setVisible(false);
                     System.out.println("invisible");
                     // TODO call make invisible
+                    sendBlockInvisibleSignal("invisible", username, Boolean.toString(isUserSeller), recipient);
+                }
+            }
+        });
+
+        becomeVisibleOption.setMaximumSize(new Dimension(200, 28));
+
+        for (ActionListener al : becomeVisibleOption.getActionListeners()) {
+            becomeVisibleOption.removeActionListener(al);
+        }
+        becomeVisibleOption.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (e.getSource() == becomeVisibleOption) {
+                    popupMenu2.setVisible(false);
+                    System.out.println("visible");
+                    // TODO call make visible again
+                    sendBlockInvisibleSignal("visible", username, Boolean.toString(isUserSeller), recipient);
                 }
             }
         });
@@ -575,6 +594,7 @@ public class MessageGui extends Client implements Runnable{
                     popupMenu2.setVisible(false);
                     System.out.println("blocking");
                     // TODO block the user
+                    sendBlockInvisibleSignal("block", username, Boolean.toString(isUserSeller), recipient);
                 }
             }
         });
@@ -590,7 +610,8 @@ public class MessageGui extends Client implements Runnable{
                 if (e.getSource() == unblockOption) {
                     popupMenu2.setVisible(false);
                     System.out.println("unblocking");
-                    // TODO block the user
+                    // TODO unblock the user
+                    sendBlockInvisibleSignal("unblock", username, Boolean.toString(isUserSeller), recipient);
                 }
             }
         });
@@ -605,9 +626,26 @@ public class MessageGui extends Client implements Runnable{
                 }
             }
         });
-        popupMenu2.add(blockOption);
-        popupMenu2.add(unblockOption);
-        popupMenu2.add(invisibleOption);
+        boolean isBlocked = false;
+        boolean cantSeeThisUser = false;
+        try {
+            isBlocked = Blocking.isRecipientBlocked(username, isUserSeller,
+                    isRecipientStore? FileManager.mapStoresToSellers().get(recipient): recipient);
+            cantSeeThisUser = Invisible.recipientCantSeeMe(username, isUserSeller,
+                    isRecipientStore? FileManager.mapStoresToSellers().get(recipient): recipient);
+        } catch (IOException ioException) {
+
+        }
+        if(isBlocked) {
+            popupMenu2.add(unblockOption);
+        } else {
+            popupMenu2.add(blockOption);
+        }
+        if(cantSeeThisUser) {
+            popupMenu2.add(becomeVisibleOption);
+        } else {
+            popupMenu2.add(invisibleOption);
+        }
         popupMenu2.add(cancelOption);
         popupMenu2.setVisible(true);
         popupMenu2.setLocation(e.getLocationOnScreen());

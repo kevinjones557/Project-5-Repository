@@ -184,4 +184,16 @@ public class Invisible {
             pw.close();
         }
     }
+
+    public static boolean recipientCantSeeMe(String currentUser, boolean isSeller, String recipient) throws IOException {
+        synchronized (OBJ) {
+            String[] blockList = invisibleList(currentUser, isSeller);
+            for (String victim : blockList) {
+                if(victim.equals(recipient)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
 }

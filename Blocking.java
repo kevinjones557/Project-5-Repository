@@ -165,4 +165,16 @@ public class Blocking {
         }
         return messageAble;
     }
+
+    public static boolean isRecipientBlocked(String currentUser, boolean isSeller, String recipient) throws IOException {
+        synchronized (OBJ) {
+            String[] blockList = blockedList(currentUser, isSeller);
+            for (String victim : blockList) {
+                if(victim.equals(recipient)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
 }

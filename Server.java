@@ -158,6 +158,18 @@ public class Server extends Thread {
                     editReceive(reader);
                 } else if (instruction.equals("display")) {
                     displayReceive(reader, writer);
+                } else if (instruction.equals("invisible")) {
+                    Invisible.becomeInvisibleToUser(request.split(";")[1], request.split(";")[3],
+                            Boolean.parseBoolean(request.split(";")[2]));
+                } else if (instruction.equals("visible")) {
+                    Invisible.becomeVisibleAgain(request.split(";")[1], request.split(";")[3],
+                            Boolean.parseBoolean(request.split(";")[2]));
+                } else if (instruction.equals("block")) {
+                    Blocking.blockUser(request.split(";")[1], request.split(";")[3],
+                            Boolean.parseBoolean(request.split(";")[2]));
+                } else if (instruction.equals("unblock")) {
+                    Blocking.unblockUser(request.split(";")[1], request.split(";")[3],
+                            Boolean.parseBoolean(request.split(";")[2]));
                 }
             }
         } catch (IOException e) {
