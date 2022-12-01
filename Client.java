@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -220,5 +221,10 @@ public class Client {
             io.printStackTrace();
         }
         return null;
+    }
+
+    public void sendBlockInvisibleSignal(String command, String currentUser, String isSeller, String victim ) {
+        writer.println(command + ";" + currentUser + ";" + isSeller + ";" + victim);
+        writer.flush();
     }
 }

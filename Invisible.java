@@ -2,6 +2,7 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class Invisible {
+    public static final Object OBJ = new Object();
     /**
      * Get a list of users that this user can see
      *
@@ -10,45 +11,47 @@ public class Invisible {
      */
     public static String[] getAvailableUsers(String currentUser, boolean isSeller) throws IOException {
         ArrayList<String> available = new ArrayList<>();
-        if (!isSeller) {
-            File sellersDir = new File("data/sellers");
-            String[] sellers = sellersDir.list();
-            for (String seller : sellers) {
-                File sellerFolder = new File("data/sellers/" + seller);
-                File invisibleFilePath = new File("data/sellers/"
-                        + seller + "/isInvisible.txt");
-                BufferedReader bfr = new BufferedReader(new FileReader(invisibleFilePath));
-                String line;
-                boolean invisible = false;
-                while ((line = bfr.readLine()) != null) {
-                    if (line.equals(currentUser)) {
-                        invisible = true;
-                        break;
+        synchronized (OBJ) {
+            if (!isSeller) {
+                File sellersDir = new File("data/sellers");
+                String[] sellers = sellersDir.list();
+                for (String seller : sellers) {
+                    File sellerFolder = new File("data/sellers/" + seller);
+                    File invisibleFilePath = new File("data/sellers/"
+                            + seller + "/isInvisible.txt");
+                    BufferedReader bfr = new BufferedReader(new FileReader(invisibleFilePath));
+                    String line;
+                    boolean invisible = false;
+                    while ((line = bfr.readLine()) != null) {
+                        if (line.equals(currentUser)) {
+                            invisible = true;
+                            break;
+                        }
+                    }
+                    bfr.close();
+                    if (!invisible) {
+                        available.add(seller);
                     }
                 }
-                bfr.close();
-                if (!invisible) {
-                    available.add(seller);
-                }
-            }
-        } else {
-            File buyersDir = new File("data/buyers");
-            String[] buyers = buyersDir.list();
-            for (String buyer : buyers) {
-                File invisibleFilePath = new File("data/buyers/" +
-                        buyer + "/isInvisible.txt");
-                BufferedReader bfr = new BufferedReader(new FileReader(invisibleFilePath));
-                String line;
-                boolean invisible = false;
-                while ((line = bfr.readLine()) != null) {
-                    if (line.equals(currentUser)) {
-                        invisible = true;
-                        break;
+            } else {
+                File buyersDir = new File("data/buyers");
+                String[] buyers = buyersDir.list();
+                for (String buyer : buyers) {
+                    File invisibleFilePath = new File("data/buyers/" +
+                            buyer + "/isInvisible.txt");
+                    BufferedReader bfr = new BufferedReader(new FileReader(invisibleFilePath));
+                    String line;
+                    boolean invisible = false;
+                    while ((line = bfr.readLine()) != null) {
+                        if (line.equals(currentUser)) {
+                            invisible = true;
+                            break;
+                        }
                     }
-                }
-                bfr.close();
-                if (!invisible) {
-                    available.add(buyer);
+                    bfr.close();
+                    if (!invisible) {
+                        available.add(buyer);
+                    }
                 }
             }
         }
@@ -67,31 +70,34 @@ public class Invisible {
      */
     public static String[] getAvailableStores(String currentUser) throws IOException {
         boolean invisible = true;
-        String[] possibleSellers = Invisible.getAvailableUsers(currentUser, false);
-        File sellers = new File("data/sellers");
-        ArrayList<String> possibleStores = new ArrayList<>();
-        String[] sellerNames = sellers.list();
-        for (String name : sellerNames) {
-            for (String seller : possibleSellers) {
-                if (seller.equals(name)) {
-                    invisible = false;
-                    break;
+        synchronized (OBJ) {
+            String[] possibleSellers = Invisible.getAvailableUsers(currentUser, false);
+            File sellers = new File("data/sellers");
+            ArrayList<String> possibleStores = new ArrayList<>();
+            String[] sellerNames = sellers.list();
+            for (String name : sellerNames) {
+                for (String seller : possibleSellers) {
+                    if (seller.equals(name)) {
+                        invisible = false;
+                        break;
+                    }
                 }
-            }
-            if (!invisible) {
-                File stores = new File("data/sellers/" + name);
-                String[] storeNames = stores.list();
-                for (String store : storeNames) {
-                    File storeFile = new File("data/sellers/" + name + "/" + store);
-                    if (storeFile.isDirectory()) {
-                        possibleStores.add(store);
+                if (!invisible) {
+                    File stores = new File("data/sellers/" + name);
+                    String[] storeNames = stores.list();
+                    for (String store : storeNames) {
+                        File storeFile = new File("data/sellers/" + name + "/" + store);
+                        if (storeFile.isDirectory()) {
+                            possibleStores.add(store);
+                        }
                     }
                 }
             }
+
+            String[] availableStores = new String[possibleStores.size()];
+            availableStores = possibleStores.toArray(availableStores);
+            return availableStores;
         }
-        String[] availableStores = new String[possibleStores.size()];
-        availableStores = possibleStores.toArray(availableStores);
-        return availableStores;
     }
 
     /**
@@ -106,14 +112,16 @@ public class Invisible {
         String invisibleFilePath = "data/" + ((isSeller) ? "sellers/" : "buyers/") +
                 currentUser + "/isInvisible.txt";
         File invisibleFile = new File(invisibleFilePath);
-        BufferedReader bfr = new BufferedReader(new FileReader(invisibleFile));
-        String line;
-        while ((line = bfr.readLine()) != null) {
-            if (!line.isEmpty()) {
-                victims.add(line);
+        synchronized (OBJ) {
+            BufferedReader bfr = new BufferedReader(new FileReader(invisibleFile));
+            String line;
+            while ((line = bfr.readLine()) != null) {
+                if (!line.isEmpty()) {
+                    victims.add(line);
+                }
             }
+            bfr.close();
         }
-        bfr.close();
         String[] invisibleList = new String[victims.size()];
         for (int i = 0; i < victims.size(); i++) {
             invisibleList[i] = victims.get(i);
@@ -130,21 +138,23 @@ public class Invisible {
         String invisibleFilePath = "data/" + ((isSeller) ? "sellers/" : "buyers/")
                 + currentUser + "/isInvisible.txt";
         File invisibleFile = new File(invisibleFilePath);
-        BufferedReader bfr = new BufferedReader(new FileReader(invisibleFile));
-        String line;
-        while ((line = bfr.readLine()) != null) {
-            if (line.equals(victim)) {
-                //Already become invisible to this user
-                return true;
+        synchronized (OBJ) {
+            BufferedReader bfr = new BufferedReader(new FileReader(invisibleFile));
+            String line;
+            while ((line = bfr.readLine()) != null) {
+                if (line.equals(victim)) {
+                    //Already become invisible to this user
+                    return true;
+                }
             }
+            bfr.close();
+            //Write the name of the victim to hasBlocked file
+            PrintWriter pw = new PrintWriter(new FileWriter(invisibleFile, true));
+            pw.write(victim);
+            pw.println();
+            pw.flush();
+            pw.close();
         }
-        bfr.close();
-        //Write the name of the victim to hasBlocked file
-        PrintWriter pw = new PrintWriter(new FileWriter(invisibleFile, true));
-        pw.write(victim);
-        pw.println();
-        pw.flush();
-        pw.close();
         return false;
 
     }
@@ -156,20 +166,22 @@ public class Invisible {
         String invisibleFilePath = "data/" + ((isSeller) ? "sellers/" : "buyers/") +
                 currentUser + "/isInvisible.txt";
         File invisibleFile = new File(invisibleFilePath);
-        BufferedReader bfr = new BufferedReader(new FileReader(invisibleFile));
-        String line;
-        while ((line = bfr.readLine()) != null) {
-            if (!line.equals(victim) && !line.isEmpty()) {
-                lines.add(line);
+        synchronized (OBJ) {
+            BufferedReader bfr = new BufferedReader(new FileReader(invisibleFile));
+            String line;
+            while ((line = bfr.readLine()) != null) {
+                if (!line.equals(victim) && !line.isEmpty()) {
+                    lines.add(line);
+                }
             }
+            bfr.close();
+            PrintWriter pw = new PrintWriter(new FileWriter(invisibleFile, false));
+            for (String l : lines) {
+                pw.write(l);
+                pw.println();
+            }
+            pw.flush();
+            pw.close();
         }
-        bfr.close();
-        PrintWriter pw = new PrintWriter(new FileWriter(invisibleFile, false));
-        for (String l : lines) {
-            pw.write(l);
-            pw.println();
-        }
-        pw.flush();
-        pw.close();
     }
 }

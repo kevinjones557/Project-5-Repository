@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class Blocking {
+    public static final Object OBJ = new Object();
+
     /**
      * blockedList method
      *
@@ -18,14 +20,16 @@ public class Blocking {
         String blockedFilePath = "data/" + ((isSeller) ? "sellers/" : "buyers/") +
                 currentUser + "/hasBlocked.txt";
         File blockedFile = new File(blockedFilePath);
-        BufferedReader bfr = new BufferedReader(new FileReader(blockedFile));
-        String line;
-        while ((line = bfr.readLine()) != null) {
-            if (!line.isEmpty()) {
-                victims.add(line);
+        synchronized (OBJ) {
+            BufferedReader bfr = new BufferedReader(new FileReader(blockedFile));
+            String line;
+            while ((line = bfr.readLine()) != null) {
+                if (!line.isEmpty()) {
+                    victims.add(line);
+                }
             }
+            bfr.close();
         }
-        bfr.close();
         String[] blockedList = new String[victims.size()];
         for (int i = 0; i < victims.size(); i++) {
             blockedList[i] = victims.get(i);
@@ -47,21 +51,24 @@ public class Blocking {
         String blockedFilePath = "data/" + ((isSeller) ? "sellers/" : "buyers/") +
                 currentUser + "/hasBlocked.txt";
         File blockedFile = new File(blockedFilePath);
-        BufferedReader bfr = new BufferedReader(new FileReader(blockedFile));
-        String line;
-        while ((line = bfr.readLine()) != null) {
-            if (line.equals(victim)) {
-                //Already blocked this user
-                return true;
+        synchronized (OBJ) {
+            BufferedReader bfr = new BufferedReader(new FileReader(blockedFile));
+            String line;
+            while ((line = bfr.readLine()) != null) {
+                if (line.equals(victim)) {
+                    //Already blocked this user
+                    return true;
+                }
             }
+            bfr.close();
+
+            //Write the name of the victim to hasBlocked file
+            PrintWriter pw = new PrintWriter(new FileWriter(blockedFile, true));
+            pw.write(victim);
+            pw.println();
+            pw.flush();
+            pw.close();
         }
-        bfr.close();
-        //Write the name of the victim to hasBlocked file
-        PrintWriter pw = new PrintWriter(new FileWriter(blockedFile, true));
-        pw.write(victim);
-        pw.println();
-        pw.flush();
-        pw.close();
         return false;
 
     }
@@ -79,22 +86,23 @@ public class Blocking {
         String blockedFilePath = "data/" + ((isSeller) ? "sellers/" : "buyers/") +
                 currentUser + "/hasBlocked.txt";
         File blockedFile = new File(blockedFilePath);
-        BufferedReader bfr = new BufferedReader(new FileReader(blockedFile));
-        String line;
-        while ((line = bfr.readLine()) != null) {
-            if (!line.equals(victim) && !line.isEmpty()) {
-                lines.add(line);
+        synchronized (OBJ) {
+            BufferedReader bfr = new BufferedReader(new FileReader(blockedFile));
+            String line;
+            while ((line = bfr.readLine()) != null) {
+                if (!line.equals(victim) && !line.isEmpty()) {
+                    lines.add(line);
+                }
             }
+            bfr.close();
+            PrintWriter pw = new PrintWriter(new FileWriter(blockedFile, false));
+            for (String l : lines) {
+                pw.write(l);
+                pw.println();
+            }
+            pw.flush();
+            pw.close();
         }
-        bfr.close();
-        PrintWriter pw = new PrintWriter(new FileWriter(blockedFile, false));
-        for (String l : lines) {
-            pw.write(l);
-            pw.println();
-        }
-        pw.flush();
-        pw.close();
-
     }
 
     /**
@@ -107,44 +115,46 @@ public class Blocking {
      */
     public static String[] getMessageAbleUser(String currentUser, boolean isSeller) throws IOException {
         ArrayList<String> available = new ArrayList<>();
-        if (!isSeller) {
-            File sellersDir = new File("data/sellers");
-            String[] sellers = sellersDir.list();
-            for (String seller : sellers) {
-                File blockedFilePath = new File("data/sellers/"
-                        + seller + "/hasBlocked.txt");
-                BufferedReader bfr = new BufferedReader(new FileReader(blockedFilePath));
-                String line;
-                boolean blocked = false;
-                while ((line = bfr.readLine()) != null) {
-                    if (line.equals(currentUser)) {
-                        blocked = true;
-                        break;
+        synchronized (OBJ) {
+            if (!isSeller) {
+                File sellersDir = new File("data/sellers");
+                String[] sellers = sellersDir.list();
+                for (String seller : sellers) {
+                    File blockedFilePath = new File("data/sellers/"
+                            + seller + "/hasBlocked.txt");
+                    BufferedReader bfr = new BufferedReader(new FileReader(blockedFilePath));
+                    String line;
+                    boolean blocked = false;
+                    while ((line = bfr.readLine()) != null) {
+                        if (line.equals(currentUser)) {
+                            blocked = true;
+                            break;
+                        }
+                    }
+                    bfr.close();
+                    if (!blocked) {
+                        available.add(seller);
                     }
                 }
-                bfr.close();
-                if (!blocked) {
-                    available.add(seller);
-                }
-            }
-        } else {
-            File buyersDir = new File("data/buyers");
-            String[] buyers = buyersDir.list();
-            for (String buyer : buyers) {
-                File blockedFilePath = new File("data/buyers/"
-                        + buyer + "/hasBlocked.txt");
-                BufferedReader bfr = new BufferedReader(new FileReader(blockedFilePath));
-                String line;
-                boolean blocked = false;
-                while ((line = bfr.readLine()) != null) {
-                    if (line.equals(currentUser)) {
-                        blocked = true;
-                        break;
+            } else {
+                File buyersDir = new File("data/buyers");
+                String[] buyers = buyersDir.list();
+                for (String buyer : buyers) {
+                    File blockedFilePath = new File("data/buyers/"
+                            + buyer + "/hasBlocked.txt");
+                    BufferedReader bfr = new BufferedReader(new FileReader(blockedFilePath));
+                    String line;
+                    boolean blocked = false;
+                    while ((line = bfr.readLine()) != null) {
+                        if (line.equals(currentUser)) {
+                            blocked = true;
+                            break;
+                        }
                     }
-                }
-                bfr.close();
-                if (!blocked) {
-                    available.add(buyer);
+                    bfr.close();
+                    if (!blocked) {
+                        available.add(buyer);
+                    }
                 }
             }
         }

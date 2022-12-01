@@ -3,6 +3,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 /**
@@ -76,8 +77,13 @@ public class Server extends Thread {
                     writer.println(FileManager.isRecipientStore(contents));
                     writer.flush();
                 } else if (instruction.equals("getStoresFromSellers")) {
-                    writer.println(String.join(";", FileManager.getStoresFromSeller(contents)));
-                    writer.flush();
+                    if (FileManager.getStoresFromSeller(contents).size() > 0) {
+                        writer.println(String.join(";", FileManager.getStoresFromSeller(contents)));
+                        writer.flush();
+                    } else {
+                        writer.println();
+                        writer.flush();
+                    }
                 } else if (instruction.equals("importFile")) {
                     String path = contents.substring(0, contents.indexOf(";"));
                     contents = contents.substring(contents.indexOf(";") + 1);

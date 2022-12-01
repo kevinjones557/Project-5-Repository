@@ -91,13 +91,13 @@ public class MessageGui extends Client implements Runnable{
 
         if (isUserSeller) {
             ArrayList<String> sellerStores = super.getStoresFromSeller(this.username);
-            System.out.println(sellerStores);
+            System.out.println("store"+sellerStores.size());
             for (String store : sellerStores) {
                 if (store.length() == 0) {
                     break;
                 }
                 ArrayList<String> buyerConversations = super.getConversationsFromStore(this.username, store);
-                System.out.println(store + buyerConversations);
+                System.out.println("hi"+store + buyerConversations);
                 if (buyerConversations.size() != 0) {
                     JLabel storeLabel = new JLabel(store + ":");
                     storeLabel.setFont(new Font("Times New Roman", Font.BOLD, 25));
