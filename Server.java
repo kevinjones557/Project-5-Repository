@@ -144,6 +144,14 @@ public class Server extends Thread {
                     handleCheckUserExists(request, socket);
                 } else if (instruction.equals("updateStoreList")) {
                     handleUpdateStoreList(request, socket);
+                } else if (instruction.equals("append")) {
+                    appendReceive(reader);
+                } else if (instruction.equals("delete")) {
+                    deleteReceive(reader);
+                } else if (instruction.equals("edit")) {
+                    editReceive(reader);
+                } else if (instruction.equals("display")) {
+                    displayReceive(reader, writer);
                 }
             }
         } catch (IOException e) {
@@ -330,6 +338,34 @@ public class Server extends Thread {
             String edit = reader.readLine();
 
             Message.editMessage(sender, recipient, storeName, isBuyer, messageToEdit, edit);
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "The data could not be handled.", "Messaging System",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    public static void displayReceive(BufferedReader reader, PrintWriter writer) {
+        try {
+            String personData = reader.readLine();
+            String sender = personData.substring(0, personData.indexOf(","));
+            personData = personData.substring(personData.indexOf(",") + 1);
+            String recipient = personData.substring(0, personData.indexOf(","));
+            personData = personData.substring(personData.indexOf(",") + 1);
+            String storeName = personData.substring(0, personData.indexOf(","));
+            personData = personData.substring(personData.indexOf(",") + 1);
+            String buyer = personData.substring(0, personData.indexOf(","));
+            boolean isBuyer = false;
+            if (buyer.equals("true"))
+                isBuyer = true;
+
+            ArrayList<String> messageContents = Message.displayMessage(sender, recipient, storeName, isBuyer);
+            String returnedContents = "";
+            for (int i = 0; i < messageContents.size(); i++) {
+                returnedContents = returnedContents + messageContents.get(i) + ": : : :";
+            }
+            writer.write(returnedContents);
+            writer.println();
+            writer.flush();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "The data could not be handled.", "Messaging System",
                     JOptionPane.ERROR_MESSAGE);
