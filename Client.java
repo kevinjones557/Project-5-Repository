@@ -76,11 +76,9 @@ public class Client {
     }
 
 
-    public static void appendOrDeleteSignal(boolean delete, String sender, String recipient, String storeName,
-                                            boolean isBuyer, String message, PrintWriter writer){
-        String buyer = "false";
-        if(isBuyer)
-            buyer = "true";
+    public void appendOrDeleteSignal(boolean delete, String sender, String recipient, String storeName,
+                                            boolean isBuyer, String message){
+        String buyer = (isBuyer)? "true" : "false";
 
         String sendData = "delete";
         if (!delete)
@@ -103,8 +101,8 @@ public class Client {
 
     }
 
-    public static void editSignal(boolean delete, String sender, String recipient, String storeName,
-                                  boolean isBuyer, String messageToEdit, String edit, PrintWriter writer) {
+    public void editSignal(boolean delete, String sender, String recipient, String storeName,
+                                  boolean isBuyer, String messageToEdit, String edit) {
         String buyer = "false";
         if(isBuyer)
             buyer = "true";
@@ -147,8 +145,8 @@ public class Client {
      *
      * @author John Brooks
      */
-    public static ArrayList<String> displaySignal(String sender, String recipient, String storeName,
-                                                   boolean isBuyer, PrintWriter writer, BufferedReader reader) {
+    public ArrayList<String> displaySignal(String sender, String recipient, String storeName,
+                                                   boolean isBuyer) {
         String buyer = "false";
         if(isBuyer)
             buyer = "true";

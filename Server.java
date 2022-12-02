@@ -46,13 +46,16 @@ public class Server extends Thread {
             while (true) {
                 String request = reader.readLine();
                 System.out.println("all " + request);
-                String instruction = request.substring(0, request.indexOf(';'));
+                String instruction = "";
+                try {
+                    instruction = request.substring(0, request.indexOf(';'));
+                } catch (IndexOutOfBoundsException e) {
+                }
                 System.out.println("instruction " + instruction);
                 String contents = "";
                 try {
                     contents = request.substring(request.indexOf(";") + 1);
                 } catch (IndexOutOfBoundsException e) {
-                    continue;
                 }
                 System.out.println("contents " + contents);
                 // TODO: convert this to a switch and make logic into individual methods to improve readability
@@ -150,11 +153,11 @@ public class Server extends Thread {
                     handleCheckUserExists(request, socket);
                 } else if (instruction.equals("updateStoreList")) {
                     handleUpdateStoreList(request, socket);
-                } else if (instruction.equals("append")) {
+                } else if (request.equals("append")) {
                     appendReceive(reader);
-                } else if (instruction.equals("delete")) {
+                } else if (request.equals("delete")) {
                     deleteReceive(reader);
-                } else if (instruction.equals("edit")) {
+                } else if (request.equals("edit")) {
                     editReceive(reader);
                 } else if (instruction.equals("display")) {
                     displayReceive(reader, writer);
@@ -307,17 +310,17 @@ public class Server extends Thread {
     }
     public static void appendReceive(BufferedReader reader) {
         try {
+            System.out.println("appending message");
             String personData = reader.readLine();
+            System.out.println(personData);
             String sender = personData.substring(0, personData.indexOf(","));
             personData = personData.substring(personData.indexOf(",") + 1);
             String recipient = personData.substring(0, personData.indexOf(","));
             personData = personData.substring(personData.indexOf(",") + 1);
             String storeName = personData.substring(0, personData.indexOf(","));
             personData = personData.substring(personData.indexOf(",") + 1);
-            String buyer = personData.substring(0, personData.indexOf(","));
-            boolean isBuyer = false;
-            if (buyer.equals("true"))
-                isBuyer = true;
+            String buyer = personData;
+            boolean isBuyer = buyer.equals("true");
 
             String message = reader.readLine();
 

@@ -40,8 +40,6 @@ public class MessageGui extends Client implements Runnable{
 
     private boolean isUserStore;
 
-
-
     private void createLeftPanel() {
         popupMenu1.setVisible(false);
         popupMenu2.setVisible(false);
@@ -76,10 +74,13 @@ public class MessageGui extends Client implements Runnable{
                         if (SwingUtilities.isLeftMouseButton(e)) {
                             // user could be a buyer, seller, or a store
                             if (!isUserSeller) {
-                                isRecipientStore = MessageGui.super.isRecipientStore(recipient);
+                                isRecipientStore = MessageGui.super.isRecipientStore(user);
+                                System.out.println(isRecipientStore);
+                                chooseRecipient(user, user);
+                            } else {
+                                chooseRecipient(user, null);
                             }
                             isUserStore = false;
-                            chooseRecipient(user, null);
                             sendMessage();
                         } else if (SwingUtilities.isRightMouseButton(e)) {
                             createPopUpBlockInvisible(e, user);
@@ -319,9 +320,17 @@ public class MessageGui extends Client implements Runnable{
                 if (e.getSource() == sendButton) {
                     if (!textField.getText().isBlank() && recipient != null) {
                         System.out.println(textField.getText().trim());
-                        // TODO call client function to append message
+                        MessageGui.super.appendOrDeleteSignal(false, username, recipient, (storeName == null)?
+                                "nil" : storeName, !isUserSeller, textField.getText().trim());
                     }
                     textField.setText("");
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            createMessageGUI();
+                            myFrame.revalidate();
+                        }
+                    });
                 }
             }
         });
@@ -518,14 +527,15 @@ public class MessageGui extends Client implements Runnable{
             this.recipient = recipient;
         } else {
             if (isRecipientStore) {
-                this.recipient = super.getSellerFromStore(storeName);
-                this.storeName = recipient;
+                this.recipient = super.getSellerFromStore(recipient);
+                this.storeName = storeName;
             } else {
                 this.storeName = null;
                 this.recipient = recipient;
             }
         }
-        System.out.println(recipient);
+        System.out.println("recipient " + this.recipient);
+        System.out.println("store " + this.storeName);
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -565,8 +575,6 @@ public class MessageGui extends Client implements Runnable{
             public void actionPerformed(ActionEvent e) {
                 if (e.getSource() == invisibleOption) {
                     popupMenu2.setVisible(false);
-                    System.out.println("invisible");
-                    // TODO call make invisible
                     sendBlockInvisibleSignal("invisible", username, Boolean.toString(isUserSeller), receiver);
                 }
             }
@@ -582,8 +590,6 @@ public class MessageGui extends Client implements Runnable{
             public void actionPerformed(ActionEvent e) {
                 if (e.getSource() == becomeVisibleOption) {
                     popupMenu2.setVisible(false);
-                    System.out.println("visible");
-                    // TODO call make visible again
                     sendBlockInvisibleSignal("visible", username, Boolean.toString(isUserSeller), receiver);
                 }
             }
@@ -599,8 +605,6 @@ public class MessageGui extends Client implements Runnable{
             public void actionPerformed(ActionEvent e) {
                 if (e.getSource() == blockOption) {
                     popupMenu2.setVisible(false);
-                    System.out.println("blocking");
-                    // TODO block the user
                     sendBlockInvisibleSignal("block", username, Boolean.toString(isUserSeller), receiver);
                 }
             }
@@ -616,8 +620,6 @@ public class MessageGui extends Client implements Runnable{
             public void actionPerformed(ActionEvent e) {
                 if (e.getSource() == unblockOption) {
                     popupMenu2.setVisible(false);
-                    System.out.println("unblocking");
-                    // TODO unblock the user
                     sendBlockInvisibleSignal("unblock", username, Boolean.toString(isUserSeller), receiver);
                 }
             }
@@ -765,46 +767,48 @@ public class MessageGui extends Client implements Runnable{
 
             metricsFrame.add(textPanel);
 
+            Box labelBox = Box.createVerticalBox();
 
-            if (true) {
-                Box labelBox = Box.createVerticalBox();
+            ArrayList<String[]> metricsData = new ArrayList<>();
+            // TODO call client version of this
+            String[] data1 = {"Walmart","478","7"};
+            String[] data2 = {"Target","700","15"};
+            String[] data3 = {"GameStop","50","30"};
+            metricsData.add(data1);
+            metricsData.add(data2);
+            metricsData.add(data3);
 
-                ArrayList<String[]> metricsData = new ArrayList<>();
-                // TODO call client version of this
-                String[] data1 = {"Walmart","478","7"};
-                String[] data2 = {"Target","700","15"};
-                String[] data3 = {"GameStop","50","30"};
-                metricsData.add(data1);
-                metricsData.add(data2);
-                metricsData.add(data3);
+            for (String[] s : metricsData) {
+                JPanel tempPanel = new JPanel();
+                textPanel.setLayout(null);
 
-                for (String[] s : metricsData) {
-                    JPanel tempPanel = new JPanel();
-                    textPanel.setLayout(null);
+                JLabel labelStore = new JLabel(s[0]);
+                labelStore.setMaximumSize(new Dimension(90, 50));
+                labelStore.setHorizontalAlignment(JLabel.CENTER);
+                labelStore.setLocation(0, 0);
+                labelStore.setFont(new Font("Times New Roman", Font.BOLD, 20));
 
-                    JLabel labelStore = new JLabel(s[0]);
-                    labelStore.setBounds(0,0, 90, 50);
-                    labelStore.setHorizontalAlignment(JLabel.CENTER);
+                JLabel labelTotal = new JLabel(s[1]);
+                labelTotal.setMaximumSize(new Dimension(225, 50));
+                labelTotal.setHorizontalAlignment(JLabel.CENTER);
+                labelTotal.setFont(new Font("Times New Roman", Font.BOLD, 20));
 
-                    JLabel labelTotal = new JLabel(s[1]);
-                    labelTotal.setBounds(100,0, 225, 50);
-                    labelTotal.setHorizontalAlignment(JLabel.CENTER);
+                JLabel labelPersonal = new JLabel(s[2]);
+                labelPersonal.setMaximumSize(new Dimension(225, 50));
+                labelPersonal.setHorizontalAlignment(JLabel.CENTER);
+                labelPersonal.setFont(new Font("Times New Roman", Font.BOLD, 20));
 
-                    JLabel labelPersonal = new JLabel(s[2]);
-                    labelPersonal.setBounds(350,0, 225, 50);
-                    labelPersonal.setHorizontalAlignment(JLabel.CENTER);
 
-                    tempPanel.add(labelStore);
-                    tempPanel.add(labelTotal);
-                    tempPanel.add(labelPersonal);
+                tempPanel.add(labelStore);
+                tempPanel.add(labelTotal);
+                tempPanel.add(labelPersonal);
 
-                    labelBox.add(tempPanel);
-                }
-                JScrollPane messagePanel = new JScrollPane(labelBox);
-                messagePanel.setBounds(0, 50, 600, 550);
-                messagePanel.setBorder(BorderFactory.createLineBorder(Color.white));
-                metricsFrame.getContentPane().add(messagePanel);
+                labelBox.add(tempPanel);
             }
+            JScrollPane messagePanel = new JScrollPane(labelBox);
+            messagePanel.setBounds(0, 50, 600, 550);
+            messagePanel.setBorder(BorderFactory.createLineBorder(Color.white));
+            metricsFrame.add(messagePanel);
         }
 
         metricsFrame.setVisible(true);

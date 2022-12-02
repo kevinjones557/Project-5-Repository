@@ -180,12 +180,10 @@ public class FileManager {
      */
     public static boolean isRecipientStore(String storeName) {
         String[] sellers = (new File("data/sellers")).list();
+        assert sellers != null;
         for (String seller : sellers) {
-            String[] possibleStores = (new File("data/sellers/" + seller)).list();
-            for (String store : possibleStores) {
-                if (store.equals(storeName)) {
-                    return true;
-                }
+            if ((Files.exists(Paths.get("data/sellers/" + seller + "/" + storeName)))) {
+                return true;
             }
         }
         return false;
