@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * This class sets up the GUI for the Client
@@ -694,6 +695,20 @@ public class MessageGui extends Client implements Runnable{
             sortNames.setBounds(90, 15, 20, 20);
             sortNames.setMargin(new Insets(0,-1,0,0));
             sortNames.setFocusPainted(false);
+            sortNames.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (e.getSource() == sortNames) {
+                        if (sortNames.getText().equals("▲")) {
+                            sortNames.setText("▼");
+                        } else {
+                            sortNames.setText("▲");
+                        }
+                    }
+                    sortNames.revalidate();
+                    textPanel.revalidate();
+                }
+            });
 
             JLabel label2 = new JLabel("Total Messages Received by Store");
             label2.setFont(new Font("Times New Roman", Font.BOLD, 12));
@@ -704,6 +719,18 @@ public class MessageGui extends Client implements Runnable{
             sortTotal.setBounds(330, 15, 20, 20);
             sortTotal.setMargin(new Insets(0,-1,0,0));
             sortTotal.setFocusPainted(false);
+            sortTotal.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (e.getSource() == sortTotal) {
+                        if (Objects.equals(sortTotal.getText(), "▲")) {
+                            sortTotal.setText("▼");
+                        } else {
+                            sortTotal.setText("▲");
+                        }
+                    }
+                }
+            });
 
             attributes = label2.getFont().getAttributes();
             attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
@@ -711,8 +738,25 @@ public class MessageGui extends Client implements Runnable{
 
             JLabel label3 = new JLabel("Number of Messages Sent to Store");
             label3.setFont(new Font("Times New Roman", Font.BOLD, 12));
-            label3.setBounds(355,0, 225, 50);
+            label3.setBounds(350,0, 225, 50);
             label3.setHorizontalAlignment(JLabel.CENTER);
+
+            JButton sortPersonal = new JButton("▼");
+            sortPersonal.setBounds(560, 15, 20, 20);
+            sortPersonal.setMargin(new Insets(0,-1,0,0));
+            sortPersonal.setFocusPainted(false);
+            sortPersonal.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (e.getSource() == sortPersonal) {
+                        if (Objects.equals(sortPersonal.getText(), "▲")) {
+                            sortPersonal.setText("▼");
+                        } else {
+                            sortPersonal.setText("▲");
+                        }
+                    }
+                }
+            });
 
             attributes = label3.getFont().getAttributes();
             attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
@@ -723,29 +767,47 @@ public class MessageGui extends Client implements Runnable{
             textPanel.add(label3);
             textPanel.add(sortTotal);
             textPanel.add(sortNames);
+            textPanel.add(sortPersonal);
 
             metricsFrame.add(textPanel);
 
 
-            if (recipient != null) {
+            if (true) {
                 Box labelBox = Box.createVerticalBox();
 
-                String[] metricsData = {};
+                ArrayList<String[]> metricsData = new ArrayList<>();
                 // TODO call client version of this
-                System.out.println(metricsData);
+                String[] data1 = {"Walmart","478","7"};
+                String[] data2 = {"Target","700","15"};
+                String[] data3 = {"GameStop","50","30"};
+                metricsData.add(data1);
+                metricsData.add(data2);
+                metricsData.add(data3);
 
-                for (String s : metricsData) {
-                    int numLines = 1 + s.length() / 160; // sets a factor for how many lines are needed
-                    JTextArea tempLabel = new JTextArea(s);
-                    tempLabel.setMaximumSize(new Dimension(820, numLines * 18));
-                    tempLabel.setEditable(false);
-                    tempLabel.setLineWrap(true);
-                    tempLabel.setLocation(10, 0);
-                    tempLabel.setBackground(myFrame.getBackground());
-                    labelBox.add(tempLabel);
+                for (String[] s : metricsData) {
+                    JPanel tempPanel = new JPanel();
+                    textPanel.setLayout(null);
+
+                    JLabel labelStore = new JLabel(s[0]);
+                    labelStore.setBounds(0,0, 90, 50);
+                    labelStore.setHorizontalAlignment(JLabel.CENTER);
+
+                    JLabel labelTotal = new JLabel(s[1]);
+                    labelTotal.setBounds(100,0, 225, 50);
+                    labelTotal.setHorizontalAlignment(JLabel.CENTER);
+
+                    JLabel labelPersonal = new JLabel(s[2]);
+                    labelPersonal.setBounds(350,0, 225, 50);
+                    labelPersonal.setHorizontalAlignment(JLabel.CENTER);
+
+                    tempPanel.add(labelStore);
+                    tempPanel.add(labelTotal);
+                    tempPanel.add(labelPersonal);
+
+                    labelBox.add(tempPanel);
                 }
                 JScrollPane messagePanel = new JScrollPane(labelBox);
-                messagePanel.setBounds(170, 90, 820, 500);
+                messagePanel.setBounds(0, 50, 600, 550);
                 messagePanel.setBorder(BorderFactory.createLineBorder(Color.white));
                 metricsFrame.getContentPane().add(messagePanel);
             }
@@ -761,6 +823,7 @@ public class MessageGui extends Client implements Runnable{
         createMessageGUI();
         myFrame.setVisible(true);
     }
+
 
     public static void main(String[] args) throws IOException {
         SwingUtilities.invokeLater(new MessageGui("dan", false, new Socket("localhost", 2000)));
