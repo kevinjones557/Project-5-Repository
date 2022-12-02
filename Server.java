@@ -170,6 +170,18 @@ public class Server extends Thread {
                 } else if (instruction.equals("unblock")) {
                     Blocking.unblockUser(request.split(";")[1], request.split(";")[3],
                             Boolean.parseBoolean(request.split(";")[2]));
+                } else if (instruction.equals("isRecipientBlocked")) {
+                    String[] ins = instruction.split(";");
+                    String sendBack = Boolean.toString(Blocking.isRecipientBlocked(ins[1], Boolean.parseBoolean(ins[2]),
+                            Boolean.parseBoolean(ins[3])? FileManager.mapStoresToSellers().get(ins[4]): ins[4]));
+                    writer.println(sendBack);
+                    writer.flush();
+                } else if (instruction.equals("recipientCantSeeMe")) {
+                    String[] ins = instruction.split(";");
+                    String sendBack = Boolean.toString(Invisible.recipientCantSeeMe(ins[1], Boolean.parseBoolean(ins[2]),
+                            Boolean.parseBoolean(ins[3])? FileManager.mapStoresToSellers().get(ins[4]): ins[4]));
+                    writer.println(sendBack);
+                    writer.flush();
                 }
             }
         } catch (IOException e) {
