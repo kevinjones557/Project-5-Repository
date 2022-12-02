@@ -194,6 +194,12 @@ public class Server extends Thread {
                             Boolean.parseBoolean(ins[2])));
                     writer.println(sendBack);
                     writer.flush();
+                }else if (instruction.equals("getBuyerMetricData")) {
+                    ArrayList<String[]> data = handleGetBuyerMetricData(request, storeNameMap);
+                    ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+                    outputStream.writeObject(data);
+                    outputStream.flush();
+
                 }
             }
         } catch (IOException e) {
@@ -201,6 +207,32 @@ public class Server extends Thread {
         }
     }
 
+    private static ArrayList<String[]> handleGetBuyerMetricData(String request, LinkedHashMap<String, String> storeNameMap) throws IOException{
+        // parameters:
+        // request; buyer's name
+        String username = request.substring(request.indexOf(";"));
+        // return an arraylist of string arrays
+        // each string array goes as follows
+        // Store Name, Total Messages, Individual DMs
+        ArrayList<String[]> metricData = new ArrayList<>();
+        storeNameMap.forEach((store, seller) -> {
+            File metrics = new File(String.format("data/%s/%s/metrics.txt", seller, store));
+            File userMetrics = new File(String.format("data/%s/%s/%s" + "metrics.txt", seller, store, username));
+            try {
+                ArrayList<String> storeMetricsData = FileManager.readFile(metrics);
+                ArrayList<String> userMetricsData = FileManager.readFile(userMetrics);
+                String line = storeMetricsData.get(0);
+                String storeMsgCount = line.substring(line.indexOf(":")+1).trim();
+                line = userMetricsData.get(0);
+                String userMsgCount = line.substring(line.indexOf(":")+1).trim();
+                metricData.add(new String[]{store, storeMsgCount, userMsgCount});
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("An error occurred while finding the metrics of " + store);
+            }
+        });
+        return metricData;
+    }
     private static void handleUpdateStoreList(String request, Socket socket) {
 
     }

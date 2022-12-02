@@ -245,4 +245,26 @@ public class FileManager {
     public static String[] getAllStores() {
         return mapStoresToSellers().keySet().toArray(new String[0]);
     }
+
+
+    public static synchronized ArrayList<String> readFile(File file) throws IOException {
+        ArrayList<String> fileData = new ArrayList<>();
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+        String line = bufferedReader.readLine();
+        while (line != null) {
+            fileData.add(line);
+            bufferedReader.readLine();
+        }
+        bufferedReader.close();
+        return fileData;
+    }
+
+    public static synchronized void writeFile(File file, String[] data, boolean append) throws IOException {
+        BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file, append));
+        for (String datum : data) {
+            bufferedWriter.write(datum);
+            bufferedWriter.newLine();
+        }
+        bufferedWriter.close();
+    }
 }
