@@ -227,4 +227,17 @@ public class Client {
         writer.println(command + ";" + currentUser + ";" + isSeller + ";" + victim);
         writer.flush();
     }
+
+    public boolean isBlockedOrCannotSee(int option, String currentUser, String isSeller, String isStore,
+                                        String recipient) {
+        String[] options = {"isRecipientBlocked", "recipientCantSeeMe"};
+        writer.println(options[option] + ";" + currentUser + ";" + isSeller + ";" + isStore + ";" + recipient);
+        writer.flush();
+        try {
+            return Boolean.parseBoolean(reader.readLine());
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

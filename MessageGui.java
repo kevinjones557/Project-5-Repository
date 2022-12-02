@@ -633,17 +633,11 @@ public class MessageGui extends Client implements Runnable{
                 }
             }
         });
-        boolean isBlocked = false;
-        boolean cantSeeThisUser = false;
-        try {
-            isBlocked = Blocking.isRecipientBlocked(username, isUserSeller,
-                    isRecipientStore? FileManager.mapStoresToSellers().get(receiver): receiver);
-            cantSeeThisUser = Invisible.recipientCantSeeMe(username, isUserSeller,
-                    isRecipientStore? FileManager.mapStoresToSellers().get(receiver): receiver);
-            //TODO
-        } catch (IOException ioException) {
+        boolean isBlocked = isBlockedOrCannotSee(0, username, Boolean.toString(isUserSeller),
+                Boolean.toString(isRecipientStore), receiver);
+        boolean cantSeeThisUser = isBlockedOrCannotSee(1, username, Boolean.toString(isUserSeller),
+                Boolean.toString(isRecipientStore), receiver);
 
-        }
         if(isBlocked) {
             popupMenu2.remove(blockOption);
             popupMenu2.add(unblockOption);
