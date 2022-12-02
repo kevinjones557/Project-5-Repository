@@ -238,4 +238,16 @@ public class Client {
         }
         return false;
     }
+
+    public ArrayList<String> getUsersSignal(int command, String currentUser, String isSeller) {
+        String[] commands = {"getAvailableUsers", "getMessageAbleUsers", "getAvailableStores", "getMessageAbleStores"};
+        writer.println(commands[command] + ";" + currentUser + ";" + isSeller);
+        writer.flush();
+        try {
+            return new ArrayList<>(Arrays.asList((reader.readLine().split(";"))));
+        } catch(IOException e) {
+            return new ArrayList<String>();
+        }
+
+    }
 }
