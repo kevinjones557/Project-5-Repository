@@ -2,11 +2,13 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.font.TextAttribute;
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * This class sets up the GUI for the Client
@@ -59,6 +61,7 @@ public class MessageGui extends Client implements Runnable{
         topLabel3.setMaximumSize(new Dimension(165, 45));
         sellerPanel.add(topLabel3);
         ArrayList<String> allMessages = super.getConversationsFromUser(this.username);
+        // TODO change to vinh
         // this is run for buyers and sellers, gets personal conversations
         for (String user : allMessages) {
             if (user.length() == 0) {
@@ -78,7 +81,7 @@ public class MessageGui extends Client implements Runnable{
                             chooseRecipient(user, null);
                             sendMessage();
                         } else if (SwingUtilities.isRightMouseButton(e)) {
-                            createPopUpBlockInvisible(e);
+                            createPopUpBlockInvisible(e, user);
                         }
                     }
                     // TODO call client function with recipient to get message info
@@ -92,7 +95,6 @@ public class MessageGui extends Client implements Runnable{
 
         if (isUserSeller) {
             ArrayList<String> sellerStores = super.getStoresFromSeller(this.username);
-            System.out.println("store"+sellerStores.size());
             for (String store : sellerStores) {
                 if (store.length() == 0) {
                     break;
@@ -257,6 +259,14 @@ public class MessageGui extends Client implements Runnable{
         JButton metricsButton = new JButton("View Statistics");
         metricsButton.setMaximumSize(new Dimension(165,74));
         bottomButtonPanel.add(metricsButton);
+        metricsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (e.getSource() == metricsButton) {
+                    createStatisticsGUI();
+                }
+            }
+        });
 
         scrollPane.setBounds(0,45,165,545);
         scrollPane.validate();
@@ -542,7 +552,7 @@ public class MessageGui extends Client implements Runnable{
         // if not username is seller's name and storeName = null
     }
 
-    public void createPopUpBlockInvisible(MouseEvent e) {
+    public void createPopUpBlockInvisible(MouseEvent e, String receiver) {
         popupMenu1.setVisible(false);
         invisibleOption.setMaximumSize(new Dimension(200, 28));
 
@@ -556,7 +566,7 @@ public class MessageGui extends Client implements Runnable{
                     popupMenu2.setVisible(false);
                     System.out.println("invisible");
                     // TODO call make invisible
-                    sendBlockInvisibleSignal("invisible", username, Boolean.toString(isUserSeller), recipient);
+                    sendBlockInvisibleSignal("invisible", username, Boolean.toString(isUserSeller), receiver);
                 }
             }
         });
@@ -573,7 +583,7 @@ public class MessageGui extends Client implements Runnable{
                     popupMenu2.setVisible(false);
                     System.out.println("visible");
                     // TODO call make visible again
-                    sendBlockInvisibleSignal("visible", username, Boolean.toString(isUserSeller), recipient);
+                    sendBlockInvisibleSignal("visible", username, Boolean.toString(isUserSeller), receiver);
                 }
             }
         });
@@ -590,7 +600,7 @@ public class MessageGui extends Client implements Runnable{
                     popupMenu2.setVisible(false);
                     System.out.println("blocking");
                     // TODO block the user
-                    sendBlockInvisibleSignal("block", username, Boolean.toString(isUserSeller), recipient);
+                    sendBlockInvisibleSignal("block", username, Boolean.toString(isUserSeller), receiver);
                 }
             }
         });
@@ -607,7 +617,7 @@ public class MessageGui extends Client implements Runnable{
                     popupMenu2.setVisible(false);
                     System.out.println("unblocking");
                     // TODO unblock the user
-                    sendBlockInvisibleSignal("unblock", username, Boolean.toString(isUserSeller), recipient);
+                    sendBlockInvisibleSignal("unblock", username, Boolean.toString(isUserSeller), receiver);
                 }
             }
         });
@@ -626,25 +636,122 @@ public class MessageGui extends Client implements Runnable{
         boolean cantSeeThisUser = false;
         try {
             isBlocked = Blocking.isRecipientBlocked(username, isUserSeller,
-                    isRecipientStore? FileManager.mapStoresToSellers().get(recipient): recipient);
+                    isRecipientStore? FileManager.mapStoresToSellers().get(receiver): receiver);
             cantSeeThisUser = Invisible.recipientCantSeeMe(username, isUserSeller,
-                    isRecipientStore? FileManager.mapStoresToSellers().get(recipient): recipient);
+                    isRecipientStore? FileManager.mapStoresToSellers().get(receiver): receiver);
+            //TODO
         } catch (IOException ioException) {
 
         }
         if(isBlocked) {
+            popupMenu2.remove(blockOption);
             popupMenu2.add(unblockOption);
         } else {
+            popupMenu2.remove(unblockOption);
             popupMenu2.add(blockOption);
         }
         if(cantSeeThisUser) {
             popupMenu2.add(becomeVisibleOption);
+            popupMenu2.remove(invisibleOption);
         } else {
+            popupMenu2.remove(becomeVisibleOption);
             popupMenu2.add(invisibleOption);
         }
         popupMenu2.add(cancelOption);
         popupMenu2.setVisible(true);
         popupMenu2.setLocation(e.getLocationOnScreen());
+    }
+
+    public void createStatisticsGUI() {
+        JFrame metricsFrame = new JFrame();
+        metricsFrame.setTitle("Statistics");
+        metricsFrame.setLayout(null);
+        //setting the bounds for the JFrame
+        metricsFrame.setBounds(500,100,600,600);
+        metricsFrame.setResizable(false);
+
+        if (isUserSeller) {
+
+        } else {
+            popupMenu1.setVisible(false);
+            popupMenu2.setVisible(false);
+
+            JPanel textPanel = new JPanel();
+            textPanel.setLayout(null);
+            textPanel.setBounds(0,0,600,50);
+
+            JLabel label1 = new JLabel("Store Name");
+            label1.setFont(new Font("Times New Roman", Font.BOLD, 12));
+            label1.setBounds(0,0, 90, 50);
+            label1.setHorizontalAlignment(JLabel.CENTER);
+
+
+            Map attributes = label1.getFont().getAttributes();
+            attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+            label1.setFont(label1.getFont().deriveFont(attributes));
+
+            JButton sortNames = new JButton("▲");
+            sortNames.setBounds(90, 15, 20, 20);
+            sortNames.setMargin(new Insets(0,-1,0,0));
+            sortNames.setFocusPainted(false);
+
+            JLabel label2 = new JLabel("Total Messages Received by Store");
+            label2.setFont(new Font("Times New Roman", Font.BOLD, 12));
+            label2.setBounds(100,0, 225, 50);
+            label2.setHorizontalAlignment(JLabel.RIGHT);
+
+            JButton sortTotal = new JButton("▲");
+            sortTotal.setBounds(330, 15, 20, 20);
+            sortTotal.setMargin(new Insets(0,-1,0,0));
+            sortTotal.setFocusPainted(false);
+
+            attributes = label2.getFont().getAttributes();
+            attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+            label2.setFont(label2.getFont().deriveFont(attributes));
+
+            JLabel label3 = new JLabel("Number of Messages Sent to Store");
+            label3.setFont(new Font("Times New Roman", Font.BOLD, 12));
+            label3.setBounds(355,0, 225, 50);
+            label3.setHorizontalAlignment(JLabel.CENTER);
+
+            attributes = label3.getFont().getAttributes();
+            attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+            label3.setFont(label3.getFont().deriveFont(attributes));
+
+            textPanel.add(label1);
+            textPanel.add(label2);
+            textPanel.add(label3);
+            textPanel.add(sortTotal);
+            textPanel.add(sortNames);
+
+            metricsFrame.add(textPanel);
+
+
+            if (recipient != null) {
+                Box labelBox = Box.createVerticalBox();
+
+                String[] metricsData = {};
+                // TODO call client version of this
+                System.out.println(metricsData);
+
+                for (String s : metricsData) {
+                    int numLines = 1 + s.length() / 160; // sets a factor for how many lines are needed
+                    JTextArea tempLabel = new JTextArea(s);
+                    tempLabel.setMaximumSize(new Dimension(820, numLines * 18));
+                    tempLabel.setEditable(false);
+                    tempLabel.setLineWrap(true);
+                    tempLabel.setLocation(10, 0);
+                    tempLabel.setBackground(myFrame.getBackground());
+                    labelBox.add(tempLabel);
+                }
+                JScrollPane messagePanel = new JScrollPane(labelBox);
+                messagePanel.setBounds(170, 90, 820, 500);
+                messagePanel.setBorder(BorderFactory.createLineBorder(Color.white));
+                metricsFrame.getContentPane().add(messagePanel);
+            }
+        }
+
+        metricsFrame.setVisible(true);
     }
 
     public void run() {
@@ -656,7 +763,7 @@ public class MessageGui extends Client implements Runnable{
     }
 
     public static void main(String[] args) throws IOException {
-        SwingUtilities.invokeLater(new MessageGui("Seller", true, new Socket("localhost", 2000)));
+        SwingUtilities.invokeLater(new MessageGui("dan", false, new Socket("localhost", 2000)));
     }
 
 }
