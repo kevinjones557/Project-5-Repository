@@ -1,8 +1,5 @@
 import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +18,8 @@ public class Client {
     private BufferedReader reader;
     private PrintWriter writer;
 
+    private Socket socket;
+
     public Client (String name, Socket socket) {
         this.name = name;
         try {
@@ -29,6 +28,7 @@ public class Client {
         } catch (IOException io) {
             io.printStackTrace();
         }
+        this.socket = socket;
 
     }
     public void sendMessage() {
@@ -251,5 +251,9 @@ public class Client {
             return new ArrayList<String>();
         }
 
+    }
+
+    public ArrayList<String[]> parseBuyerMetricData() {
+        ObjectInputStream objectInputStream = new ObjectInputStream(socket);
     }
 }
