@@ -139,8 +139,6 @@ public class Client {
      * @param recipient recipient
      * @param storeName storeName
      * @param isBuyer if buyer
-     * @param writer writer being used
-     * @param reader reader being used
      * @return array list of messages
      *
      * @author John Brooks
