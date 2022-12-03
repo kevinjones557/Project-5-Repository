@@ -253,6 +253,22 @@ public class Client {
 
     }
 
+    public ArrayList<String> getFilteringList(String username) {
+        writer.println("getFilteringList;" + username);
+        writer.flush();
+        try {
+            return new ArrayList<>(Arrays.asList((reader.readLine().split(";"))));
+        } catch(IOException e) {
+            return new ArrayList<String>();
+        }
+    }
+
+    public void filteringSignal(int option, String username, String censoredWord, String replacement) {
+        String[] options = {"addFilter", "deleteFilter", "editFilter"};
+        writer.println(options[option] + ";" + username + ";" + censoredWord + ";" + replacement);
+        writer.flush();
+    }
+
    /* public ArrayList<String[]> parseBuyerMetricData() {
         ObjectInputStream objectInputStream = new ObjectInputStream(socket);
     }

@@ -31,6 +31,9 @@ public class Server extends Thread {
     }
 
     public static void main(String[] args) throws IOException {
+        //create folder for filter message
+        File filterRoot = new File("filter");
+        filterRoot.createNewFile();
         while (true) {
             Server server = new Server(serverSocket.accept());
             server.start();
@@ -209,6 +212,32 @@ public class Server extends Thread {
                     ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
                     outputStream.writeObject(data);
                     outputStream.flush();
+                } else if (instruction.equals("getFilteringList")) {
+                    String sendBack = String.join(";",(String[])
+                            Filtering.censoredList(request.split(";")[1]).toArray());
+                    writer.println(sendBack);
+                    writer.flush();
+                } else if (instruction.equals("addFilter")) {
+                    String[] ins = request.split(";");
+                    try {
+                        Filtering.addFilter(ins[1], ins[2], ins[3]);
+                    } catch(Exception e) {
+
+                    }
+                } else if (instruction.equals("deleteFilter")) {
+                    String[] ins = request.split(";");
+                    try {
+                        Filtering.deleteFilter(ins[1], ins[2]);
+                    } catch (Exception e) {
+
+                    }
+                } else if (instruction.equals("editFilter")) {
+                    String[] ins = request.split(";");
+                    try {
+                        Filtering.editFilter(ins[1], ins[2], ins[3]);
+                    } catch (Exception e) {
+
+                    }
                 }
             }
         } catch (IOException e) {
