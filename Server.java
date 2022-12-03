@@ -194,12 +194,21 @@ public class Server extends Thread {
                             Boolean.parseBoolean(ins[2])));
                     writer.println(sendBack);
                     writer.flush();
-                }else if (instruction.equals("getBuyerMetricData")) {
+                } else if (instruction.equals("getAvailableStores")){
+                    String[] ins = request.split(";");
+                    String sendBack = String.join(";", Invisible.getAvailableStores(ins[1]));
+                    writer.println(sendBack);
+                    writer.flush();
+                } else if (instruction.equals("getMessageAbleStores")) {
+                    String[] ins = request.split(";");
+                    String sendBack = String.join(";", Blocking.getMessageAbleStores(ins[1]));
+                    writer.println(sendBack);
+                    writer.flush();
+                } else if (instruction.equals("getBuyerMetricData")) {
                     ArrayList<String[]> data = handleGetBuyerMetricData(request, storeNameMap);
                     ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
                     outputStream.writeObject(data);
                     outputStream.flush();
-
                 }
             }
         } catch (IOException e) {

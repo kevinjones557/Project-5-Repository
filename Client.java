@@ -253,7 +253,9 @@ public class Client {
 
     }
 
-    public ArrayList<String[]> parseBuyerMetricData() {
+   /* public ArrayList<String[]> parseBuyerMetricData() {
         ObjectInputStream objectInputStream = new ObjectInputStream(socket);
     }
+
+    */
 }

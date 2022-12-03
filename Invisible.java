@@ -3,6 +3,7 @@ import java.util.ArrayList;
 
 public class Invisible {
     public static final Object OBJ = new Object();
+
     /**
      * Get a list of users that this user can see
      *
@@ -62,6 +63,7 @@ public class Invisible {
         }
         return availables;
     }
+
     /**
      * Get a list of stores this user can see
      *
@@ -69,29 +71,26 @@ public class Invisible {
      * @throws IOException in case of error
      */
     public static String[] getAvailableStores(String currentUser) throws IOException {
-        boolean invisible = true;
         synchronized (OBJ) {
             String[] possibleSellers = Invisible.getAvailableUsers(currentUser, false);
             File sellers = new File("data/sellers");
             ArrayList<String> possibleStores = new ArrayList<>();
             String[] sellerNames = sellers.list();
-            for (String name : sellerNames) {
-                for (String seller : possibleSellers) {
-                    if (seller.equals(name)) {
-                        invisible = false;
+            for (String name : sellerNames) { //Loop through all sellers
+                for (String seller : possibleSellers) { //Loop through available sellers
+                    if (seller.equals(name)) { //If matched then break loop then add stores
                         break;
                     }
                 }
-                if (!invisible) {
-                    File stores = new File("data/sellers/" + name);
-                    String[] storeNames = stores.list();
-                    for (String store : storeNames) {
-                        File storeFile = new File("data/sellers/" + name + "/" + store);
-                        if (storeFile.isDirectory()) {
-                            possibleStores.add(store);
-                        }
+                File stores = new File("data/sellers/" + name);
+                String[] storeNames = stores.list();
+                for (String store : storeNames) {
+                    File storeFile = new File("data/sellers/" + name + "/" + store);
+                    if (storeFile.isDirectory()) {
+                        possibleStores.add(store);
                     }
                 }
+
             }
 
             String[] availableStores = new String[possibleStores.size()];
@@ -99,6 +98,7 @@ public class Invisible {
             return availableStores;
         }
     }
+
 
     /**
      * Return list of people that can't see this user (and his stores)
@@ -128,6 +128,7 @@ public class Invisible {
         }
         return invisibleList;
     }
+
     /**
      * Become invisible to a user if not already invisible
      *
@@ -158,6 +159,7 @@ public class Invisible {
         return false;
 
     }
+
     /**
      * Become visible to a user from the isInvisible file
      */
@@ -189,7 +191,7 @@ public class Invisible {
         synchronized (OBJ) {
             String[] blockList = invisibleList(currentUser, isSeller);
             for (String victim : blockList) {
-                if(victim.equals(recipient)) {
+                if (victim.equals(recipient)) {
                     return true;
                 }
             }
