@@ -1,8 +1,5 @@
 import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +18,8 @@ public class Client {
     private BufferedReader reader;
     private PrintWriter writer;
 
+    private Socket socket;
+
     public Client (String name, Socket socket) {
         this.name = name;
         try {
@@ -29,6 +28,7 @@ public class Client {
         } catch (IOException io) {
             io.printStackTrace();
         }
+        this.socket = socket;
 
     }
     public void sendMessage() {
@@ -248,4 +248,26 @@ public class Client {
         }
 
     }
+
+    public ArrayList<String> getFilteringList(String username) {
+        writer.println("getFilteringList;" + username);
+        writer.flush();
+        try {
+            return new ArrayList<>(Arrays.asList((reader.readLine().split(";"))));
+        } catch(IOException e) {
+            return new ArrayList<String>();
+        }
+    }
+
+    public void filteringSignal(int option, String username, String censoredWord, String replacement) {
+        String[] options = {"addFilter", "deleteFilter", "editFilter"};
+        writer.println(options[option] + ";" + username + ";" + censoredWord + ";" + replacement);
+        writer.flush();
+    }
+
+   /* public ArrayList<String[]> parseBuyerMetricData() {
+        ObjectInputStream objectInputStream = new ObjectInputStream(socket);
+    }
+
+    */
 }

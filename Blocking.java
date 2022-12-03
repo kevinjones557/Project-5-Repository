@@ -177,4 +177,33 @@ public class Blocking {
             return false;
         }
     }
+
+    public static String[] getMessageAbleStores(String currentUser) throws IOException {
+        synchronized (OBJ) {
+            String[] possibleSellers = Blocking.getMessageAbleUser(currentUser, false);
+            File sellers = new File("data/sellers");
+            ArrayList<String> possibleStores = new ArrayList<>();
+            String[] sellerNames = sellers.list();
+            for (String name : sellerNames) { //Loop through all sellers
+                for (String seller : possibleSellers) { //Loop through message-able sellers
+                    if (seller.equals(name)) { //If matched then break loop then add stores
+                        break;
+                    }
+                }
+                File stores = new File("data/sellers/" + name);
+                String[] storeNames = stores.list();
+                for (String store : storeNames) {
+                    File storeFile = new File("data/sellers/" + name + "/" + store);
+                    if (storeFile.isDirectory()) {
+                        possibleStores.add(store);
+                    }
+                }
+
+            }
+
+            String[] availableStores = new String[possibleStores.size()];
+            availableStores = possibleStores.toArray(availableStores);
+            return availableStores;
+        }
+    }
 }
