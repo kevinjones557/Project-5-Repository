@@ -104,12 +104,11 @@ public class Client {
     public void editSignal(boolean delete, String sender, String recipient, String storeName,
                                   boolean isBuyer, String messageToEdit, String edit) {
         String buyer = "false";
-        if(isBuyer)
+        if(isBuyer) {
             buyer = "true";
+        }
 
-        String sendData = "delete";
-        if (!delete)
-            sendData = "append";
+        String sendData = "edit";
 
         String personData = sender + "," + recipient + "," +
                 storeName + "," + buyer;
@@ -145,9 +144,7 @@ public class Client {
      */
     public ArrayList<String> displaySignal(String sender, String recipient, String storeName,
                                                    boolean isBuyer) {
-        String buyer = "false";
-        if(isBuyer)
-            buyer = "true";
+        String buyer = Boolean.toString(isBuyer);
 
         String sendData = "display";
 
@@ -162,25 +159,14 @@ public class Client {
         writer.println();
         writer.flush();
 
-        String messages = "";
         try {
-            messages = reader.readLine();
+            return new ArrayList<>(Arrays.asList((reader.readLine().split(";"))));
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Failed to retrieve message contents.", "Messaging System",
                     JOptionPane.ERROR_MESSAGE);
         }
+        return null;
 
-        ArrayList<String> messageContents = new ArrayList<>();
-
-        int indexOfSeparator = messages.indexOf(": : : :");
-
-        while (indexOfSeparator != -1) {
-            messageContents.add(messages.substring(0, indexOfSeparator));
-            indexOfSeparator = messages.indexOf(": : : :");
-            messages = messages.substring(indexOfSeparator + 7);
-        }
-
-        return messageContents;
     }
     
     public void importFile(String path, String recipient, String username, boolean isSeller,
@@ -237,7 +223,7 @@ public class Client {
         return false;
     }
 
-    public ArrayList<String> getUsersSignal(int command, String currentUser, String isSeller) {
+    public ArrayList<String> getUsersSignal(int command, String currentUser, boolean isSeller) {
         String[] commands = {"getAvailableUsers", "getMessageAbleUsers", "getAvailableStores", "getMessageAbleStores"};
         writer.println(commands[command] + ";" + currentUser + ";" + isSeller);
         writer.flush();

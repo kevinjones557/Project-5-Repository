@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,6 +39,8 @@ public class Message {
                 fileRecipient = "data/buyers/" + recipient + "/" + recipient + storeName + ".txt";
             }
         }
+        JOptionPane.showMessageDialog(null, "recipient " + fileRecipient);
+        JOptionPane.showMessageDialog(null, "Sender " + fileSender);
         appendMessageExecute(sender, recipient, isBuyer, fileSender, fileRecipient, message);
     }
 
@@ -328,16 +331,18 @@ public class Message {
         String line = "";
         ArrayList<String> returnContents = new ArrayList<>();
 
-        if (storeName == null) {
-            if (isBuyer)
+        if (storeName.equals("nil")) {
+            if (isBuyer) {
                 path = "data/buyers/" + sender + "/" + sender + recipient + ".txt";
-            else
+            } else {
                 path = "data/sellers/" + sender + "/" + sender + recipient + ".txt";
+            }
         } else {
-            if (isBuyer)
+            if (isBuyer) {
                 path = "data/buyers/" + sender + "/" + sender + storeName + ".txt";
-            else
+            } else {
                 path = "data/sellers/" + sender + "/" + storeName + "/" + storeName + recipient + ".txt";
+            }
         }
         try {
             synchronized (SYNCH) {

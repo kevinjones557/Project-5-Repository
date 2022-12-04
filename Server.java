@@ -162,7 +162,7 @@ public class Server extends Thread {
                     deleteReceive(reader);
                 } else if (request.equals("edit")) {
                     editReceive(reader);
-                } else if (instruction.equals("display")) {
+                } else if (request.equals("display")) {
                     displayReceive(reader, writer);
                 } else if (instruction.equals("invisible")) {
                     Invisible.becomeInvisibleToUser(request.split(";")[1], request.split(";")[3],
@@ -189,6 +189,7 @@ public class Server extends Thread {
                     writer.println(sendBack);
                     writer.flush();
                 } else if (instruction.equals("getAvailableUsers")){
+                    System.out.println("hi");
                     String[] ins = request.split(";");
                     String sendBack = String.join(";", Invisible.getAvailableUsers(ins[1],
                             Boolean.parseBoolean(ins[2])));
@@ -421,10 +422,8 @@ public class Server extends Thread {
             personData = personData.substring(personData.indexOf(",") + 1);
             String storeName = personData.substring(0, personData.indexOf(","));
             personData = personData.substring(personData.indexOf(",") + 1);
-            String buyer = personData.substring(0, personData.indexOf(","));
-            boolean isBuyer = false;
-            if (buyer.equals("true"))
-                isBuyer = true;
+            String buyer = personData;
+            boolean isBuyer = buyer.equals("true");
 
             String message = reader.readLine();
 
@@ -444,10 +443,8 @@ public class Server extends Thread {
             personData = personData.substring(personData.indexOf(",") + 1);
             String storeName = personData.substring(0, personData.indexOf(","));
             personData = personData.substring(personData.indexOf(",") + 1);
-            String buyer = personData.substring(0, personData.indexOf(","));
-            boolean isBuyer = false;
-            if (buyer.equals("true"))
-                isBuyer = true;
+            String buyer = personData;
+            boolean isBuyer = buyer.equals("true");
 
             String messageToEdit = reader.readLine();
             String edit = reader.readLine();
@@ -460,6 +457,7 @@ public class Server extends Thread {
     }
     
     public static void displayReceive(BufferedReader reader, PrintWriter writer) {
+        System.out.println("dislpaying");
         try {
             String personData = reader.readLine();
             String sender = personData.substring(0, personData.indexOf(","));
@@ -468,18 +466,11 @@ public class Server extends Thread {
             personData = personData.substring(personData.indexOf(",") + 1);
             String storeName = personData.substring(0, personData.indexOf(","));
             personData = personData.substring(personData.indexOf(",") + 1);
-            String buyer = personData.substring(0, personData.indexOf(","));
-            boolean isBuyer = false;
-            if (buyer.equals("true"))
-                isBuyer = true;
+            String buyer = personData;
+            boolean isBuyer = buyer.equals("true");
 
             ArrayList<String> messageContents = Message.displayMessage(sender, recipient, storeName, isBuyer);
-            String returnedContents = "";
-            for (int i = 0; i < messageContents.size(); i++) {
-                returnedContents = returnedContents + messageContents.get(i) + ": : : :";
-            }
-            writer.write(returnedContents);
-            writer.println();
+            writer.println(String.join(";", messageContents));
             writer.flush();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "The data could not be handled.", "Messaging System",
