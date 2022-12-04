@@ -1,5 +1,6 @@
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.font.TextAttribute;
@@ -358,11 +359,22 @@ public class MessageGui extends Client implements Runnable{
         topPanel.setBounds(165, 0, 820, 90);
         topPanel.setBorder(br);
 
-        JLabel label = new JLabel("Right click on message to edit or delete it.");
-        label.setFont(new Font("Times New Roman", Font.BOLD, 30));
-        label.setBounds(0, 0, 820, 45);
-        label.setHorizontalAlignment(JLabel.CENTER);
+        JLabel label = new JLabel(this.username.toUpperCase() + "'s MESSAGES");
+        label.setFont(new Font("Times New Roman", Font.BOLD, 25));
+        label.setBounds(0, 0, 400, 45);
+        ImageIcon i = new ImageIcon("info.png");
+
+        Image image = i.getImage();
+        Image rescaled = image.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+        i = new ImageIcon(rescaled);
+        JLabel info = new JLabel(i);
+        info.setToolTipText("Right click on a message to edit");
+        info.setHorizontalAlignment(SwingConstants.RIGHT);
+        info.setBounds(780, 4, 40, 30);
+        label.setHorizontalAlignment(JLabel.LEFT);
+        label.setBorder(new EmptyBorder(10, 30, 10, 10));
         topPanel.add(label);
+        topPanel.add(info);
 
         JButton importFileButton = new JButton("Import a File");
         importFileButton.setLayout(null);
@@ -838,6 +850,9 @@ public class MessageGui extends Client implements Runnable{
 
 
     public static void main(String[] args) throws IOException {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {}
         SwingUtilities.invokeLater(new MessageGui("dan", false, new Socket("localhost", 2000)));
     }
 
