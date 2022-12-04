@@ -43,6 +43,8 @@ public class MessageGui extends Client implements Runnable{
 
 
     private void createLeftPanel() {
+        ToolTipManager.sharedInstance().setInitialDelay(0);
+        ToolTipManager.sharedInstance().setLightWeightPopupEnabled(true);
         popupMenu1.setVisible(false);
         popupMenu2.setVisible(false);
         myFrame.setTitle("Messaging System");
@@ -56,11 +58,22 @@ public class MessageGui extends Client implements Runnable{
         // creating box with buttons
         Box sellerPanel = Box.createVerticalBox();
         sellerPanel.removeAll();
-        JLabel topLabel3 = new JLabel("Personal Chats:");
-        topLabel3.setFont(new Font("Times New Roman",Font.BOLD,22));
-        topLabel3.setHorizontalAlignment(JLabel.CENTER);
-        topLabel3.setMaximumSize(new Dimension(165, 45));
-        sellerPanel.add(topLabel3);
+        JPanel topLeft = new JPanel();
+        JLabel topLabel3 = new JLabel("Personal Chats");
+        topLeft.add(topLabel3, Component.LEFT_ALIGNMENT);
+        topLabel3.setFont(new Font("Times New Roman",Font.BOLD,18));
+        topLabel3.setHorizontalAlignment(JLabel.LEFT); //xyz CENTER
+        topLabel3.setMaximumSize(new Dimension(130, 45));
+        sellerPanel.add(topLeft);
+        ImageIcon i = new ImageIcon("info.png");
+        Image image = i.getImage();
+        Image rescaled = image.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+        i = new ImageIcon(rescaled);
+        JLabel info = new JLabel(i);
+        info.setToolTipText("Right click on users to use block/invisible options");
+        info.setHorizontalAlignment(SwingConstants.RIGHT);
+        info.setBounds(130, 0, 20, 20);
+        topLeft.add(info, Component.RIGHT_ALIGNMENT);
         ArrayList<String> allMessages = super.getConversationsFromUser(this.username);
         // TODO change to vinh
         // this is run for buyers and sellers, gets personal conversations
@@ -145,11 +158,12 @@ public class MessageGui extends Client implements Runnable{
         topLabel1.setBounds(12, 0, 165, 25);
         topLabel2.setBounds(12, 20, 165, 20);
 
-        topTextPanel.add(topLabel1);
-        topTextPanel.add(topLabel2);
+        //topTextPanel.add(topLabel1);  //xyz
+        //topTextPanel.add(topLabel2);
         // creating buttons for bottom panel
         JButton searchForUserButton = new JButton("Search for a " + ((isUserSeller)? "buyer" : "seller"));
         searchForUserButton.setMaximumSize(new Dimension(165,74));
+        searchForUserButton.setFocusable(false);
         bottomButtonPanel.add(searchForUserButton);
         searchForUserButton.addActionListener(new ActionListener() {
             @Override
@@ -200,6 +214,7 @@ public class MessageGui extends Client implements Runnable{
 
         JButton seeListOfUsersButton = new JButton("See a list of " + ((isUserSeller)? "buyers" : "stores"));
         seeListOfUsersButton.setMaximumSize(new Dimension(165,74));
+        seeListOfUsersButton.setFocusable(false);
         bottomButtonPanel.add(seeListOfUsersButton);
         seeListOfUsersButton.addActionListener(new ActionListener() {
             @Override
@@ -259,6 +274,7 @@ public class MessageGui extends Client implements Runnable{
 
         JButton metricsButton = new JButton("View Statistics");
         metricsButton.setMaximumSize(new Dimension(165,74));
+        metricsButton.setFocusable(false);
         bottomButtonPanel.add(metricsButton);
         metricsButton.addActionListener(new ActionListener() {
             @Override
@@ -269,7 +285,7 @@ public class MessageGui extends Client implements Runnable{
             }
         });
 
-        scrollPane.setBounds(0,45,165,545);
+        scrollPane.setBounds(0,0,165,600); //xyz y45  height545
         scrollPane.validate();
 
         //Panel 4
@@ -284,7 +300,7 @@ public class MessageGui extends Client implements Runnable{
 
         //adding the panel to the Container of the JFrame
         c.add(scrollPane);
-        c.add(topTextPanel);
+        //c.add(topTextPanel); //xyz
         c.add(bottomButtonPanel);
     }
 
@@ -295,24 +311,24 @@ public class MessageGui extends Client implements Runnable{
 
         //crete panel for the text area
         JPanel textPanel = new JPanel();
-        textPanel.setBounds(165, 590, 820, 171);
+        textPanel.setBounds(165, 590, 820, 171); //171
         textPanel.setBorder(br);
         textPanel.setLayout(null);
 
         //creating a label for the panel
         JLabel label = new JLabel("Type Message Here:");
         label.setFont(new Font("Times New Roman", Font.BOLD, 25));
-        label.setBounds(10,0,250,171);
+        label.setBounds(10,0,250,171); //171
         textPanel.add(label);
 
         JTextArea textField = new JTextArea(9,50);
-        textField.setBounds(250,10,350,150);
+        textField.setBounds(250,10,350,150); //150
         textField.setLineWrap(true);
         textPanel.add(textField);
 
         JButton sendButton = new JButton("Send Message");
         sendButton.setLayout(null);
-        sendButton.setBounds(610, 10, 200, 150);
+        sendButton.setBounds(610, 10, 200, 150); //150
         sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -351,6 +367,7 @@ public class MessageGui extends Client implements Runnable{
         JButton importFileButton = new JButton("Import a File");
         importFileButton.setLayout(null);
         importFileButton.setBounds(0, 45, 410, 45);
+        importFileButton.setFocusable(false);
         importFileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -383,6 +400,7 @@ public class MessageGui extends Client implements Runnable{
 
         JButton exportFileButton = new JButton("Choose directory to export conversation as CSV File");
         exportFileButton.setLayout(null);
+        exportFileButton.setFocusable(false);
         exportFileButton.setBounds(410, 45, 410, 45);
         exportFileButton.addActionListener(new ActionListener() {
             @Override
