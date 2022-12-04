@@ -208,52 +208,50 @@ public class MessageGui extends Client implements Runnable{
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (e.getSource() == seeListOfUsersButton) {
-                    try {
-                        String user = username;
-                        // if user is a seller allow option to choose account to message from
+                    String user = username;
+                    // if user is a seller allow option to choose account to message from
+                    if (isUserSeller) {
+                        //first choose which account to start message from
+                        ArrayList<String> sellerStores = MessageGui.super.getStoresFromSeller(username);
+                        sellerStores.add(0, username);
+                        String[] accounts = sellerStores.toArray(new String[0]);
+                        user = (String) JOptionPane.showInputDialog(null, "Choose account " +
+                                        "to message from", "Select Account", JOptionPane.PLAIN_MESSAGE, null,
+                                accounts, null);
+                        isUserStore = user != null && !user.equals(username);
+                    }
+                    if (user != null) {
+                        ArrayList<String> options;
                         if (isUserSeller) {
-                            //first choose which account to start message from
-                            ArrayList<String> sellerStores = MessageGui.super.getStoresFromSeller(username);
-                            sellerStores.add(0, username);
-                            String[] accounts = sellerStores.toArray(new String[0]);
-                            user = (String) JOptionPane.showInputDialog(null, "Choose account " +
-                                            "to message from", "Select Account", JOptionPane.PLAIN_MESSAGE, null,
-                                    accounts, null);
-                            isUserStore = user != null && !user.equals(username);
+                            options = MessageGui.super.getUsersSignal(0, username, true);
+                        } else {
+                            options = MessageGui.super.getUsersSignal(2, username, false);
                         }
-                        if (user != null) {
-                            String[] options = Blocking.getMessageAbleUser(username, isUserSeller);
-                            // TODO call client version of this getavailable
-                            if (!isUserSeller) {
-                                // if it is a buyer get all the stores from the sellers
-                                ArrayList<String> allStores = new ArrayList<>();
-                                for (String seller : options) {
-                                    allStores.addAll(MessageGui.super.getStoresFromSeller(seller));
-                                }
-                                options = allStores.toArray(new String[0]);
-                            }
-                            String newChatRecipient = (String) JOptionPane.showInputDialog(null,
+                        // TODO call client version of this getavailable
+                        String newChatRecipient;
+                        if (options.get(0).length() > 0) {
+                            newChatRecipient = (String) JOptionPane.showInputDialog(null,
                                     "Choose a " + ((isUserSeller) ? "buyer:" : "store:"), "Start New Chat",
-                                    JOptionPane.PLAIN_MESSAGE, null, options, null);
-
-                            if (newChatRecipient != null) {
-                                // here we know that the user is a buyer, so they must choose a store
-                                isRecipientStore = !isUserSeller;
-                                MessageGui.super.checkIfMessageExists(newChatRecipient, isRecipientStore, isUserSeller,
-                                        user, isUserStore);
-                                chooseRecipient(newChatRecipient, user);
-                                SwingUtilities.invokeLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        System.out.println("remaking");
-                                        createLeftPanel();
-                                    }
-                                });
-                            }
+                                    JOptionPane.PLAIN_MESSAGE, null, options.toArray(), null);
+                        } else {
+                            newChatRecipient = null;
+                            JOptionPane.showMessageDialog(null, "No options available!");
                         }
-                    } catch (IOException io) {
-                        io.printStackTrace();
-                        JOptionPane.showMessageDialog(null, "Unable to collect info!");
+
+                        if (newChatRecipient != null) {
+                            // here we know that the user is a buyer, so they must choose a store
+                            isRecipientStore = !isUserSeller;
+                            MessageGui.super.checkIfMessageExists(newChatRecipient, isRecipientStore, isUserSeller,
+                                    user, isUserStore);
+                            chooseRecipient(newChatRecipient, user);
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    System.out.println("remaking");
+                                    createLeftPanel();
+                                }
+                            });
+                        }
                     }
                 }
             }
@@ -321,7 +319,6 @@ public class MessageGui extends Client implements Runnable{
                 if (e.getSource() == sendButton) {
                     if (!textField.getText().isBlank() && recipient != null) {
                         System.out.println(textField.getText().trim());
-                        System.out.println(storeName);
                         MessageGui.super.appendOrDeleteSignal(false, username, recipient, (storeName == null)?
                                 "nil" : storeName, !isUserSeller, textField.getText().trim());
                     }
@@ -841,7 +838,7 @@ public class MessageGui extends Client implements Runnable{
 
 
     public static void main(String[] args) throws IOException {
-        SwingUtilities.invokeLater(new MessageGui("Seller", true, new Socket("localhost", 2000)));
+        SwingUtilities.invokeLater(new MessageGui("Buyer", false, new Socket("localhost", 2000)));
     }
 
 }

@@ -4,6 +4,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 
 /**
@@ -163,7 +164,7 @@ public class Server extends Thread {
                 } else if (request.equals("edit")) {
                     editReceive(reader);
                 } else if (request.equals("display")) {
-                    displayReceive(reader, writer);
+                    displayReceive(reader, socket);
                 } else if (instruction.equals("invisible")) {
                     Invisible.becomeInvisibleToUser(request.split(";")[1], request.split(";")[3],
                             Boolean.parseBoolean(request.split(";")[2]));
@@ -204,6 +205,7 @@ public class Server extends Thread {
                 } else if (instruction.equals("getAvailableStores")){
                     String[] ins = request.split(";");
                     String sendBack = String.join(";", Invisible.getAvailableStores(ins[1]));
+                    System.out.println(sendBack);
                     writer.println(sendBack);
                     writer.flush();
                 } else if (instruction.equals("getMessageAbleStores")) {
@@ -456,7 +458,7 @@ public class Server extends Thread {
         }
     }
     
-    public static void displayReceive(BufferedReader reader, PrintWriter writer) {
+    public static void displayReceive(BufferedReader reader, Socket socket) {
         System.out.println("dislpaying");
         try {
             String personData = reader.readLine();
@@ -470,8 +472,9 @@ public class Server extends Thread {
             boolean isBuyer = buyer.equals("true");
 
             ArrayList<String> messageContents = Message.displayMessage(sender, recipient, storeName, isBuyer);
-            writer.println(String.join(";", messageContents));
-            writer.flush();
+            ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+            outputStream.writeObject(messageContents);
+            outputStream.flush();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "The data could not be handled.", "Messaging System",
                     JOptionPane.ERROR_MESSAGE);

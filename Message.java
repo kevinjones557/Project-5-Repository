@@ -1,4 +1,3 @@
-import javax.swing.*;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -21,8 +20,10 @@ public class Message {
     public static void appendMessage(String sender, String recipient, String storeName, boolean isBuyer, String message) {
         String fileRecipient = "";
         String fileSender = "";
+        String realSender;
 
         if (storeName.equals("nil")) {
+            realSender = sender;
             if (isBuyer) {
                 fileSender = "data/buyers/" + sender + "/" + sender + recipient + ".txt";
                 fileRecipient = "data/sellers/" + recipient + "/" + recipient + sender + ".txt";
@@ -31,6 +32,7 @@ public class Message {
                 fileRecipient = "data/buyers/" + recipient + "/" + recipient + sender + ".txt";
             }
         } else {
+            realSender = storeName;
             if (isBuyer) {
                 fileSender = "data/buyers/" + sender + "/" + sender + storeName + ".txt";
                 fileRecipient = "data/sellers/" + recipient + "/" + storeName + "/" + storeName + sender + ".txt";
@@ -39,9 +41,7 @@ public class Message {
                 fileRecipient = "data/buyers/" + recipient + "/" + recipient + storeName + ".txt";
             }
         }
-        JOptionPane.showMessageDialog(null, "recipient " + fileRecipient);
-        JOptionPane.showMessageDialog(null, "Sender " + fileSender);
-        appendMessageExecute(sender, recipient, isBuyer, fileSender, fileRecipient, message);
+        appendMessageExecute(realSender, recipient, isBuyer, fileSender, fileRecipient, message);
     }
 
     /**

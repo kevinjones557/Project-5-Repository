@@ -160,10 +160,13 @@ public class Client {
         writer.flush();
 
         try {
-            return new ArrayList<>(Arrays.asList((reader.readLine().split(";"))));
+            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+            return (ArrayList<String>) ois.readObject();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Failed to retrieve message contents.", "Messaging System",
                     JOptionPane.ERROR_MESSAGE);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
         return null;
 
