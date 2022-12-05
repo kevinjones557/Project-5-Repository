@@ -497,7 +497,6 @@ public class MessageGui extends Client implements Runnable{
             System.out.println("username " + this.username + "recipient " + this.recipient + "storeName " + this.storeName);
             ArrayList<String> messages = super.displaySignal(username, recipient,
                     (storeName == null)? "nil" : storeName, !isUserSeller);
-            System.out.println(messages);
 
             for (String s : messages) {
                 int numLines = 1 + s.length() / 160; // sets a factor for how many lines are needed
@@ -529,6 +528,7 @@ public class MessageGui extends Client implements Runnable{
                                         SwingUtilities.invokeLater(new Runnable() {
                                             @Override
                                             public void run() {
+                                                myFrame.invalidate();
                                                 createMessageGUI();
                                                 myFrame.revalidate();
                                             }
@@ -556,6 +556,14 @@ public class MessageGui extends Client implements Runnable{
                                                     (storeName == null)? "nil":storeName, !isUserSeller,
                                                     tempLabel.getText(), newMessage);
                                         }
+                                        SwingUtilities.invokeLater(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                myFrame.invalidate();
+                                                createMessageGUI();
+                                                myFrame.revalidate();
+                                            }
+                                        });
                                     }
                                 }
                             });
@@ -757,7 +765,9 @@ public class MessageGui extends Client implements Runnable{
         metricsFrame.setResizable(false);
 
         if (isUserSeller) {
-
+            popupMenu1.setVisible(false);
+            popupMenu2.setVisible(false);
+            //TODO seller statistics gui
         } else {
             popupMenu1.setVisible(false);
             popupMenu2.setVisible(false);
