@@ -307,6 +307,7 @@ public class Message {
                     }
                     MetricManager.addDeleteMessageData(sender, storePath,
                             message, true);
+                    // TODO: trim off the excess data that is sent along instead of the message body
                 }
 
             } catch (IOException e) {
