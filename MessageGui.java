@@ -69,7 +69,7 @@ public class MessageGui extends Client implements Runnable{
         if (!isUserSeller) {
             availableMessages.addAll(super.getUsersSignal(2, this.username, false));
         }
-        ArrayList<String> allMessages = super.getConversationsFromUser("dan");
+        ArrayList<String> allMessages = super.getConversationsFromUser(this.username);
         System.out.println(allMessages);
         System.out.println("as;dflj " + availableMessages);
         JPanel topLeft = new JPanel();
@@ -90,7 +90,7 @@ public class MessageGui extends Client implements Runnable{
                 break;
             }
             if (!availableMessages.contains(user)) {
-                break;
+                continue;
             }
             JButton tempButton = new JButton(user);
             MouseListener tempListener = new MouseAdapter() {
@@ -135,6 +135,9 @@ public class MessageGui extends Client implements Runnable{
                     storeLabel.setHorizontalAlignment(JLabel.CENTER);
                     userPanel.add(storeLabel);
                     for (String buyer : buyerConversations) {
+                        if (!availableMessages.contains(buyer)) {
+                            continue;
+                        }
                         JButton tempButton = new JButton(buyer);
                         ActionListener tempListener = new ActionListener() {
                             @Override
@@ -181,46 +184,42 @@ public class MessageGui extends Client implements Runnable{
         searchForUserButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    if (e.getSource() == searchForUserButton) {
-                        String user = username;
-                        // if user is a seller allow option to choose account to message from
-                        if (isUserSeller) {
-                            //first choose which account to start message from
-                            ArrayList<String> sellerStores = MessageGui.super.getStoresFromSeller(username);
-                            sellerStores.add(0, username);
-                            String[] accounts = sellerStores.toArray(new String[0]);
-                            user = (String) JOptionPane.showInputDialog(null, "Choose account " +
-                                            "to message from", "Select Account", JOptionPane.PLAIN_MESSAGE, null,
-                                    accounts, null);
-                            isUserStore = user != null && !user.equals(username);
-                        }
-                        if (user != null) {
-                            String[] options = Blocking.getMessageAbleUser(username, isUserSeller);
-                            // TODO call client version of this^^^^
-                            String newChatRecipient = (String) JOptionPane.showInputDialog(null,
-                                    "Enter the name of a " + ((isUserSeller) ? "buyer:" : "seller:"),
-                                    "Start New Chat", JOptionPane.PLAIN_MESSAGE);
-                            if (!Arrays.asList(options).contains(newChatRecipient)) {
-                                JOptionPane.showMessageDialog(null, "Sorry, no user found " +
-                                        "with this name!","Error",JOptionPane.ERROR_MESSAGE);
-                            } else {
-                                MessageGui.super.checkIfMessageExists(newChatRecipient, isRecipientStore, isUserSeller,
-                                        user, isUserStore);
-                                chooseRecipient(newChatRecipient, user);
-                                SwingUtilities.invokeLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        System.out.println("remaking");
-                                        createLeftPanel();
-                                        myFrame.revalidate();
-                                    }
-                                });
-                            }
+                if (e.getSource() == searchForUserButton) {
+                    String user = username;
+                    // if user is a seller allow option to choose account to message from
+                    if (isUserSeller) {
+                        //first choose which account to start message from
+                        ArrayList<String> sellerStores = MessageGui.super.getStoresFromSeller(username);
+                        sellerStores.add(0, username);
+                        String[] accounts = sellerStores.toArray(new String[0]);
+                        user = (String) JOptionPane.showInputDialog(null, "Choose account " +
+                                        "to message from", "Select Account", JOptionPane.PLAIN_MESSAGE, null,
+                                accounts, null);
+                        isUserStore = user != null && !user.equals(username);
+                    }
+                    if (user != null) {
+                        ArrayList<String> availableMessages = getUsersSignal(0, username, isUserSeller);
+                        System.out.println("searching " + availableMessages);
+                        String newChatRecipient = (String) JOptionPane.showInputDialog(null,
+                                "Enter the name of a " + ((isUserSeller) ? "buyer:" : "seller:"),
+                                "Start New Chat", JOptionPane.PLAIN_MESSAGE);
+                        if (!availableMessages.contains(newChatRecipient)) {
+                            JOptionPane.showMessageDialog(null, "Sorry, no user found " +
+                                    "with this name!","Error",JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            MessageGui.super.checkIfMessageExists(newChatRecipient, isRecipientStore, isUserSeller,
+                                    user, isUserStore);
+                            chooseRecipient(newChatRecipient, user);
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    System.out.println("remaking");
+                                    createLeftPanel();
+                                    myFrame.revalidate();
+                                }
+                            });
                         }
                     }
-                } catch (IOException io) {
-                    io.printStackTrace();
                 }
             }
         });
@@ -347,6 +346,13 @@ public class MessageGui extends Client implements Runnable{
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (e.getSource() == sendButton) {
+                    ArrayList<String> unblockedUsers = getUsersSignal(1, username, isUserSeller);
+                    System.out.println("blocked" + unblockedUsers);
+                    if (!unblockedUsers.contains(recipient)) {
+                        JOptionPane.showMessageDialog(null, "Sorry, this user has blocked you"
+                        , "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
                     if (!textField.getText().isBlank() && recipient != null) {
                         System.out.println(textField.getText().trim());
                         MessageGui.super.appendOrDeleteSignal(false, username, recipient, (storeName == null)?
@@ -386,8 +392,10 @@ public class MessageGui extends Client implements Runnable{
         connectedLabel.setText("Connected with " + this.recipient);
         if (this.recipient == null) {
             connectedLabel.setText("You are not connected with anyone");
-        } else if (this.storeName != null) {
+        } else if (this.storeName != null && !isUserSeller) {
             connectedLabel.setText("Connected with " + this.storeName);
+        } else if (this.storeName != null) {
+            connectedLabel.setText("Connected with " + this.recipient + " through " + this.storeName);
         }
         connectedLabel.setFont(new Font("Times New Roman", Font.BOLD, 25));
         connectedLabel.setBounds(0, 0, 600, 45);
@@ -449,6 +457,11 @@ public class MessageGui extends Client implements Runnable{
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (e.getSource() == exportFileButton) {
+                    if (recipient == null) {
+                        JOptionPane.showMessageDialog(null, "Please select a recipient first",
+                                "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
                     JFileChooser directoryChooser = new JFileChooser();
                     directoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                     directoryChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
@@ -904,7 +917,7 @@ public class MessageGui extends Client implements Runnable{
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {}
-        SwingUtilities.invokeLater(new MessageGui("dan", false, new Socket("localhost", 2000)));
+        SwingUtilities.invokeLater(new MessageGui("Buyer", false, new Socket("localhost", 2000)));
     }
 
 }
@@ -922,5 +935,4 @@ seller -> buyer         false or true. Username is always itself, recipient is a
 //Todo when deleting or editing message it does not update
 //todo metrics manager issue when deleting
 //todo update the buttons when a user adds a new chat
-//todo check blocking and invisible
 //todo write test cases and record video and write readme
