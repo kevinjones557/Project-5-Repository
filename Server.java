@@ -34,7 +34,7 @@ public class Server extends Thread {
     public static void main(String[] args) throws IOException {
         //create folder for filter message
         File filterRoot = new File("filter");
-        filterRoot.createNewFile();
+        filterRoot.mkdir();
         while (true) {
             Server server = new Server(serverSocket.accept());
             server.start();

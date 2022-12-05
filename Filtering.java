@@ -114,10 +114,9 @@ public class Filtering{
      * @param startEnd
      * @return new replaced String
      */
-    public static String customReplace(String string, int[] startEnd) {
+    public static String customReplace(String string, String replacement, int[] startEnd) {
         String head = string.substring(0, startEnd[0]);
-        String toChange = string.substring(startEnd[0], startEnd[1] + 1);
-        String newPart = "*".repeat(toChange.toCharArray().length);
+        String newPart = replacement;
         String tail = string.substring(startEnd[1] + 1);
         String ans = head + newPart + tail;
         return ans;
@@ -131,10 +130,10 @@ public class Filtering{
      * and "nitrate" as "nitr***". Looks sus
      *
      * @param message
-     * @param censoredWords
+     * @param
      * @return LightFiltered message
      */
-    public static String lightFilter(String message, String[] censoredWords) {
+    public static String lightFilter(String message, ArrayList<String[]> censoredWordsPairs) {
         //Locate where the actual words are
         ArrayList<int[]> wordPositions = new ArrayList<>();
         int start = 0;
@@ -157,9 +156,9 @@ public class Filtering{
         }
         String ans = message;
         for (int[] startEnd : wordPositions) {
-            for (String censoredWord : censoredWords) {
-                if (censoredWord.equals(ans.substring(startEnd[0], startEnd[1] + 1).toLowerCase())) {
-                    ans = customReplace(ans, startEnd);
+            for (String[] censoredWordPair : censoredWordsPairs) {
+                if (censoredWordPair[0].equals(ans.substring(startEnd[0], startEnd[1] + 1).toLowerCase())) {
+                    ans = customReplace(ans, censoredWordPair[1], startEnd);
                 }
             }
         }
@@ -171,13 +170,13 @@ public class Filtering{
      * if you entered some letters together you
      * won't every see those together
      * @param message
-     * @param censoredWords
+     * @param
      * @return
      */
-    public static String absoluteFilter(String message, String[] censoredWords) {
+    public static String absoluteFilter(String message, ArrayList<String[]> censoredWordsPairs) {
         String ans = message;
-        for (String censoredWord : censoredWords) {
-            ans = ans.replace(censoredWord, "*".repeat(censoredWord.toCharArray().length));
+        for (String[] censoredWordPair : censoredWordsPairs) {
+            ans = ans.replace(censoredWordPair[0], censoredWordPair[1]);
         }
         return ans;
     }
