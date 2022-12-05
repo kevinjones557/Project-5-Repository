@@ -42,6 +42,7 @@ public class MessageGui extends Client implements Runnable{
     private final boolean isUserSeller;
 
     private boolean isUserStore;
+    private boolean initialSetup = true;
 
     private void createLeftPanel() {
         ToolTipManager.sharedInstance().setInitialDelay(0);
@@ -64,10 +65,13 @@ public class MessageGui extends Client implements Runnable{
         topLabel3.setHorizontalAlignment(JLabel.CENTER);
         topLabel3.setMaximumSize(new Dimension(165, 45));
         userPanel.add(topLabel3);
-        ArrayList<String> allMessages = super.getUsersSignal(0, this.username, this.isUserSeller);
+        ArrayList<String> availableMessages = super.getUsersSignal(0, this.username, this.isUserSeller);
         if (!isUserSeller) {
-            allMessages.addAll(super.getUsersSignal(2, this.username, false));
+            availableMessages.addAll(super.getUsersSignal(2, this.username, false));
         }
+        ArrayList<String> allMessages = super.getConversationsFromUser("dan");
+        System.out.println(allMessages);
+        System.out.println("as;dflj " + availableMessages);
         JPanel topLeft = new JPanel();
         topLeft.add(topLabel3, Component.LEFT_ALIGNMENT);
         userPanel.add(topLeft);
@@ -83,6 +87,9 @@ public class MessageGui extends Client implements Runnable{
         // this is run for buyers and sellers, gets personal conversations
         for (String user : allMessages) {
             if (user.length() == 0) {
+                break;
+            }
+            if (!availableMessages.contains(user)) {
                 break;
             }
             JButton tempButton = new JButton(user);
@@ -374,6 +381,8 @@ public class MessageGui extends Client implements Runnable{
         topPanel.setBounds(165, 0, 820, 90);
         topPanel.setBorder(br);
 
+        connectedLabel.removeAll();
+        connectedLabel.setText("");
         connectedLabel.setText("Connected with " + this.recipient);
         if (this.recipient == null) {
             connectedLabel.setText("You are not connected with anyone");
@@ -393,7 +402,9 @@ public class MessageGui extends Client implements Runnable{
         info.setBounds(780, 4, 40, 30);
         connectedLabel.setHorizontalAlignment(JLabel.LEFT);
         connectedLabel.setBorder(new EmptyBorder(10, 30, 10, 10));
-        topPanel.add(connectedLabel);
+        if (initialSetup) {
+            topPanel.add(connectedLabel);
+        }
         topPanel.add(info);
 
         JButton importFileButton = new JButton("Import a File");
@@ -885,6 +896,7 @@ public class MessageGui extends Client implements Runnable{
         createTopPanel();
         createMessageGUI();
         myFrame.setVisible(true);
+        initialSetup = false;
     }
 
 
