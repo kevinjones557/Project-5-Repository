@@ -73,9 +73,13 @@ public class Invisible {
     public static String[] getAvailableStores(String currentUser) throws IOException {
         synchronized (OBJ) {
             String[] possibleSellers = Invisible.getAvailableUsers(currentUser, false);
+            if (possibleSellers.length == 0) {
+                return new String[0];
+            }
             File sellers = new File("data/sellers");
             ArrayList<String> possibleStores = new ArrayList<>();
             String[] sellerNames = sellers.list();
+            assert sellerNames != null;
             for (String name : sellerNames) { //Loop through all sellers
                 for (String seller : possibleSellers) { //Loop through available sellers
                     if (seller.equals(name)) { //If matched then break loop then add stores
@@ -84,6 +88,7 @@ public class Invisible {
                 }
                 File stores = new File("data/sellers/" + name);
                 String[] storeNames = stores.list();
+                assert storeNames != null;
                 for (String store : storeNames) {
                     File storeFile = new File("data/sellers/" + name + "/" + store);
                     if (storeFile.isDirectory()) {
