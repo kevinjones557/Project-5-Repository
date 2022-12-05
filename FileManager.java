@@ -222,7 +222,6 @@ public class FileManager {
             ArrayList<String> names = new ArrayList<>();
             if (conversations != null) {
                 for (String fileName : conversations) {
-
                     if (!fileName.equals("hasBlocked.txt") && !fileName.equals("metrics.txt") &&
                             !fileName.equals("isInvisible.txt") &&
                             !(new  File(getStoreDirectory(username, fileName))).isDirectory()) {
