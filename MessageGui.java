@@ -220,6 +220,7 @@ public class MessageGui extends Client implements Runnable{
 
         JButton seeListOfUsersButton = new JButton("See a list of " + ((isUserSeller)? "buyers" : "stores"));
         seeListOfUsersButton.setMaximumSize(new Dimension(165,74));
+        seeListOfUsersButton.setFocusable(false);
         bottomButtonPanel.add(seeListOfUsersButton);
         seeListOfUsersButton.addActionListener(new ActionListener() {
             @Override
