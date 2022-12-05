@@ -1,5 +1,6 @@
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.font.TextAttribute;
@@ -31,6 +32,7 @@ public class MessageGui extends Client implements Runnable{
     private final JButton becomeVisibleOption = new JButton("Become Visible to User");
     private final JButton blockOption = new JButton("Block User");
     private final JButton unblockOption = new JButton("Unblock User");
+    private final JLabel connectedLabel = new JLabel();
 
     // characteristics of chat
     private String recipient;
@@ -40,8 +42,6 @@ public class MessageGui extends Client implements Runnable{
     private final boolean isUserSeller;
 
     private boolean isUserStore;
-
-
 
     private void createLeftPanel() {
         ToolTipManager.sharedInstance().setInitialDelay(0);
@@ -60,7 +60,7 @@ public class MessageGui extends Client implements Runnable{
         Box userPanel = Box.createVerticalBox();
         userPanel.removeAll();
         JLabel topLabel3 = new JLabel("Personal Chats:");
-        topLabel3.setFont(new Font("Times New Roman",Font.BOLD,22));
+        topLabel3.setFont(new Font("Times New Roman",Font.BOLD,18));
         topLabel3.setHorizontalAlignment(JLabel.CENTER);
         topLabel3.setMaximumSize(new Dimension(165, 45));
         userPanel.add(topLabel3);
@@ -300,12 +300,13 @@ public class MessageGui extends Client implements Runnable{
         // Panel border
         scrollPane.getViewport().setView(userPanel);
         scrollPane.setBorder(BorderFactory.createLineBorder(Color.black));
+        scrollPane.getVerticalScrollBar().setValue(0);
         topTextPanel.setBorder(br);
         bottomButtonPanel.setBorder(br);
 
         //adding the panel to the Container of the JFrame
         c.add(scrollPane);
-        //c.add(topTextPanel); //xyz
+        c.add(topTextPanel); //xyz
         c.add(bottomButtonPanel);
     }
 
@@ -372,9 +373,14 @@ public class MessageGui extends Client implements Runnable{
         topPanel.setBounds(165, 0, 820, 90);
         topPanel.setBorder(br);
 
-        JLabel label = new JLabel(this.username.toUpperCase() + "'s MESSAGES");
-        label.setFont(new Font("Times New Roman", Font.BOLD, 25));
-        label.setBounds(0, 0, 400, 45);
+        connectedLabel.setText("Connected with " + this.recipient);
+        if (this.recipient == null) {
+            connectedLabel.setText("You are not connected with anyone");
+        } else if (this.storeName != null) {
+            connectedLabel.setText("Connected with " + this.storeName);
+        }
+        connectedLabel.setFont(new Font("Times New Roman", Font.BOLD, 25));
+        connectedLabel.setBounds(0, 0, 600, 45);
         ImageIcon i = new ImageIcon("info.png");
 
         Image image = i.getImage();
@@ -384,9 +390,9 @@ public class MessageGui extends Client implements Runnable{
         info.setToolTipText("Right click on a message to edit");
         info.setHorizontalAlignment(SwingConstants.RIGHT);
         info.setBounds(780, 4, 40, 30);
-        label.setHorizontalAlignment(JLabel.LEFT);
-        label.setBorder(new EmptyBorder(10, 30, 10, 10));
-        topPanel.add(label);
+        connectedLabel.setHorizontalAlignment(JLabel.LEFT);
+        connectedLabel.setBorder(new EmptyBorder(10, 30, 10, 10));
+        topPanel.add(connectedLabel);
         topPanel.add(info);
 
         JButton importFileButton = new JButton("Import a File");
@@ -588,6 +594,7 @@ public class MessageGui extends Client implements Runnable{
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+                createTopPanel();
                 createMessageGUI();
                 myFrame.revalidate();
             }
