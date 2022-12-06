@@ -90,7 +90,6 @@ public class MessageGui extends Client implements Runnable{
         topLeft.add(info, Component.RIGHT_ALIGNMENT);
         //userPanel.add(topLeft);
 
-
         // this is run for buyers and sellers, gets personal conversations
         for (String user : allMessages) {
             if (user.length() == 0) {
