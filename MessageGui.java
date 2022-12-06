@@ -18,11 +18,14 @@ import java.util.*;
  */
 public class MessageGui extends Client implements Runnable{
     //Gui initializations
-    JFrame myFrame = new JFrame();
-    JPanel topLeft = new JPanel();
+    private final JFrame myFrame = new JFrame();
+    private final JFrame metricsFrame = new JFrame();
+    private final JPanel topLeft = new JPanel();
     private final JScrollPane messagePanel = new JScrollPane();
     private final JScrollPane scrollPane = new JScrollPane();
+    private final JScrollPane metricsScroll = new JScrollPane();
     private final Box userPanel = Box.createVerticalBox();
+    private final Box labelBox = Box.createVerticalBox();
 
     private final JPopupMenu popupMenu1 = new JPopupMenu();
     private final JPopupMenu popupMenu2 =  new JPopupMenu();
@@ -34,6 +37,7 @@ public class MessageGui extends Client implements Runnable{
     private final JButton blockOption = new JButton("Block User");
     private final JButton unblockOption = new JButton("Unblock User");
     private final JLabel connectedLabel = new JLabel();
+    private int sortType = 0;
     JLabel info = new JLabel();
     JLabel topLabel3 = new JLabel();
 
@@ -767,7 +771,6 @@ public class MessageGui extends Client implements Runnable{
     }
 
     public void createStatisticsGUI() {
-        JFrame metricsFrame = new JFrame();
         metricsFrame.setTitle("Statistics");
         metricsFrame.setLayout(null);
         //setting the bounds for the JFrame
@@ -806,12 +809,19 @@ public class MessageGui extends Client implements Runnable{
                     if (e.getSource() == sortNames) {
                         if (sortNames.getText().equals("▲")) {
                             sortNames.setText("▼");
+                            sortType = 1;
                         } else {
                             sortNames.setText("▲");
+                            sortType = 0;
                         }
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                createStatisticsGUI();
+                                metricsFrame.revalidate();
+                            }
+                        });
                     }
-                    sortNames.revalidate();
-                    textPanel.revalidate();
                 }
             });
 
@@ -830,9 +840,18 @@ public class MessageGui extends Client implements Runnable{
                     if (e.getSource() == sortTotal) {
                         if (Objects.equals(sortTotal.getText(), "▲")) {
                             sortTotal.setText("▼");
+                            sortType = 2;
                         } else {
                             sortTotal.setText("▲");
+                            sortType = 3;
                         }
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                createStatisticsGUI();
+                                metricsFrame.revalidate();
+                            }
+                        });
                     }
                 }
             });
@@ -856,9 +875,19 @@ public class MessageGui extends Client implements Runnable{
                     if (e.getSource() == sortPersonal) {
                         if (Objects.equals(sortPersonal.getText(), "▲")) {
                             sortPersonal.setText("▼");
+                            sortType = 4;
                         } else {
                             sortPersonal.setText("▲");
+                            sortType = 5;
                         }
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                metricsFrame.invalidate();
+                                createStatisticsGUI();
+                                metricsFrame.revalidate();
+                            }
+                        });
                     }
                 }
             });
@@ -876,35 +905,33 @@ public class MessageGui extends Client implements Runnable{
 
             metricsFrame.add(textPanel);
 
-            Box labelBox = Box.createVerticalBox();
+            labelBox.removeAll();
 
-            ArrayList<String[]> metricsData = new ArrayList<>();
-            // TODO call client version of this
-            String[] data1 = {"Walmart","478","7"};
-            String[] data2 = {"Target","700","15"};
-            String[] data3 = {"GameStop","50","30"};
-            metricsData.add(data1);
-            metricsData.add(data2);
-            metricsData.add(data3);
+            System.out.println(sortType);
+            ArrayList<String[]> metricsData = MessageGui.super.sortMetricsData(this.username, sortType);
+            for (String[] s : metricsData) {
+                System.out.print(Arrays.toString(s));
+            }
+            System.out.println();
 
             for (String[] s : metricsData) {
                 JPanel tempPanel = new JPanel();
-                textPanel.setLayout(null);
+                tempPanel.setLayout(null);
+                tempPanel.setMaximumSize(new Dimension(7000, 50));
 
                 JLabel labelStore = new JLabel(s[0]);
-                labelStore.setMaximumSize(new Dimension(90, 50));
                 labelStore.setHorizontalAlignment(JLabel.CENTER);
-                labelStore.setLocation(0, 0);
+                labelStore.setBounds(0, 0, 110, 50);
                 labelStore.setFont(new Font("Times New Roman", Font.BOLD, 20));
 
                 JLabel labelTotal = new JLabel(s[1]);
-                labelTotal.setMaximumSize(new Dimension(225, 50));
                 labelTotal.setHorizontalAlignment(JLabel.CENTER);
+                labelTotal.setBounds(110, 0, 225, 50);
                 labelTotal.setFont(new Font("Times New Roman", Font.BOLD, 20));
 
                 JLabel labelPersonal = new JLabel(s[2]);
-                labelPersonal.setMaximumSize(new Dimension(225, 50));
                 labelPersonal.setHorizontalAlignment(JLabel.CENTER);
+                labelPersonal.setBounds(350,0, 225, 50);
                 labelPersonal.setFont(new Font("Times New Roman", Font.BOLD, 20));
 
 
@@ -914,10 +941,10 @@ public class MessageGui extends Client implements Runnable{
 
                 labelBox.add(tempPanel);
             }
-            JScrollPane metricsPanel = new JScrollPane(labelBox);
-            metricsPanel.setBounds(0, 50, 600, 550);
-            metricsPanel.setBorder(BorderFactory.createLineBorder(Color.white));
-            metricsFrame.add(metricsPanel);
+            metricsScroll.setViewportView(labelBox);
+            metricsScroll.setBounds(0, 50, 600, 550);
+            metricsScroll.setBorder(BorderFactory.createLineBorder(Color.white));
+            metricsFrame.getContentPane().add(metricsScroll);
         }
 
         metricsFrame.setVisible(true);

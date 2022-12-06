@@ -70,6 +70,17 @@ public class Client {
         return false;
     }
 
+    public ArrayList<String[]> sortMetricsData(String username, int index) {
+        writer.println("sortMetrics;" + username + ";" + index);
+        writer.flush();
+        try {
+            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+            return (ArrayList<String[]>) ois.readObject();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     public void checkIfMessageExists(String recipient, boolean isRecipientStore, boolean isSeller,
                                      String username, boolean isUserStore) {
         writer.println("CheckIfMessageExists;" + recipient + ";" + isRecipientStore + ";" + isSeller + ";" +

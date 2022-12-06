@@ -250,7 +250,7 @@ public class FileManager {
         String line = bufferedReader.readLine();
         while (line != null) {
             fileData.add(line);
-            bufferedReader.readLine();
+            line = bufferedReader.readLine();
         }
         bufferedReader.close();
         return fileData;
