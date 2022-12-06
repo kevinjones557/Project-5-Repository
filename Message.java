@@ -76,6 +76,7 @@ public class Message {
                     messageSenderWriter.close();
                     messageReceiveWriter.close();
                 }
+                message = message.substring(message.indexOf("-") + 2);
                 if (isBuyer) {
                     String storePath;
                     if (FileManager.checkSellerExists(recipient)) {
@@ -200,6 +201,8 @@ public class Message {
                     messageSenderWriter.close();
                     messageReceiveWriter.close();
                 }
+                message = message.substring(message.indexOf("-") + 2);
+                edit = edit.substring(edit.indexOf("-") + 2);
                 if (isBuyer) {
                     String storePath;
                     if (FileManager.checkSellerExists(recipient)) {
@@ -298,6 +301,7 @@ public class Message {
                     readSend.close();
                     messageSenderWriter.close();
                 }
+                message = message.substring(message.indexOf("-") + 2);
                 if (isBuyer) {
                     String storePath;
                     if (FileManager.checkSellerExists(recipient)) {
@@ -307,7 +311,6 @@ public class Message {
                     }
                     MetricManager.addDeleteMessageData(sender, storePath,
                             message, true);
-                    // TODO: trim off the excess data that is sent along instead of the message body
                 }
 
             } catch (IOException e) {
