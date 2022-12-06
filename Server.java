@@ -151,8 +151,6 @@ public class Server extends Thread {
                     handleCheckPassword(request, socket);
                 } else if (instruction.equals("moveUsername")) {
                     handleMoveUsername(request, socket);
-                } else if (instruction.equals("changeStoreName")) {
-                    handleChangeStoreName(request, socket);
                 } else if (instruction.equals("checkUserExists")) {
                     handleCheckUserExists(request, socket);
                 } else if (instruction.equals("updateStoreList")) {
@@ -249,7 +247,12 @@ public class Server extends Thread {
                     UserManager.changeUsername(contents.substring(0, contents.indexOf(";")),
                             contents.substring(contents.indexOf(";") + 1));
                 } else if (instruction.equals("deleteUser")) {
+                    //sample request: deleteUser;<username>
                     UserManager.deleteUsername(contents);
+                } else if (instruction.equals("changeStoreName")) {
+                    //sample request: editUsername;<oldStoreName>;<newStoreName>
+                    UserManager.changeStoreName(contents.substring(0, contents.indexOf(";")),
+                            contents.substring(contents.indexOf(";") + 1));
                 }
             }
         } catch (IOException e) {

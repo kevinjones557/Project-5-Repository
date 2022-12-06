@@ -25,6 +25,7 @@ public class UserManager {
                     File fs = new File(FileManager.getDirectoryFromUsername(username)
                             + "/" + file);
                     String[] storeFiles = fs.list();
+                    assert storeFiles != null;
                     for (String storeFile : storeFiles) {
                         Files.delete(Paths.get((FileManager.getDirectoryFromUsername(username) + "/" + file +
                                 "/" + storeFile)));
@@ -53,6 +54,7 @@ public class UserManager {
         File buyerDirectories = new File("data/buyers/");
         String[] sellers = sellerDirectories.list();
         String[] buyers = buyerDirectories.list();
+        assert sellers != null;
         for (String seller : sellers) {
             File currentSeller = new File("data/sellers/" + seller);
             String[] allFiles = currentSeller.list();
@@ -110,6 +112,7 @@ public class UserManager {
 
             }
         }
+        assert buyers != null;
         for (String buyer : buyers) {
             File currentBuyer = new File("data/buyers/" + buyer);
             String[] allFiles = currentBuyer.list();
@@ -145,6 +148,74 @@ public class UserManager {
         /* at this point the directory has been renamed,
         now go through all directories, find files that contain old
         username, go through files and change all the names and rename files */
+    }
+
+    public static void changeStoreName(String oldStoreName, String newStoreName) {
+        File sellerDirectories = new File("data/sellers/");
+        File buyerDirectories = new File("data/buyers/");
+        String[] sellers = sellerDirectories.list();
+        String[] buyers = buyerDirectories.list();
+        assert buyers != null;
+        for (String buyer : buyers) {
+            File currentBuyer = new File("data/buyers/" + buyer);
+            String[] allFiles = currentBuyer.list();
+            if (!(allFiles == null)) {
+                for (String filename : allFiles) {
+                    int indexOldStoreName = filename.indexOf(oldStoreName);
+                    if (indexOldStoreName >= 0) {
+                        changeNameInFile(oldStoreName, newStoreName,
+                                "data/buyers/" + buyer + "/" + filename);
+                        String newFilename;
+                        newFilename = filename.substring(0, indexOldStoreName) + newStoreName + ".txt";
+                        try {
+                            Files.move(Paths.get("data/buyers/" + buyer + "/" + filename),
+                                    Paths.get("data/buyers/" + buyer + "/" + newFilename));
+                        } catch (IOException e) {
+                            System.out.println("Sorry, failed to rename user!");
+                        }
+                    }
+                }
+            }
+        }
+        assert sellers != null;
+        for (String seller : sellers) {
+            File currentSeller = new File("data/sellers/" + seller);
+            String[] allFiles = currentSeller.list();
+            if (!(allFiles == null)) {
+                for (String filename : allFiles) {
+                    File possibleStore = new File("data/sellers/" +
+                            seller + "/" + filename);
+                    if (possibleStore.isDirectory() && filename.equals(oldStoreName)) {
+                        String[] storeFiles = possibleStore.list();
+                        if (!(storeFiles == null)) {
+                            for (String storeFile : storeFiles) {
+                                int indexOldUsername = storeFile.indexOf(oldStoreName);
+                                if (indexOldUsername >= 0) {
+                                    changeNameInFile(oldStoreName, newStoreName, "data/sellers/" +
+                                            seller + "/" + filename + "/" + storeFile);
+                                    String newFilename;
+                                    newFilename = newStoreName + storeFile.substring(oldStoreName.length());
+                                    try {
+                                        Files.move(Paths.get("data/sellers/" + seller + "/"
+                                                        + filename + "/" + storeFile),
+                                                Paths.get("data/sellers/" + seller + "/"
+                                                        + filename + "/" + newFilename));
+                                    } catch (IOException e) {
+                                        System.out.println("Sorry, failed to rename user!");
+                                    }
+                                }
+                            }
+                        }
+                        try {
+                            Files.move(Paths.get("data/sellers/" + seller + "/" + oldStoreName),
+                                    Paths.get("data/sellers/" + seller + "/" + newStoreName));
+                        } catch (Exception e) {
+                            System.out.println("Sorry, unable to rename store!");
+                        }
+                    }
+                }
+            }
+        }
     }
     /**
      * A static method that will go through given file and replace old username with new username
