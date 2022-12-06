@@ -244,6 +244,12 @@ public class Server extends Thread {
                     } catch (Exception e) {
 
                     }
+                } else if (instruction.equals("editUsername")) {
+                    //sample request: editUsername;<oldUsername>;<newUsername>
+                    UserManager.changeUsername(contents.substring(0, contents.indexOf(";")),
+                            contents.substring(contents.indexOf(";") + 1));
+                } else if (instruction.equals("deleteUser")) {
+                    UserManager.deleteUsername(contents);
                 }
             }
         } catch (IOException e) {
