@@ -25,6 +25,8 @@ public class Client {
         try {
             this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.writer = new PrintWriter(socket.getOutputStream());
+            writer.println("deleteUser;alphabet");
+            writer.flush();
         } catch (IOException io) {
             io.printStackTrace();
         }

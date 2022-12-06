@@ -19,9 +19,10 @@ import java.util.*;
 public class MessageGui extends Client implements Runnable{
     //Gui initializations
     JFrame myFrame = new JFrame();
+    JPanel topLeft = new JPanel();
     private final JScrollPane messagePanel = new JScrollPane();
     private final JScrollPane scrollPane = new JScrollPane();
-    private final Box labelBox = Box.createVerticalBox();
+    private final Box userPanel = Box.createVerticalBox();
 
     private final JPopupMenu popupMenu1 = new JPopupMenu();
     private final JPopupMenu popupMenu2 =  new JPopupMenu();
@@ -33,6 +34,8 @@ public class MessageGui extends Client implements Runnable{
     private final JButton blockOption = new JButton("Block User");
     private final JButton unblockOption = new JButton("Unblock User");
     private final JLabel connectedLabel = new JLabel();
+    JLabel info = new JLabel();
+    JLabel topLabel3 = new JLabel();
 
     // characteristics of chat
     private String recipient;
@@ -49,22 +52,18 @@ public class MessageGui extends Client implements Runnable{
         ToolTipManager.sharedInstance().setLightWeightPopupEnabled(true);
         popupMenu1.setVisible(false);
         popupMenu2.setVisible(false);
-        myFrame.setTitle("Messaging System");
-        myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        myFrame.setLayout(null);
-        //setting the bounds for the JFrame
-        myFrame.setBounds(300,10,1000,800);
-        myFrame.setResizable(false);
+        if (initialSetup) {
+            myFrame.setTitle("Messaging System");
+            myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            myFrame.setLayout(null);
+            //setting the bounds for the JFrame
+            myFrame.setBounds(300, 10, 1000, 800);
+            myFrame.setResizable(false);
+        }
         Border br = BorderFactory.createLineBorder(Color.black);
         Container c = myFrame.getContentPane();
         // creating box with buttons
-        Box userPanel = Box.createVerticalBox();
         userPanel.removeAll();
-        JLabel topLabel3 = new JLabel("Personal Chats:");
-        topLabel3.setFont(new Font("Times New Roman",Font.BOLD,18));
-        topLabel3.setHorizontalAlignment(JLabel.CENTER);
-        topLabel3.setMaximumSize(new Dimension(165, 45));
-        userPanel.add(topLabel3);
         ArrayList<String> availableMessages = super.getUsersSignal(0, this.username, this.isUserSeller);
         if (!isUserSeller) {
             availableMessages.addAll(super.getUsersSignal(2, this.username, false));
@@ -72,18 +71,26 @@ public class MessageGui extends Client implements Runnable{
         ArrayList<String> allMessages = super.getConversationsFromUser(this.username);
         System.out.println(allMessages);
         System.out.println("as;dflj " + availableMessages);
-        JPanel topLeft = new JPanel();
-        topLeft.add(topLabel3, Component.LEFT_ALIGNMENT);
-        userPanel.add(topLeft);
+
+        topLeft.setLayout(null);
+        topLeft.setBounds(0, 0, 165, 45);
+
+        topLabel3.removeAll();
+        topLabel3.setText("Personal Chats: ");
+        topLabel3.setFont(new Font("Times New Roman", Font.BOLD, 18));
+        topLabel3.setHorizontalAlignment(JLabel.CENTER);
+        topLabel3.setMaximumSize(new Dimension(165, 45));
+        userPanel.add(topLabel3, Component.LEFT_ALIGNMENT);
+
         ImageIcon i = new ImageIcon("info.png");
         Image image = i.getImage();
         Image rescaled = image.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
         i = new ImageIcon(rescaled);
-        JLabel info = new JLabel(i);
-        info.setToolTipText("Right click on users to use block/invisible options");
-        info.setHorizontalAlignment(SwingConstants.RIGHT);
-        info.setBounds(130, 0, 20, 20);
+        info.setIcon(i);
         topLeft.add(info, Component.RIGHT_ALIGNMENT);
+        //userPanel.add(topLeft);
+
+
         // this is run for buyers and sellers, gets personal conversations
         for (String user : allMessages) {
             if (user.length() == 0) {
@@ -214,6 +221,7 @@ public class MessageGui extends Client implements Runnable{
                                 @Override
                                 public void run() {
                                     System.out.println("remaking");
+                                    myFrame.invalidate();
                                     createLeftPanel();
                                     myFrame.revalidate();
                                 }
@@ -272,7 +280,9 @@ public class MessageGui extends Client implements Runnable{
                                 @Override
                                 public void run() {
                                     System.out.println("remaking");
+                                    myFrame.invalidate();
                                     createLeftPanel();
+                                    myFrame.revalidate();
                                 }
                             });
                         }
@@ -293,11 +303,14 @@ public class MessageGui extends Client implements Runnable{
                 }
             }
         });
-        JScrollPane scrollPane = new JScrollPane(userPanel);
-        scrollPane.setBounds(0,45,165,545);
-        //TODO check this vvv
-        scrollPane.setBounds(0,0,165,600); //xyz y45  height545
-        scrollPane.validate();
+        if (initialSetup) {
+            scrollPane.setViewportView(userPanel);
+            scrollPane.setBounds(0, 45, 165, 545);
+            //TODO check this vvv
+            scrollPane.setBounds(0, 0, 165, 600); //xyz y45  height545
+            scrollPane.validate();
+            c.add(scrollPane);
+        }
 
         //Panel 4
 
@@ -305,14 +318,12 @@ public class MessageGui extends Client implements Runnable{
         topTextPanel.setBounds(0,0,165,90);
 
         // Panel border
-        scrollPane.getViewport().setView(userPanel);
         scrollPane.setBorder(BorderFactory.createLineBorder(Color.black));
         scrollPane.getVerticalScrollBar().setValue(0);
         topTextPanel.setBorder(br);
         bottomButtonPanel.setBorder(br);
 
         //adding the panel to the Container of the JFrame
-        c.add(scrollPane);
         c.add(topTextPanel); //xyz
         c.add(bottomButtonPanel);
     }
@@ -927,7 +938,7 @@ public class MessageGui extends Client implements Runnable{
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {}
-        SwingUtilities.invokeLater(new MessageGui("Buyer", false, new Socket("localhost", 2000)));
+        SwingUtilities.invokeLater(new MessageGui("mulan", false, new Socket("localhost", 2000)));
     }
 
 }
@@ -942,7 +953,7 @@ seller -> buyer         false or true. Username is always itself, recipient is a
                         could be null or a storeName if seller is a store
  */
 //TODO bugs
-//Todo when deleting or editing message it does not update
 //todo metrics manager issue when deleting
 //todo update the buttons when a user adds a new chat
 //todo write test cases and record video and write readme
+//todo edit storeName

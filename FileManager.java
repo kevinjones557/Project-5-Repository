@@ -223,7 +223,7 @@ public class FileManager {
             if (conversations != null) {
                 for (String fileName : conversations) {
                     if (!fileName.equals("hasBlocked.txt") && !fileName.equals("metrics.txt") &&
-                            !fileName.equals("isInvisible.txt") &&
+                            !fileName.equals("isInvisible.txt") && !fileName.equals(username + ".txt") &&
                             !(new  File(getStoreDirectory(username, fileName))).isDirectory()) {
                         names.add(fileName.substring(username.length(), fileName.indexOf(".")));
                     }
