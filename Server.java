@@ -3,9 +3,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
+import java.util.*;
 
 /**
  * This will be a class that sets up the server for the messaging system
@@ -54,12 +52,14 @@ public class Server extends Thread {
                 try {
                     instruction = request.substring(0, request.indexOf(';'));
                 } catch (IndexOutOfBoundsException e) {
+                    System.out.println("Not to worry");
                 }
                 System.out.println("instruction " + instruction);
                 String contents = "";
                 try {
                     contents = request.substring(request.indexOf(";") + 1);
                 } catch (IndexOutOfBoundsException e) {
+                    System.out.println("Not to worry");
                 }
                 System.out.println("contents " + contents);
                 // TODO: convert this to a switch and make logic into individual methods to improve readability
@@ -253,6 +253,37 @@ public class Server extends Thread {
                     //sample request: editUsername;<oldStoreName>;<newStoreName>
                     UserManager.changeStoreName(contents.substring(0, contents.indexOf(";")),
                             contents.substring(contents.indexOf(";") + 1));
+                } else if (instruction.equals("sortMetrics")) {
+                    String username = contents.substring(0, contents.indexOf(';'));
+                    String index = contents.substring(contents.indexOf(';') + 1);
+                    ArrayList<String[]> data = handleGetBuyerMetricData(username, storeNameMap);
+                    ObjectOutputStream ois = new ObjectOutputStream(socket.getOutputStream());
+                    switch (index) {
+                        case "0" ->  // alphabetical
+                                sortAlphabetically(data);
+                        case "1" -> {  // reverse alphabetical
+                            sortAlphabetically(data);
+                            Collections.reverse(data);
+                        }
+                        case "2" ->  // numerical by total
+                                sortNumerically(data, 1);
+                        case "3" -> {  // reverse numerical by total
+                            sortNumerically(data, 1);
+                            Collections.reverse(data);
+                        }
+                        case "4" ->  // numerical by personal
+                                sortNumerically(data, 2);
+                        case "5" -> {  // reverse numerical by personal
+                            sortNumerically(data, 2);
+                            Collections.reverse(data);
+                        }
+                    }
+                    for (String[] s : data) {
+                        System.out.println(Arrays.toString(s));
+                    }
+                    System.out.println();
+                    ois.writeObject(data);
+                    ois.flush();
                 }
             }
         } catch (IOException e) {
@@ -260,17 +291,52 @@ public class Server extends Thread {
         }
     }
 
-    private static ArrayList<String[]> handleGetBuyerMetricData(String request, LinkedHashMap<String, String> storeNameMap) throws IOException{
+    public static void sortAlphabetically (ArrayList<String[]> arr) {
+        String[] temp;
+        for (int i = 0; i < arr.size(); i++) {
+            for (int j = i + 1; j < arr.size(); j++) {
+                // to compare one string with other strings
+                if (arr.get(1)[0].compareTo(arr.get(j)[0]) > 0) {
+                    // swapping
+                    temp = arr.get(i);
+                    arr.set(i, arr.get(j));
+                    arr.set(j, temp);
+                }
+            }
+        }
+        for (String[] s : arr) {
+            System.out.println("in sort " + Arrays.toString(s));
+        }
+        System.out.println();
+    }
+
+    public static void sortNumerically (ArrayList<String[]> arr, int index) {
+        String[] temp;
+        for (int i = 0; i < arr.size(); i++) {
+            for (int j = i + 1; j < arr.size(); j++) {
+                // to compare one string with other strings
+                if (Integer.parseInt(arr.get(i)[index]) > Integer.parseInt(arr.get(j)[index])) {
+                    // swapping
+                    temp = arr.get(i);
+                    arr.set(i, arr.get(j));
+                    arr.set(j, temp);
+                }
+            }
+        }
+    }
+
+    private static ArrayList<String[]> handleGetBuyerMetricData(String request, LinkedHashMap<String,
+            String> storeNameMap) throws IOException{
         // parameters:
         // request; buyer's name
-        String username = request.substring(request.indexOf(";"));
+        String username = request.substring(request.indexOf(";") + 1);
         // return an arraylist of string arrays
         // each string array goes as follows
         // Store Name, Total Messages, Individual DMs
         ArrayList<String[]> metricData = new ArrayList<>();
         storeNameMap.forEach((store, seller) -> {
-            File metrics = new File(String.format("data/%s/%s/metrics.txt", seller, store));
-            File userMetrics = new File(String.format("data/%s/%s/%s" + "metrics.txt", seller, store, username));
+            File metrics = new File(String.format("data/sellers/%s/%s/metrics.txt", seller, store));
+            File userMetrics = new File(String.format("data/sellers/%s/%s/%s" + "metrics.txt", seller, store, username));
             try {
                 ArrayList<String> storeMetricsData = FileManager.readFile(metrics);
                 ArrayList<String> userMetricsData = FileManager.readFile(userMetrics);
