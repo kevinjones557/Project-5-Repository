@@ -7,21 +7,18 @@ import java.util.Arrays;
 /**
  * This is a class that sets up the client for each messenger, it is the parent class of the GUI and its functions
  * will be called from the GUI to send and recieve data to and from the server and hand it back to the GUI
- *
  * Its methods will be called by the MessageGUI and will in tern send information to and form server
  *
  * @author Kevin Jones
  * @version 11/20
  */
 public class Client {
-    private String name;
     private BufferedReader reader;
     private PrintWriter writer;
 
-    private Socket socket;
+    private final Socket socket;
 
-    public Client (String name, Socket socket) {
-        this.name = name;
+    public Client (Socket socket) {
         try {
             this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.writer = new PrintWriter(socket.getOutputStream());
