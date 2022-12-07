@@ -79,19 +79,29 @@ public class MessageGui extends Client implements Runnable{
         topLeft.setLayout(null);
         topLeft.setBounds(0, 0, 165, 45);
 
+        ImageIcon i = new ImageIcon("info.png");
+        Image image = i.getImage();
+        Image rescaled = image.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+        i = new ImageIcon(rescaled);
+
         topLabel3.removeAll();
-        topLabel3.setText("Personal Chats: ");
+        topLabel3.setText("Personal Chats ");
+        topLabel3.setHorizontalTextPosition(SwingConstants.LEFT);
+        topLabel3.setIcon(i);
         topLabel3.setFont(new Font("Times New Roman", Font.BOLD, 18));
         topLabel3.setHorizontalAlignment(JLabel.CENTER);
         topLabel3.setMaximumSize(new Dimension(165, 45));
         userPanel.add(topLabel3, Component.LEFT_ALIGNMENT);
 
-        ImageIcon i = new ImageIcon("info.png");
-        Image image = i.getImage();
-        Image rescaled = image.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
-        i = new ImageIcon(rescaled);
-        info.setIcon(i);
-        topLeft.add(info, Component.RIGHT_ALIGNMENT);
+        JPanel placeholder = new JPanel();
+        placeholder.setOpaque(false);
+        placeholder.setBounds(140, 14, 15, 15);
+        placeholder.setToolTipText("Right click to use block/invisible button");
+        //placeholder.setVisible(false);
+        myFrame.add(placeholder);
+
+        //info.setIcon(i);
+        //topLeft.add(info, Component.RIGHT_ALIGNMENT);
         //userPanel.add(topLeft);
 
         // this is run for buyers and sellers, gets personal conversations
