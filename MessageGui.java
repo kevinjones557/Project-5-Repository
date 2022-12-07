@@ -113,6 +113,7 @@ public class MessageGui extends Client implements Runnable{
                 continue;
             }
             JButton tempButton = new JButton(user);
+            tempButton.setFocusable(false);
             MouseListener tempListener = new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
@@ -159,6 +160,7 @@ public class MessageGui extends Client implements Runnable{
                             continue;
                         }
                         JButton tempButton = new JButton(buyer);
+                        tempButton.setFocusable(false);
                         ActionListener tempListener = new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
