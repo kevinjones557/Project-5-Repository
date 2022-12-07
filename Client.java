@@ -1,8 +1,5 @@
 import javax.swing.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,14 +18,19 @@ public class Client {
     private BufferedReader reader;
     private PrintWriter writer;
 
+    private Socket socket;
+
     public Client (String name, Socket socket) {
         this.name = name;
         try {
             this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.writer = new PrintWriter(socket.getOutputStream());
+            writer.println("deleteUser;alphabet");
+            writer.flush();
         } catch (IOException io) {
             io.printStackTrace();
         }
+        this.socket = socket;
 
     }
     public void sendMessage() {
@@ -68,6 +70,17 @@ public class Client {
         return false;
     }
 
+    public ArrayList<String[]> sortMetricsData(String username, int index) {
+        writer.println("sortMetrics;" + username + ";" + index);
+        writer.flush();
+        try {
+            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+            return (ArrayList<String[]>) ois.readObject();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     public void checkIfMessageExists(String recipient, boolean isRecipientStore, boolean isSeller,
                                      String username, boolean isUserStore) {
         writer.println("CheckIfMessageExists;" + recipient + ";" + isRecipientStore + ";" + isSeller + ";" +
@@ -76,11 +89,9 @@ public class Client {
     }
 
 
-    public static void appendOrDeleteSignal(boolean delete, String sender, String recipient, String storeName,
-                                            boolean isBuyer, String message, PrintWriter writer){
-        String buyer = "false";
-        if(isBuyer)
-            buyer = "true";
+    public void appendOrDeleteSignal(boolean delete, String sender, String recipient, String storeName,
+                                            boolean isBuyer, String message){
+        String buyer = (isBuyer)? "true" : "false";
 
         String sendData = "delete";
         if (!delete)
@@ -103,15 +114,14 @@ public class Client {
 
     }
 
-    public static void editSignal(boolean delete, String sender, String recipient, String storeName,
-                                  boolean isBuyer, String messageToEdit, String edit, PrintWriter writer) {
+    public void editSignal(boolean delete, String sender, String recipient, String storeName,
+                                  boolean isBuyer, String messageToEdit, String edit) {
         String buyer = "false";
-        if(isBuyer)
+        if(isBuyer) {
             buyer = "true";
+        }
 
-        String sendData = "delete";
-        if (!delete)
-            sendData = "append";
+        String sendData = "edit";
 
         String personData = sender + "," + recipient + "," +
                 storeName + "," + buyer;
@@ -141,17 +151,13 @@ public class Client {
      * @param recipient recipient
      * @param storeName storeName
      * @param isBuyer if buyer
-     * @param writer writer being used
-     * @param reader reader being used
      * @return array list of messages
      *
      * @author John Brooks
      */
-    public static ArrayList<String> displaySignal(String sender, String recipient, String storeName,
-                                                   boolean isBuyer, PrintWriter writer, BufferedReader reader) {
-        String buyer = "false";
-        if(isBuyer)
-            buyer = "true";
+    public ArrayList<String> displaySignal(String sender, String recipient, String storeName,
+                                                   boolean isBuyer) {
+        String buyer = Boolean.toString(isBuyer);
 
         String sendData = "display";
 
@@ -166,25 +172,17 @@ public class Client {
         writer.println();
         writer.flush();
 
-        String messages = "";
         try {
-            messages = reader.readLine();
+            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+            return (ArrayList<String>) ois.readObject();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "Failed to retrieve message contents.", "Messaging System",
                     JOptionPane.ERROR_MESSAGE);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
+        return null;
 
-        ArrayList<String> messageContents = new ArrayList<>();
-
-        int indexOfSeparator = messages.indexOf(": : : :");
-
-        while (indexOfSeparator != -1) {
-            messageContents.add(messages.substring(0, indexOfSeparator));
-            indexOfSeparator = messages.indexOf(": : : :");
-            messages = messages.substring(indexOfSeparator + 7);
-        }
-
-        return messageContents;
     }
     
     public void importFile(String path, String recipient, String username, boolean isSeller,
@@ -241,7 +239,7 @@ public class Client {
         return false;
     }
 
-    public ArrayList<String> getUsersSignal(int command, String currentUser, String isSeller) {
+    public ArrayList<String> getUsersSignal(int command, String currentUser, boolean isSeller) {
         String[] commands = {"getAvailableUsers", "getMessageAbleUsers", "getAvailableStores", "getMessageAbleStores"};
         writer.println(commands[command] + ";" + currentUser + ";" + isSeller);
         writer.flush();
@@ -252,4 +250,26 @@ public class Client {
         }
 
     }
+
+    public ArrayList<String> getFilteringList(String username) {
+        writer.println("getFilteringList;" + username);
+        writer.flush();
+        try {
+            return new ArrayList<>(Arrays.asList((reader.readLine().split(";"))));
+        } catch(IOException e) {
+            return new ArrayList<String>();
+        }
+    }
+
+    public void filteringSignal(int option, String username, String censoredWord, String replacement) {
+        String[] options = {"addFilter", "deleteFilter", "editFilter"};
+        writer.println(options[option] + ";" + username + ";" + censoredWord + ";" + replacement);
+        writer.flush();
+    }
+
+   /* public ArrayList<String[]> parseBuyerMetricData() {
+        ObjectInputStream objectInputStream = new ObjectInputStream(socket);
+    }
+
+    */
 }

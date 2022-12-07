@@ -180,12 +180,10 @@ public class FileManager {
      */
     public static boolean isRecipientStore(String storeName) {
         String[] sellers = (new File("data/sellers")).list();
+        assert sellers != null;
         for (String seller : sellers) {
-            String[] possibleStores = (new File("data/sellers/" + seller)).list();
-            for (String store : possibleStores) {
-                if (store.equals(storeName)) {
-                    return true;
-                }
+            if ((Files.exists(Paths.get("data/sellers/" + seller + "/" + storeName)))) {
+                return true;
             }
         }
         return false;
@@ -224,9 +222,8 @@ public class FileManager {
             ArrayList<String> names = new ArrayList<>();
             if (conversations != null) {
                 for (String fileName : conversations) {
-
                     if (!fileName.equals("hasBlocked.txt") && !fileName.equals("metrics.txt") &&
-                            !fileName.equals("isInvisible.txt") &&
+                            !fileName.equals("isInvisible.txt") && !fileName.equals(username + ".txt") &&
                             !(new  File(getStoreDirectory(username, fileName))).isDirectory()) {
                         names.add(fileName.substring(username.length(), fileName.indexOf(".")));
                     }
@@ -253,7 +250,7 @@ public class FileManager {
         String line = bufferedReader.readLine();
         while (line != null) {
             fileData.add(line);
-            bufferedReader.readLine();
+            line = bufferedReader.readLine();
         }
         bufferedReader.close();
         return fileData;

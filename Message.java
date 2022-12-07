@@ -20,8 +20,10 @@ public class Message {
     public static void appendMessage(String sender, String recipient, String storeName, boolean isBuyer, String message) {
         String fileRecipient = "";
         String fileSender = "";
+        String realSender;
 
         if (storeName.equals("nil")) {
+            realSender = sender;
             if (isBuyer) {
                 fileSender = "data/buyers/" + sender + "/" + sender + recipient + ".txt";
                 fileRecipient = "data/sellers/" + recipient + "/" + recipient + sender + ".txt";
@@ -30,6 +32,7 @@ public class Message {
                 fileRecipient = "data/buyers/" + recipient + "/" + recipient + sender + ".txt";
             }
         } else {
+            realSender = storeName;
             if (isBuyer) {
                 fileSender = "data/buyers/" + sender + "/" + sender + storeName + ".txt";
                 fileRecipient = "data/sellers/" + recipient + "/" + storeName + "/" + storeName + sender + ".txt";
@@ -38,7 +41,7 @@ public class Message {
                 fileRecipient = "data/buyers/" + recipient + "/" + recipient + storeName + ".txt";
             }
         }
-        appendMessageExecute(sender, recipient, isBuyer, fileSender, fileRecipient, message);
+        appendMessageExecute(realSender, recipient, isBuyer, fileSender, fileRecipient, message);
     }
 
     /**
@@ -73,6 +76,7 @@ public class Message {
                     messageSenderWriter.close();
                     messageReceiveWriter.close();
                 }
+                message = message.substring(message.indexOf("-") + 2);
                 if (isBuyer) {
                     String storePath;
                     if (FileManager.checkSellerExists(recipient)) {
@@ -197,6 +201,8 @@ public class Message {
                     messageSenderWriter.close();
                     messageReceiveWriter.close();
                 }
+                message = message.substring(message.indexOf("-") + 2);
+                edit = edit.substring(edit.indexOf("-") + 2);
                 if (isBuyer) {
                     String storePath;
                     if (FileManager.checkSellerExists(recipient)) {
@@ -295,6 +301,7 @@ public class Message {
                     readSend.close();
                     messageSenderWriter.close();
                 }
+                message = message.substring(message.indexOf("-") + 2);
                 if (isBuyer) {
                     String storePath;
                     if (FileManager.checkSellerExists(recipient)) {
@@ -328,16 +335,18 @@ public class Message {
         String line = "";
         ArrayList<String> returnContents = new ArrayList<>();
 
-        if (storeName == null) {
-            if (isBuyer)
+        if (storeName.equals("nil")) {
+            if (isBuyer) {
                 path = "data/buyers/" + sender + "/" + sender + recipient + ".txt";
-            else
+            } else {
                 path = "data/sellers/" + sender + "/" + sender + recipient + ".txt";
+            }
         } else {
-            if (isBuyer)
+            if (isBuyer) {
                 path = "data/buyers/" + sender + "/" + sender + storeName + ".txt";
-            else
+            } else {
                 path = "data/sellers/" + sender + "/" + storeName + "/" + storeName + recipient + ".txt";
+            }
         }
         try {
             synchronized (SYNCH) {

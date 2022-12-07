@@ -1,15 +1,13 @@
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.font.TextAttribute;
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * This class sets up the GUI for the Client
@@ -20,7 +18,15 @@ import java.util.Objects;
  */
 public class MessageGui extends Client implements Runnable{
     //Gui initializations
-    JFrame myFrame = new JFrame();
+    private final JFrame myFrame = new JFrame();
+    private final JFrame metricsFrame = new JFrame();
+    private final JPanel topLeft = new JPanel();
+    private final JScrollPane messagePanel = new JScrollPane();
+    private final JScrollPane scrollPane = new JScrollPane();
+    private final JScrollPane metricsScroll = new JScrollPane();
+    private final Box userPanel = Box.createVerticalBox();
+    private final Box labelBox = Box.createVerticalBox();
+
     private final JPopupMenu popupMenu1 = new JPopupMenu();
     private final JPopupMenu popupMenu2 =  new JPopupMenu();
     private final JButton editOption = new JButton("Edit");
@@ -30,6 +36,10 @@ public class MessageGui extends Client implements Runnable{
     private final JButton becomeVisibleOption = new JButton("Become Visible to User");
     private final JButton blockOption = new JButton("Block User");
     private final JButton unblockOption = new JButton("Unblock User");
+    private final JLabel connectedLabel = new JLabel();
+    private int sortType = 0;
+    JLabel info = new JLabel();
+    JLabel topLabel3 = new JLabel();
 
     // characteristics of chat
     private String recipient;
@@ -39,34 +49,58 @@ public class MessageGui extends Client implements Runnable{
     private final boolean isUserSeller;
 
     private boolean isUserStore;
-
-
+    private boolean initialSetup = true;
 
     private void createLeftPanel() {
+        ToolTipManager.sharedInstance().setInitialDelay(0);
+        ToolTipManager.sharedInstance().setLightWeightPopupEnabled(true);
         popupMenu1.setVisible(false);
         popupMenu2.setVisible(false);
-        myFrame.setTitle("Messaging System");
-        myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        myFrame.setLayout(null);
-        //setting the bounds for the JFrame
-        myFrame.setBounds(300,10,1000,800);
-        myFrame.setResizable(false);
+        if (initialSetup) {
+            myFrame.setTitle("Messaging System");
+            myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            myFrame.setLayout(null);
+            //setting the bounds for the JFrame
+            myFrame.setBounds(300, 10, 1000, 800);
+            myFrame.setResizable(false);
+        }
         Border br = BorderFactory.createLineBorder(Color.black);
         Container c = myFrame.getContentPane();
         // creating box with buttons
-        Box sellerPanel = Box.createVerticalBox();
-        sellerPanel.removeAll();
-        JLabel topLabel3 = new JLabel("Personal Chats:");
-        topLabel3.setFont(new Font("Times New Roman",Font.BOLD,22));
+        userPanel.removeAll();
+        ArrayList<String> availableMessages = super.getUsersSignal(0, this.username, this.isUserSeller);
+        if (!isUserSeller) {
+            availableMessages.addAll(super.getUsersSignal(2, this.username, false));
+        }
+        ArrayList<String> allMessages = super.getConversationsFromUser(this.username);
+        System.out.println(allMessages);
+        System.out.println("as;dflj " + availableMessages);
+
+        topLeft.setLayout(null);
+        topLeft.setBounds(0, 0, 165, 45);
+
+        topLabel3.removeAll();
+        topLabel3.setText("Personal Chats: ");
+        topLabel3.setFont(new Font("Times New Roman", Font.BOLD, 18));
         topLabel3.setHorizontalAlignment(JLabel.CENTER);
         topLabel3.setMaximumSize(new Dimension(165, 45));
-        sellerPanel.add(topLabel3);
-        ArrayList<String> allMessages = super.getConversationsFromUser(this.username);
-        // TODO change to vinh
+        userPanel.add(topLabel3, Component.LEFT_ALIGNMENT);
+
+        ImageIcon i = new ImageIcon("info.png");
+        Image image = i.getImage();
+        Image rescaled = image.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+        i = new ImageIcon(rescaled);
+        info.setIcon(i);
+        topLeft.add(info, Component.RIGHT_ALIGNMENT);
+        //userPanel.add(topLeft);
+
         // this is run for buyers and sellers, gets personal conversations
         for (String user : allMessages) {
             if (user.length() == 0) {
                 break;
+            }
+            if (!availableMessages.contains(user)) {
+                continue;
             }
             JButton tempButton = new JButton(user);
             MouseListener tempListener = new MouseAdapter() {
@@ -76,11 +110,13 @@ public class MessageGui extends Client implements Runnable{
                         if (SwingUtilities.isLeftMouseButton(e)) {
                             // user could be a buyer, seller, or a store
                             if (!isUserSeller) {
-                                isRecipientStore = MessageGui.super.isRecipientStore(recipient);
+                                isRecipientStore = MessageGui.super.isRecipientStore(user);
+                                System.out.println(isRecipientStore);
+                                chooseRecipient(user, user);
+                            } else {
+                                chooseRecipient(user, null);
                             }
                             isUserStore = false;
-                            chooseRecipient(user, null);
-                            sendMessage();
                         } else if (SwingUtilities.isRightMouseButton(e)) {
                             createPopUpBlockInvisible(e, user);
                         }
@@ -91,7 +127,7 @@ public class MessageGui extends Client implements Runnable{
             tempButton.addMouseListener(tempListener);
             tempButton.setMinimumSize(new Dimension(165,50));
             tempButton.setMaximumSize(new Dimension(165,50));
-            sellerPanel.add(tempButton);
+            userPanel.add(tempButton);
         }
 
         if (isUserSeller) {
@@ -107,8 +143,11 @@ public class MessageGui extends Client implements Runnable{
                     storeLabel.setFont(new Font("Times New Roman", Font.BOLD, 25));
                     storeLabel.setMaximumSize(new Dimension(165, 30));
                     storeLabel.setHorizontalAlignment(JLabel.CENTER);
-                    sellerPanel.add(storeLabel);
+                    userPanel.add(storeLabel);
                     for (String buyer : buyerConversations) {
+                        if (!availableMessages.contains(buyer)) {
+                            continue;
+                        }
                         JButton tempButton = new JButton(buyer);
                         ActionListener tempListener = new ActionListener() {
                             @Override
@@ -124,14 +163,14 @@ public class MessageGui extends Client implements Runnable{
                         tempButton.addActionListener(tempListener);
                         tempButton.setMinimumSize(new Dimension(165, 50));
                         tempButton.setMaximumSize(new Dimension(165, 50));
-                        sellerPanel.add(tempButton);
+                        userPanel.add(tempButton);
                     }
                 }
             }
         }
 
         //Creating a JPanel for the JFrame
-        JScrollPane scrollPane = new JScrollPane(sellerPanel);
+
         JPanel topTextPanel = new JPanel();
         Box bottomButtonPanel = Box.createVerticalBox();
         bottomButtonPanel.setBounds(0,590,165,172);
@@ -150,108 +189,106 @@ public class MessageGui extends Client implements Runnable{
         // creating buttons for bottom panel
         JButton searchForUserButton = new JButton("Search for a " + ((isUserSeller)? "buyer" : "seller"));
         searchForUserButton.setMaximumSize(new Dimension(165,74));
+        searchForUserButton.setFocusable(false);
         bottomButtonPanel.add(searchForUserButton);
         searchForUserButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                try {
-                    if (e.getSource() == searchForUserButton) {
-                        String user = username;
-                        // if user is a seller allow option to choose account to message from
-                        if (isUserSeller) {
-                            //first choose which account to start message from
-                            ArrayList<String> sellerStores = MessageGui.super.getStoresFromSeller(username);
-                            sellerStores.add(0, username);
-                            String[] accounts = sellerStores.toArray(new String[0]);
-                            user = (String) JOptionPane.showInputDialog(null, "Choose account " +
-                                            "to message from", "Select Account", JOptionPane.PLAIN_MESSAGE, null,
-                                    accounts, null);
-                            isUserStore = user != null && !user.equals(username);
-                        }
-                        if (user != null) {
-                            String[] options = Blocking.getMessageAbleUser(username, isUserSeller);
-                            // TODO call client version of this^^^^
-                            String newChatRecipient = (String) JOptionPane.showInputDialog(null,
-                                    "Enter the name of a " + ((isUserSeller) ? "buyer:" : "seller:"),
-                                    "Start New Chat", JOptionPane.PLAIN_MESSAGE);
-                            if (!Arrays.asList(options).contains(newChatRecipient)) {
-                                JOptionPane.showMessageDialog(null, "Sorry, no user found " +
-                                        "with this name!","Error",JOptionPane.ERROR_MESSAGE);
-                            } else {
-                                MessageGui.super.checkIfMessageExists(newChatRecipient, isRecipientStore, isUserSeller,
-                                        user, isUserStore);
-                                chooseRecipient(newChatRecipient, user);
-                                SwingUtilities.invokeLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        System.out.println("remaking");
-                                        createLeftPanel();
-                                        myFrame.revalidate();
-                                    }
-                                });
-                            }
+                if (e.getSource() == searchForUserButton) {
+                    String user = username;
+                    // if user is a seller allow option to choose account to message from
+                    if (isUserSeller) {
+                        //first choose which account to start message from
+                        ArrayList<String> sellerStores = MessageGui.super.getStoresFromSeller(username);
+                        sellerStores.add(0, username);
+                        String[] accounts = sellerStores.toArray(new String[0]);
+                        user = (String) JOptionPane.showInputDialog(null, "Choose account " +
+                                        "to message from", "Select Account", JOptionPane.PLAIN_MESSAGE, null,
+                                accounts, null);
+                        isUserStore = user != null && !user.equals(username);
+                    }
+                    if (user != null) {
+                        ArrayList<String> availableMessages = getUsersSignal(0, username, isUserSeller);
+                        System.out.println("searching " + availableMessages);
+                        String newChatRecipient = (String) JOptionPane.showInputDialog(null,
+                                "Enter the name of a " + ((isUserSeller) ? "buyer:" : "seller:"),
+                                "Start New Chat", JOptionPane.PLAIN_MESSAGE);
+                        if (!availableMessages.contains(newChatRecipient)) {
+                            JOptionPane.showMessageDialog(null, "Sorry, no user found " +
+                                    "with this name!","Error",JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            MessageGui.super.checkIfMessageExists(newChatRecipient, isRecipientStore, isUserSeller,
+                                    user, isUserStore);
+                            chooseRecipient(newChatRecipient, user);
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    System.out.println("remaking");
+                                    myFrame.invalidate();
+                                    createLeftPanel();
+                                    myFrame.revalidate();
+                                }
+                            });
                         }
                     }
-                } catch (IOException io) {
-                    io.printStackTrace();
                 }
             }
         });
 
         JButton seeListOfUsersButton = new JButton("See a list of " + ((isUserSeller)? "buyers" : "stores"));
         seeListOfUsersButton.setMaximumSize(new Dimension(165,74));
+        seeListOfUsersButton.setFocusable(false);
         bottomButtonPanel.add(seeListOfUsersButton);
         seeListOfUsersButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (e.getSource() == seeListOfUsersButton) {
-                    try {
-                        String user = username;
-                        // if user is a seller allow option to choose account to message from
+                    String user = username;
+                    // if user is a seller allow option to choose account to message from
+                    if (isUserSeller) {
+                        //first choose which account to start message from
+                        ArrayList<String> sellerStores = MessageGui.super.getStoresFromSeller(username);
+                        sellerStores.add(0, username);
+                        String[] accounts = sellerStores.toArray(new String[0]);
+                        user = (String) JOptionPane.showInputDialog(null, "Choose account " +
+                                        "to message from", "Select Account", JOptionPane.PLAIN_MESSAGE, null,
+                                accounts, null);
+                        isUserStore = user != null && !user.equals(username);
+                    }
+                    if (user != null) {
+                        ArrayList<String> options;
                         if (isUserSeller) {
-                            //first choose which account to start message from
-                            ArrayList<String> sellerStores = MessageGui.super.getStoresFromSeller(username);
-                            sellerStores.add(0, username);
-                            String[] accounts = sellerStores.toArray(new String[0]);
-                            user = (String) JOptionPane.showInputDialog(null, "Choose account " +
-                                            "to message from", "Select Account", JOptionPane.PLAIN_MESSAGE, null,
-                                    accounts, null);
-                            isUserStore = user != null && !user.equals(username);
+                            options = MessageGui.super.getUsersSignal(0, username, true);
+                        } else {
+                            options = MessageGui.super.getUsersSignal(2, username, false);
                         }
-                        if (user != null) {
-                            String[] options = Blocking.getMessageAbleUser(username, isUserSeller);
-                            // TODO call client version of this
-                            if (!isUserSeller) {
-                                // if it is a buyer get all the stores from the sellers
-                                ArrayList<String> allStores = new ArrayList<>();
-                                for (String seller : options) {
-                                    allStores.addAll(MessageGui.super.getStoresFromSeller(seller));
-                                }
-                                options = allStores.toArray(new String[0]);
-                            }
-                            String newChatRecipient = (String) JOptionPane.showInputDialog(null,
+                        // TODO call client version of this getavailable
+                        String newChatRecipient;
+                        if (options.get(0).length() > 0) {
+                            newChatRecipient = (String) JOptionPane.showInputDialog(null,
                                     "Choose a " + ((isUserSeller) ? "buyer:" : "store:"), "Start New Chat",
-                                    JOptionPane.PLAIN_MESSAGE, null, options, null);
-                            if (!isUserSeller) {
-                                // here we know that the user is a buyer, so they must choose a store
-                                isRecipientStore = true;
-                            }
-                            if (newChatRecipient != null) {
-                                MessageGui.super.checkIfMessageExists(newChatRecipient, isRecipientStore, isUserSeller,
-                                        user, isUserStore);
-                                chooseRecipient(newChatRecipient, user);
-                                SwingUtilities.invokeLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        System.out.println("remaking");
-                                        createLeftPanel();
-                                    }
-                                });
-                            }
+                                    JOptionPane.PLAIN_MESSAGE, null, options.toArray(), null);
+                        } else {
+                            newChatRecipient = null;
+                            JOptionPane.showMessageDialog(null, "No options available!");
                         }
-                    } catch (IOException io) {
-                        io.printStackTrace();
-                        JOptionPane.showMessageDialog(null, "Unable to collect info!");
+
+                        if (newChatRecipient != null) {
+                            // here we know that the user is a buyer, so they must choose a store
+                            isRecipientStore = !isUserSeller;
+                            MessageGui.super.checkIfMessageExists(newChatRecipient, isRecipientStore, isUserSeller,
+                                    user, isUserStore);
+                            chooseRecipient(newChatRecipient, user);
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    System.out.println("remaking");
+                                    myFrame.invalidate();
+                                    createLeftPanel();
+                                    myFrame.revalidate();
+                                }
+                            });
+                        }
                     }
                 }
             }
@@ -259,6 +296,7 @@ public class MessageGui extends Client implements Runnable{
 
         JButton metricsButton = new JButton("View Statistics");
         metricsButton.setMaximumSize(new Dimension(165,74));
+        metricsButton.setFocusable(false);
         bottomButtonPanel.add(metricsButton);
         metricsButton.addActionListener(new ActionListener() {
             @Override
@@ -268,9 +306,14 @@ public class MessageGui extends Client implements Runnable{
                 }
             }
         });
-
-        scrollPane.setBounds(0,45,165,545);
-        scrollPane.validate();
+        if (initialSetup) {
+            scrollPane.setViewportView(userPanel);
+            scrollPane.setBounds(0, 45, 165, 545);
+            //TODO check this vvv
+            scrollPane.setBounds(0, 0, 165, 600); //xyz y45  height545
+            scrollPane.validate();
+            c.add(scrollPane);
+        }
 
         //Panel 4
 
@@ -278,13 +321,13 @@ public class MessageGui extends Client implements Runnable{
         topTextPanel.setBounds(0,0,165,90);
 
         // Panel border
-        scrollPane.setBorder(br);
+        scrollPane.setBorder(BorderFactory.createLineBorder(Color.black));
+        scrollPane.getVerticalScrollBar().setValue(0);
         topTextPanel.setBorder(br);
         bottomButtonPanel.setBorder(br);
 
         //adding the panel to the Container of the JFrame
-        c.add(scrollPane);
-        c.add(topTextPanel);
+        c.add(topTextPanel); //xyz
         c.add(bottomButtonPanel);
     }
 
@@ -295,33 +338,49 @@ public class MessageGui extends Client implements Runnable{
 
         //crete panel for the text area
         JPanel textPanel = new JPanel();
-        textPanel.setBounds(165, 590, 820, 171);
+        textPanel.setBounds(165, 590, 820, 171); //171
         textPanel.setBorder(br);
         textPanel.setLayout(null);
 
         //creating a label for the panel
         JLabel label = new JLabel("Type Message Here:");
         label.setFont(new Font("Times New Roman", Font.BOLD, 25));
-        label.setBounds(10,0,250,171);
+        label.setBounds(10,0,250,171); //171
         textPanel.add(label);
 
         JTextArea textField = new JTextArea(9,50);
-        textField.setBounds(250,10,350,150);
+        textField.setBounds(250,10,350,150); //150
         textField.setLineWrap(true);
         textPanel.add(textField);
 
         JButton sendButton = new JButton("Send Message");
         sendButton.setLayout(null);
-        sendButton.setBounds(610, 10, 200, 150);
+        sendButton.setBounds(610, 10, 200, 150); //150
         sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (e.getSource() == sendButton) {
+                    ArrayList<String> unblockedUsers = getUsersSignal(1, username, isUserSeller);
+                    System.out.println("blocked" + unblockedUsers);
+                    if (!unblockedUsers.contains(recipient)) {
+                        JOptionPane.showMessageDialog(null, "Sorry, this user has blocked you"
+                        , "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
                     if (!textField.getText().isBlank() && recipient != null) {
                         System.out.println(textField.getText().trim());
-                        // TODO call client function to append message
+                        MessageGui.super.appendOrDeleteSignal(false, username, recipient, (storeName == null)?
+                                "nil" : storeName, !isUserSeller, textField.getText().trim());
                     }
                     textField.setText("");
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            myFrame.invalidate();
+                            createMessageGUI();
+                            myFrame.revalidate();
+                        }
+                    });
                 }
             }
         });
@@ -342,15 +401,38 @@ public class MessageGui extends Client implements Runnable{
         topPanel.setBounds(165, 0, 820, 90);
         topPanel.setBorder(br);
 
-        JLabel label = new JLabel("Right click on message to edit or delete it.");
-        label.setFont(new Font("Times New Roman", Font.BOLD, 30));
-        label.setBounds(0, 0, 820, 45);
-        label.setHorizontalAlignment(JLabel.CENTER);
-        topPanel.add(label);
+        connectedLabel.removeAll();
+        connectedLabel.setText("");
+        connectedLabel.setText("Connected with " + this.recipient);
+        if (this.recipient == null) {
+            connectedLabel.setText("You are not connected with anyone");
+        } else if (this.storeName != null && !isUserSeller) {
+            connectedLabel.setText("Connected with " + this.storeName);
+        } else if (this.storeName != null) {
+            connectedLabel.setText("Connected with " + this.recipient + " through " + this.storeName);
+        }
+        connectedLabel.setFont(new Font("Times New Roman", Font.BOLD, 25));
+        connectedLabel.setBounds(0, 0, 600, 45);
+        ImageIcon i = new ImageIcon("info.png");
+
+        Image image = i.getImage();
+        Image rescaled = image.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+        i = new ImageIcon(rescaled);
+        JLabel info = new JLabel(i);
+        info.setToolTipText("Right click on a message to edit");
+        info.setHorizontalAlignment(SwingConstants.RIGHT);
+        info.setBounds(780, 4, 40, 30);
+        connectedLabel.setHorizontalAlignment(JLabel.LEFT);
+        connectedLabel.setBorder(new EmptyBorder(10, 30, 10, 10));
+        if (initialSetup) {
+            topPanel.add(connectedLabel);
+        }
+        topPanel.add(info);
 
         JButton importFileButton = new JButton("Import a File");
         importFileButton.setLayout(null);
         importFileButton.setBounds(0, 45, 410, 45);
+        importFileButton.setFocusable(false);
         importFileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -383,11 +465,17 @@ public class MessageGui extends Client implements Runnable{
 
         JButton exportFileButton = new JButton("Choose directory to export conversation as CSV File");
         exportFileButton.setLayout(null);
+        exportFileButton.setFocusable(false);
         exportFileButton.setBounds(410, 45, 410, 45);
         exportFileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (e.getSource() == exportFileButton) {
+                    if (recipient == null) {
+                        JOptionPane.showMessageDialog(null, "Please select a recipient first",
+                                "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
                     JFileChooser directoryChooser = new JFileChooser();
                     directoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                     directoryChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
@@ -419,18 +507,20 @@ public class MessageGui extends Client implements Runnable{
         if (recipient != null) {
             Box labelBox = Box.createVerticalBox();
 
-            ArrayList<String> messages = Message.displayMessage(username, recipient, storeName, !isUserSeller);
-            // TODO call client version of this
-            System.out.println(messages);
+            labelBox.removeAll();
+            System.out.println("username " + this.username + "recipient " + this.recipient + "storeName " + this.storeName);
+            ArrayList<String> messages = super.displaySignal(username, recipient,
+                    (storeName == null)? "nil" : storeName, !isUserSeller);
 
             for (String s : messages) {
                 int numLines = 1 + s.length() / 160; // sets a factor for how many lines are needed
-                JTextArea tempLabel = new JTextArea(s);
+                JTextArea tempLabel = new JTextArea(s);;
                 tempLabel.setMaximumSize(new Dimension(820, numLines * 18));
                 tempLabel.setEditable(false);
                 tempLabel.setLineWrap(true);
                 tempLabel.setLocation(10, 0);
                 tempLabel.setBackground(myFrame.getBackground());
+                System.out.println("here" + s);
                 tempLabel.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
@@ -446,7 +536,17 @@ public class MessageGui extends Client implements Runnable{
                                 public void actionPerformed(ActionEvent e) {
                                     if (e.getSource() == deleteOption) {
                                         popupMenu1.setVisible(false);
-                                        // TODO call delete message on the selected message
+                                        MessageGui.super.appendOrDeleteSignal(true, username, recipient,
+                                                (storeName == null)? "nil" : storeName, !isUserSeller,
+                                                tempLabel.getText());
+                                        SwingUtilities.invokeLater(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                myFrame.invalidate();
+                                                createMessageGUI();
+                                                myFrame.revalidate();
+                                            }
+                                        });
                                     }
                                 }
                             });
@@ -462,12 +562,22 @@ public class MessageGui extends Client implements Runnable{
                                     if (e.getSource() == editOption) {
                                         popupMenu1.setVisible(false);
                                         String newMessage = JOptionPane.showInputDialog("Current Message: " +
-                                                s.substring(s.indexOf("-") + 2) +
+                                                tempLabel.getText().substring(s.indexOf("-") + 2) +
                                                 "\nWhat would you like the new " +
                                                 "message to say?");
                                         if (newMessage != null) {
-                                            // TODO call edit message with new message and original and recipient
+                                            MessageGui.super.editSignal(false, username, recipient,
+                                                    (storeName == null)? "nil":storeName, !isUserSeller,
+                                                    tempLabel.getText(), newMessage);
                                         }
+                                        SwingUtilities.invokeLater(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                myFrame.invalidate();
+                                                createMessageGUI();
+                                                myFrame.revalidate();
+                                            }
+                                        });
                                     }
                                 }
                             });
@@ -492,7 +602,7 @@ public class MessageGui extends Client implements Runnable{
                 });
                 labelBox.add(tempLabel);
             }
-            JScrollPane messagePanel = new JScrollPane(labelBox);
+            messagePanel.setViewportView(labelBox);
             messagePanel.setBounds(170, 90, 820, 500);
             messagePanel.setBorder(BorderFactory.createLineBorder(Color.white));
             c.add(messagePanel);
@@ -518,17 +628,20 @@ public class MessageGui extends Client implements Runnable{
             this.recipient = recipient;
         } else {
             if (isRecipientStore) {
-                this.recipient = super.getSellerFromStore(storeName);
+                this.recipient = super.getSellerFromStore(recipient);
                 this.storeName = recipient;
             } else {
                 this.storeName = null;
                 this.recipient = recipient;
             }
         }
-        System.out.println(recipient);
+        System.out.println("recipient " + this.recipient);
+        System.out.println("store " + this.storeName);
+
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+                createTopPanel();
                 createMessageGUI();
                 myFrame.revalidate();
             }
@@ -658,7 +771,6 @@ public class MessageGui extends Client implements Runnable{
     }
 
     public void createStatisticsGUI() {
-        JFrame metricsFrame = new JFrame();
         metricsFrame.setTitle("Statistics");
         metricsFrame.setLayout(null);
         //setting the bounds for the JFrame
@@ -666,6 +778,154 @@ public class MessageGui extends Client implements Runnable{
         metricsFrame.setResizable(false);
 
         if (isUserSeller) {
+            popupMenu1.setVisible(false);
+            popupMenu2.setVisible(false);
+            //TODO seller statistics gui
+            JPanel textPanel = new JPanel();
+            textPanel.setLayout(null);
+            textPanel.setBounds(0,0,600,50);
+
+            JLabel label1 = new JLabel("Stores and Customers");
+            label1.setFont(new Font("Times New Roman", Font.BOLD, 12));
+            label1.setBounds(20,0, 250, 50);
+            label1.setHorizontalAlignment(JLabel.CENTER);
+
+
+            Map attributes = label1.getFont().getAttributes();
+            attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+            label1.setFont(label1.getFont().deriveFont(attributes));
+
+            JButton sortNames = new JButton("▲");
+            sortNames.setBounds(215, 15, 20, 20);
+            sortNames.setMargin(new Insets(0,-1,0,0));
+            sortNames.setFocusPainted(false);
+            sortNames.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (e.getSource() == sortNames) {
+                        if (sortNames.getText().equals("▲")) {
+                            sortNames.setText("▼");
+                        } else {
+                            sortNames.setText("▲");
+                        }
+                    }
+                    sortNames.revalidate();
+                    textPanel.revalidate();
+                }
+            });
+
+            JLabel label2 = new JLabel("Most Common Overall Words");
+            label2.setFont(new Font("Times New Roman", Font.BOLD, 12));
+            label2.setBounds(280,0, 225, 50);
+            label2.setHorizontalAlignment(JLabel.RIGHT);
+
+            JButton sortTotal = new JButton("▲");
+            sortTotal.setBounds(520, 15, 20, 20);
+            sortTotal.setMargin(new Insets(0,-1,0,0));
+            sortTotal.setFocusPainted(false);
+            sortTotal.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (e.getSource() == sortTotal) {
+                        if (Objects.equals(sortTotal.getText(), "▲")) {
+                            sortTotal.setText("▼");
+                        } else {
+                            sortTotal.setText("▲");
+                        }
+                    }
+                }
+            });
+
+            attributes = label2.getFont().getAttributes();
+            attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+            label2.setFont(label2.getFont().deriveFont(attributes));
+
+
+            textPanel.add(label1);
+            textPanel.add(label2);
+
+            textPanel.add(sortTotal);
+            textPanel.add(sortNames);
+
+
+            metricsFrame.add(textPanel);
+
+            Box labelBox = Box.createVerticalBox();
+            Box labelBox2 = Box.createVerticalBox();
+
+            ArrayList<String[]> metricsData = new ArrayList<>();
+            // TODO call client version of this
+            String[] data1 = {"Walmart-","Bob: 478","Jim: 7"};
+            String[] data2 = {"Target-","Billy: 700","Bob: 15"};
+            String[] data3 = {"GameStop-","Jimmy: 50","Todd: 30","William: 40"};
+            String[] dataOther = {"Aldi-","Jordan: 500"};
+            String[] dataOther2 = {"GameStop-","Jimmy: 50","Todd: 30","William: 40"};
+            String[] dataOther3 = {"GameStop-","Jimmy: 50","Todd: 30","William: 40"};
+            metricsData.add(data1);
+            metricsData.add(data2);
+            metricsData.add(data3);
+            metricsData.add(dataOther);
+            metricsData.add(dataOther2);
+            metricsData.add(dataOther3);
+
+            // TODO call client for common words
+            String[] data4 = {"the: 221", "a: 195", "product: 137", "sell: 122", "because: 96", "stock: 94", "we: 80", "sale: 73", "cost: 60", "discount: 50"};
+
+            for (String[] s : metricsData) {
+                JPanel tempPanel = new JPanel();
+                textPanel.setLayout(null);
+
+                JLabel labelStore = new JLabel(s[0]);
+                labelStore.setMaximumSize(new Dimension(90, 50));
+                labelStore.setHorizontalAlignment(JLabel.CENTER);
+                labelStore.setLocation(0, 0);
+                labelStore.setFont(new Font("Times New Roman", Font.BOLD, 20));
+
+                tempPanel.add(labelStore);
+                labelBox.add(tempPanel);
+
+                for (int i = 1; i < s.length; i++) {
+                    JPanel tempPanel2 = new JPanel();
+                    textPanel.setLayout(null);
+
+                    JLabel labelCustomer = new JLabel(s[i]);
+                    //labelCustomer.setMaximumSize(new Dimension(60, 20));
+                    labelCustomer.setHorizontalAlignment(JLabel.CENTER);
+                    //labelCustomer.setLocation(0, 0);
+                    labelCustomer.setFont(new Font("Times New Roman", Font.PLAIN, 13));
+
+                    tempPanel2.add(labelCustomer);
+                    labelBox.add(tempPanel2);
+                }
+            }
+
+            JPanel tempPanel3 = new JPanel();
+            textPanel.setLayout(null);
+
+            for (int i = 0; i < data4.length; i++) {
+                JPanel tempPanel4 = new JPanel();
+                textPanel.setLayout(null);
+
+                JLabel labelListOfWords = new JLabel(data4[i]);
+                labelListOfWords.setMaximumSize(new Dimension(90, 50));
+                labelListOfWords.setHorizontalAlignment(JLabel.CENTER);
+                labelListOfWords.setLocation(0, 0);
+                labelListOfWords.setFont(new Font("Times New Roman", Font.BOLD, 15));
+
+                tempPanel4.add(labelListOfWords);
+                labelBox2.add(tempPanel4);
+            }
+
+            JScrollPane metricsPanel = new JScrollPane(labelBox, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            JScrollPane metricsPanel2 = new JScrollPane(labelBox2, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            metricsPanel.setBounds(0, 50, 300, 510);
+            metricsPanel.setBorder(BorderFactory.createLineBorder(Color.white));
+            metricsPanel2.setBounds(300, 50, 285, 510);
+            metricsPanel2.setBorder(BorderFactory.createLineBorder(Color.white));
+            metricsFrame.add(metricsPanel);
+            metricsFrame.add(metricsPanel2);
 
         } else {
             popupMenu1.setVisible(false);
@@ -695,12 +955,19 @@ public class MessageGui extends Client implements Runnable{
                     if (e.getSource() == sortNames) {
                         if (sortNames.getText().equals("▲")) {
                             sortNames.setText("▼");
+                            sortType = 1;
                         } else {
                             sortNames.setText("▲");
+                            sortType = 0;
                         }
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                createStatisticsGUI();
+                                metricsFrame.revalidate();
+                            }
+                        });
                     }
-                    sortNames.revalidate();
-                    textPanel.revalidate();
                 }
             });
 
@@ -719,9 +986,18 @@ public class MessageGui extends Client implements Runnable{
                     if (e.getSource() == sortTotal) {
                         if (Objects.equals(sortTotal.getText(), "▲")) {
                             sortTotal.setText("▼");
+                            sortType = 2;
                         } else {
                             sortTotal.setText("▲");
+                            sortType = 3;
                         }
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                createStatisticsGUI();
+                                metricsFrame.revalidate();
+                            }
+                        });
                     }
                 }
             });
@@ -745,9 +1021,19 @@ public class MessageGui extends Client implements Runnable{
                     if (e.getSource() == sortPersonal) {
                         if (Objects.equals(sortPersonal.getText(), "▲")) {
                             sortPersonal.setText("▼");
+                            sortType = 4;
                         } else {
                             sortPersonal.setText("▲");
+                            sortType = 5;
                         }
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                metricsFrame.invalidate();
+                                createStatisticsGUI();
+                                metricsFrame.revalidate();
+                            }
+                        });
                     }
                 }
             });
@@ -765,46 +1051,46 @@ public class MessageGui extends Client implements Runnable{
 
             metricsFrame.add(textPanel);
 
+            labelBox.removeAll();
 
-            if (true) {
-                Box labelBox = Box.createVerticalBox();
-
-                ArrayList<String[]> metricsData = new ArrayList<>();
-                // TODO call client version of this
-                String[] data1 = {"Walmart","478","7"};
-                String[] data2 = {"Target","700","15"};
-                String[] data3 = {"GameStop","50","30"};
-                metricsData.add(data1);
-                metricsData.add(data2);
-                metricsData.add(data3);
-
-                for (String[] s : metricsData) {
-                    JPanel tempPanel = new JPanel();
-                    textPanel.setLayout(null);
-
-                    JLabel labelStore = new JLabel(s[0]);
-                    labelStore.setBounds(0,0, 90, 50);
-                    labelStore.setHorizontalAlignment(JLabel.CENTER);
-
-                    JLabel labelTotal = new JLabel(s[1]);
-                    labelTotal.setBounds(100,0, 225, 50);
-                    labelTotal.setHorizontalAlignment(JLabel.CENTER);
-
-                    JLabel labelPersonal = new JLabel(s[2]);
-                    labelPersonal.setBounds(350,0, 225, 50);
-                    labelPersonal.setHorizontalAlignment(JLabel.CENTER);
-
-                    tempPanel.add(labelStore);
-                    tempPanel.add(labelTotal);
-                    tempPanel.add(labelPersonal);
-
-                    labelBox.add(tempPanel);
-                }
-                JScrollPane messagePanel = new JScrollPane(labelBox);
-                messagePanel.setBounds(0, 50, 600, 550);
-                messagePanel.setBorder(BorderFactory.createLineBorder(Color.white));
-                metricsFrame.getContentPane().add(messagePanel);
+            System.out.println(sortType);
+            ArrayList<String[]> metricsData = MessageGui.super.sortMetricsData(this.username, sortType);
+            for (String[] s : metricsData) {
+                System.out.print(Arrays.toString(s));
             }
+            System.out.println();
+
+            for (String[] s : metricsData) {
+                JPanel tempPanel = new JPanel();
+                tempPanel.setLayout(null);
+                tempPanel.setMaximumSize(new Dimension(7000, 50));
+
+                JLabel labelStore = new JLabel(s[0]);
+                labelStore.setHorizontalAlignment(JLabel.CENTER);
+                labelStore.setBounds(0, 0, 110, 50);
+                labelStore.setFont(new Font("Times New Roman", Font.BOLD, 20));
+
+                JLabel labelTotal = new JLabel(s[1]);
+                labelTotal.setHorizontalAlignment(JLabel.CENTER);
+                labelTotal.setBounds(110, 0, 225, 50);
+                labelTotal.setFont(new Font("Times New Roman", Font.BOLD, 20));
+
+                JLabel labelPersonal = new JLabel(s[2]);
+                labelPersonal.setHorizontalAlignment(JLabel.CENTER);
+                labelPersonal.setBounds(350,0, 225, 50);
+                labelPersonal.setFont(new Font("Times New Roman", Font.BOLD, 20));
+
+
+                tempPanel.add(labelStore);
+                tempPanel.add(labelTotal);
+                tempPanel.add(labelPersonal);
+
+                labelBox.add(tempPanel);
+            }
+            metricsScroll.setViewportView(labelBox);
+            metricsScroll.setBounds(0, 50, 600, 550);
+            metricsScroll.setBorder(BorderFactory.createLineBorder(Color.white));
+            metricsFrame.getContentPane().add(metricsScroll);
         }
 
         metricsFrame.setVisible(true);
@@ -816,11 +1102,15 @@ public class MessageGui extends Client implements Runnable{
         createTopPanel();
         createMessageGUI();
         myFrame.setVisible(true);
+        initialSetup = false;
     }
 
 
     public static void main(String[] args) throws IOException {
-        SwingUtilities.invokeLater(new MessageGui("dan", false, new Socket("localhost", 2000)));
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {}
+        SwingUtilities.invokeLater(new MessageGui("mulan", false, new Socket("localhost", 2000)));
     }
 
 }
@@ -834,3 +1124,8 @@ store -> buyer          for both of these, isRecipientStore is false, isUserSell
 seller -> buyer         false or true. Username is always itself, recipient is always a buyer name, storeName
                         could be null or a storeName if seller is a store
  */
+//TODO bugs
+//todo metrics manager issue when deleting
+//todo update the buttons when a user adds a new chat
+//todo write test cases and record video and write readme
+//todo edit storeName
