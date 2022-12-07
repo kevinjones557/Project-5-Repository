@@ -112,6 +112,7 @@ public class MessageGui extends Client implements Runnable{
             if (!availableMessages.contains(user)) {
                 continue;
             }
+
             JButton tempButton = new JButton(user);
             tempButton.setFocusable(false);
             MouseListener tempListener = new MouseAdapter() {
@@ -199,7 +200,14 @@ public class MessageGui extends Client implements Runnable{
         topTextPanel.add(topLabel1);
         topTextPanel.add(topLabel2);
         // creating buttons for bottom panel
-        JButton searchForUserButton = new JButton("Search for a " + ((isUserSeller)? "buyer" : "seller"));
+
+        ImageIcon i4 = new ImageIcon("search.jpg");
+
+        Image image4 = i4.getImage();
+        Image rescaled4 = image4.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+        i4 = new ImageIcon(rescaled4);
+
+        JButton searchForUserButton = new JButton("Search for a " + ((isUserSeller)? "buyer" : "seller"), i4);
         searchForUserButton.setMaximumSize(new Dimension(165,74));
         searchForUserButton.setFocusable(false);
         bottomButtonPanel.add(searchForUserButton);
@@ -247,7 +255,7 @@ public class MessageGui extends Client implements Runnable{
             }
         });
 
-        JButton seeListOfUsersButton = new JButton("See a list of " + ((isUserSeller)? "buyers" : "stores"));
+        JButton seeListOfUsersButton = new JButton("See a list of " + ((isUserSeller)? "buyers" : "stores"), i4);
         seeListOfUsersButton.setMaximumSize(new Dimension(165,74));
         seeListOfUsersButton.setFocusable(false);
         bottomButtonPanel.add(seeListOfUsersButton);
@@ -306,7 +314,14 @@ public class MessageGui extends Client implements Runnable{
             }
         });
 
-        JButton metricsButton = new JButton("View Statistics");
+        ImageIcon i5 = new ImageIcon("statistic.png");
+
+        Image image5 = i5.getImage();
+        Image rescaled5 = image5.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+        i5 = new ImageIcon(rescaled5);
+
+        JButton metricsButton = new JButton("View Statistics", i5);
+        metricsButton.setFocusable(false);
         metricsButton.setMaximumSize(new Dimension(165,74));
         metricsButton.setFocusable(false);
         bottomButtonPanel.add(metricsButton);
@@ -350,24 +365,35 @@ public class MessageGui extends Client implements Runnable{
 
         //crete panel for the text area
         JPanel textPanel = new JPanel();
-        textPanel.setBounds(165, 590, 820, 171); //171
+        textPanel.setBounds(165, 690, 820, 71); //171
         textPanel.setBorder(br);
         textPanel.setLayout(null);
 
         //creating a label for the panel
         JLabel label = new JLabel("Type Message Here:");
         label.setFont(new Font("Times New Roman", Font.BOLD, 25));
-        label.setBounds(10,0,250,171); //171
+        label.setBounds(10,10,250,50); //171
         textPanel.add(label);
 
-        JTextArea textField = new JTextArea(9,50);
-        textField.setBounds(250,10,350,150); //150
-        textField.setLineWrap(true);
-        textPanel.add(textField);
 
-        JButton sendButton = new JButton("Send Message");
+        JTextArea textField = new JTextArea();
+        //textField.setBounds(250,8,350,55); //150
+        textField.setLineWrap(true);
+        textField.setWrapStyleWord(true);
+        JScrollPane typingSpace = new JScrollPane(textField);
+        typingSpace.setBounds(250, 8, 350, 55);
+        textPanel.add(typingSpace);
+
+        ImageIcon i1 = new ImageIcon("send.png");
+
+        Image image = i1.getImage();
+        Image rescaled = image.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+        i1 = new ImageIcon(rescaled);
+
+        JButton sendButton = new JButton("Send", i1);
+        sendButton.setFocusable(false);
         sendButton.setLayout(null);
-        sendButton.setBounds(610, 10, 200, 150); //150
+        sendButton.setBounds(610, 10, 100, 50); //150
         sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -399,6 +425,25 @@ public class MessageGui extends Client implements Runnable{
 
         textPanel.add(sendButton);
 
+        ImageIcon i = new ImageIcon("clear.png");
+
+        Image image1 = i.getImage();
+        Image rescaled1 = image1.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        i = new ImageIcon(rescaled1);
+        JButton clear = new JButton("Clear", i);
+        clear.setIconTextGap(3);
+        clear.setFocusable(false);
+        clear.setLayout(null);
+        clear.setBounds(710, 10, 100, 50);
+        clear.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(e.getSource() == clear) {
+                    textField.setText("");
+                }
+            }
+        });
+        textPanel.add(clear);
         c.add(textPanel);
     }
 
@@ -433,7 +478,7 @@ public class MessageGui extends Client implements Runnable{
         JLabel info = new JLabel(i);
         info.setToolTipText("Right click on a message to edit");
         info.setHorizontalAlignment(SwingConstants.RIGHT);
-        info.setBounds(780, 4, 40, 30);
+        info.setBounds(780, 8, 40, 30);
         connectedLabel.setHorizontalAlignment(JLabel.LEFT);
         connectedLabel.setBorder(new EmptyBorder(10, 30, 10, 10));
         if (initialSetup) {
@@ -441,7 +486,13 @@ public class MessageGui extends Client implements Runnable{
         }
         topPanel.add(info);
 
-        JButton importFileButton = new JButton("Import a File");
+        ImageIcon i2 = new ImageIcon("import.png");
+
+        Image image2 = i2.getImage();
+        Image rescaled2 = image2.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        i2 = new ImageIcon(rescaled2);
+
+        JButton importFileButton = new JButton("Import a File", i2);
         importFileButton.setLayout(null);
         importFileButton.setBounds(0, 45, 410, 45);
         importFileButton.setFocusable(false);
@@ -475,7 +526,13 @@ public class MessageGui extends Client implements Runnable{
         });
         topPanel.add(importFileButton);
 
-        JButton exportFileButton = new JButton("Choose directory to export conversation as CSV File");
+        ImageIcon i3 = new ImageIcon("export.png");
+
+        Image image3 = i3.getImage();
+        Image rescaled3 = image3.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+        i3 = new ImageIcon(rescaled3);
+
+        JButton exportFileButton = new JButton("Choose directory to export conversation as CSV File", i3);
         exportFileButton.setLayout(null);
         exportFileButton.setFocusable(false);
         exportFileButton.setBounds(410, 45, 410, 45);
@@ -615,7 +672,7 @@ public class MessageGui extends Client implements Runnable{
                 labelBox.add(tempLabel);
             }
             messagePanel.setViewportView(labelBox);
-            messagePanel.setBounds(170, 90, 820, 500);
+            messagePanel.setBounds(170, 90, 820, 600);
             messagePanel.setBorder(BorderFactory.createLineBorder(Color.white));
             c.add(messagePanel);
         }
