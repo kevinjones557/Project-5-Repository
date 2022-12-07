@@ -79,19 +79,29 @@ public class MessageGui extends Client implements Runnable{
         topLeft.setLayout(null);
         topLeft.setBounds(0, 0, 165, 45);
 
+        ImageIcon i = new ImageIcon("info.png");
+        Image image = i.getImage();
+        Image rescaled = image.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+        i = new ImageIcon(rescaled);
+
         topLabel3.removeAll();
-        topLabel3.setText("Personal Chats: ");
+        topLabel3.setText("Personal Chats ");
+        topLabel3.setHorizontalTextPosition(SwingConstants.LEFT);
+        topLabel3.setIcon(i);
         topLabel3.setFont(new Font("Times New Roman", Font.BOLD, 18));
         topLabel3.setHorizontalAlignment(JLabel.CENTER);
         topLabel3.setMaximumSize(new Dimension(165, 45));
         userPanel.add(topLabel3, Component.LEFT_ALIGNMENT);
 
-        ImageIcon i = new ImageIcon("info.png");
-        Image image = i.getImage();
-        Image rescaled = image.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
-        i = new ImageIcon(rescaled);
-        info.setIcon(i);
-        topLeft.add(info, Component.RIGHT_ALIGNMENT);
+        JPanel placeholder = new JPanel();
+        placeholder.setOpaque(false);
+        placeholder.setBounds(140, 14, 15, 15);
+        placeholder.setToolTipText("Right click to use block/invisible button");
+        //placeholder.setVisible(false);
+        myFrame.add(placeholder);
+
+        //info.setIcon(i);
+        //topLeft.add(info, Component.RIGHT_ALIGNMENT);
         //userPanel.add(topLeft);
 
         // this is run for buyers and sellers, gets personal conversations
@@ -102,7 +112,9 @@ public class MessageGui extends Client implements Runnable{
             if (!availableMessages.contains(user)) {
                 continue;
             }
+
             JButton tempButton = new JButton(user);
+            tempButton.setFocusable(false);
             MouseListener tempListener = new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
@@ -149,13 +161,13 @@ public class MessageGui extends Client implements Runnable{
                             continue;
                         }
                         JButton tempButton = new JButton(buyer);
+                        tempButton.setFocusable(false);
                         ActionListener tempListener = e -> {
                             if (e.getSource() == tempButton) {
                                 isUserStore = true;
                                 isRecipientStore = false;
                                 chooseRecipient(buyer, store);
                             }
-                            // TODO call client function with recipient to get message info
                         };
                         tempButton.addActionListener(tempListener);
                         tempButton.setMinimumSize(new Dimension(165, 50));
@@ -184,7 +196,14 @@ public class MessageGui extends Client implements Runnable{
         topTextPanel.add(topLabel1);
         topTextPanel.add(topLabel2);
         // creating buttons for bottom panel
-        JButton searchForUserButton = new JButton("Search for a " + ((isUserSeller)? "buyer" : "seller"));
+
+        ImageIcon i4 = new ImageIcon("search.jpg");
+
+        Image image4 = i4.getImage();
+        Image rescaled4 = image4.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+        i4 = new ImageIcon(rescaled4);
+
+        JButton searchForUserButton = new JButton("Search for a " + ((isUserSeller)? "buyer" : "seller"), i4);
         searchForUserButton.setMaximumSize(new Dimension(165,74));
         searchForUserButton.setFocusable(false);
         bottomButtonPanel.add(searchForUserButton);
@@ -226,7 +245,7 @@ public class MessageGui extends Client implements Runnable{
             }
         });
 
-        JButton seeListOfUsersButton = new JButton("See a list of " + ((isUserSeller)? "buyers" : "stores"));
+        JButton seeListOfUsersButton = new JButton("See a list of " + ((isUserSeller)? "buyers" : "stores"), i4);
         seeListOfUsersButton.setMaximumSize(new Dimension(165,74));
         seeListOfUsersButton.setFocusable(false);
         bottomButtonPanel.add(seeListOfUsersButton);
@@ -279,7 +298,14 @@ public class MessageGui extends Client implements Runnable{
             }
         });
 
-        JButton metricsButton = new JButton("View Statistics");
+        ImageIcon i5 = new ImageIcon("statistic.png");
+
+        Image image5 = i5.getImage();
+        Image rescaled5 = image5.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+        i5 = new ImageIcon(rescaled5);
+
+        JButton metricsButton = new JButton("View Statistics", i5);
+        metricsButton.setFocusable(false);
         metricsButton.setMaximumSize(new Dimension(165,74));
         metricsButton.setFocusable(false);
         bottomButtonPanel.add(metricsButton);
@@ -320,22 +346,33 @@ public class MessageGui extends Client implements Runnable{
 
         //crete panel for the text area
         JPanel textPanel = new JPanel();
-        textPanel.setBounds(165, 590, 820, 171); //171
+        textPanel.setBounds(165, 690, 820, 71); //171
         textPanel.setBorder(br);
         textPanel.setLayout(null);
 
         //creating a label for the panel
         JLabel label = new JLabel("Type Message Here:");
         label.setFont(new Font("Times New Roman", Font.BOLD, 25));
-        label.setBounds(10,0,250,171); //171
+        label.setBounds(10,10,250,50); //171
         textPanel.add(label);
 
-        JTextArea textField = new JTextArea(9,50);
-        textField.setBounds(250,10,350,150); //150
-        textField.setLineWrap(true);
-        textPanel.add(textField);
 
-        JButton sendButton = new JButton("Send Message");
+        JTextArea textField = new JTextArea();
+        //textField.setBounds(250,8,350,55); //150
+        textField.setLineWrap(true);
+        textField.setWrapStyleWord(true);
+        JScrollPane typingSpace = new JScrollPane(textField);
+        typingSpace.setBounds(250, 8, 350, 55);
+        textPanel.add(typingSpace);
+
+        ImageIcon i1 = new ImageIcon("send.png");
+
+        Image image = i1.getImage();
+        Image rescaled = image.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+        i1 = new ImageIcon(rescaled);
+
+        JButton sendButton = new JButton("Send", i1);
+        sendButton.setFocusable(false);
         sendButton.setLayout(null);
         sendButton.setBounds(610, 10, 200, 150); //150
         sendButton.addActionListener(e -> {
@@ -363,6 +400,25 @@ public class MessageGui extends Client implements Runnable{
 
         textPanel.add(sendButton);
 
+        ImageIcon i = new ImageIcon("clear.png");
+
+        Image image1 = i.getImage();
+        Image rescaled1 = image1.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        i = new ImageIcon(rescaled1);
+        JButton clear = new JButton("Clear", i);
+        clear.setIconTextGap(3);
+        clear.setFocusable(false);
+        clear.setLayout(null);
+        clear.setBounds(710, 10, 100, 50);
+        clear.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(e.getSource() == clear) {
+                    textField.setText("");
+                }
+            }
+        });
+        textPanel.add(clear);
         c.add(textPanel);
     }
 
@@ -397,7 +453,7 @@ public class MessageGui extends Client implements Runnable{
         JLabel info = new JLabel(i);
         info.setToolTipText("Right click on a message to edit");
         info.setHorizontalAlignment(SwingConstants.RIGHT);
-        info.setBounds(780, 4, 40, 30);
+        info.setBounds(780, 8, 40, 30);
         connectedLabel.setHorizontalAlignment(JLabel.LEFT);
         connectedLabel.setBorder(new EmptyBorder(10, 30, 10, 10));
         if (initialSetup) {
@@ -405,7 +461,13 @@ public class MessageGui extends Client implements Runnable{
         }
         topPanel.add(info);
 
-        JButton importFileButton = new JButton("Import a File");
+        ImageIcon i2 = new ImageIcon("import.png");
+
+        Image image2 = i2.getImage();
+        Image rescaled2 = image2.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
+        i2 = new ImageIcon(rescaled2);
+
+        JButton importFileButton = new JButton("Import a File", i2);
         importFileButton.setLayout(null);
         importFileButton.setBounds(0, 45, 410, 45);
         importFileButton.setFocusable(false);
@@ -435,7 +497,13 @@ public class MessageGui extends Client implements Runnable{
         });
         topPanel.add(importFileButton);
 
-        JButton exportFileButton = new JButton("Choose directory to export conversation as CSV File");
+        ImageIcon i3 = new ImageIcon("export.png");
+
+        Image image3 = i3.getImage();
+        Image rescaled3 = image3.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+        i3 = new ImageIcon(rescaled3);
+
+        JButton exportFileButton = new JButton("Choose directory to export conversation as CSV File", i3);
         exportFileButton.setLayout(null);
         exportFileButton.setFocusable(false);
         exportFileButton.setBounds(410, 45, 410, 45);
@@ -557,7 +625,7 @@ public class MessageGui extends Client implements Runnable{
                 labelBox.add(tempLabel);
             }
             messagePanel.setViewportView(labelBox);
-            messagePanel.setBounds(170, 90, 820, 500);
+            messagePanel.setBounds(170, 90, 820, 600);
             messagePanel.setBorder(BorderFactory.createLineBorder(Color.white));
             c.add(messagePanel);
         }
@@ -717,6 +785,152 @@ public class MessageGui extends Client implements Runnable{
             popupMenu1.setVisible(false);
             popupMenu2.setVisible(false);
             //TODO seller statistics gui
+            JPanel textPanel = new JPanel();
+            textPanel.setLayout(null);
+            textPanel.setBounds(0,0,600,50);
+
+            JLabel label1 = new JLabel("Stores and Customers");
+            label1.setFont(new Font("Times New Roman", Font.BOLD, 12));
+            label1.setBounds(20,0, 250, 50);
+            label1.setHorizontalAlignment(JLabel.CENTER);
+
+
+            Map attributes = label1.getFont().getAttributes();
+            attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+            label1.setFont(label1.getFont().deriveFont(attributes));
+
+            JButton sortNames = new JButton("▲");
+            sortNames.setBounds(215, 15, 20, 20);
+            sortNames.setMargin(new Insets(0,-1,0,0));
+            sortNames.setFocusPainted(false);
+            sortNames.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (e.getSource() == sortNames) {
+                        if (sortNames.getText().equals("▲")) {
+                            sortNames.setText("▼");
+                        } else {
+                            sortNames.setText("▲");
+                        }
+                    }
+                    sortNames.revalidate();
+                    textPanel.revalidate();
+                }
+            });
+
+            JLabel label2 = new JLabel("Most Common Overall Words");
+            label2.setFont(new Font("Times New Roman", Font.BOLD, 12));
+            label2.setBounds(280,0, 225, 50);
+            label2.setHorizontalAlignment(JLabel.RIGHT);
+
+            JButton sortTotal = new JButton("▲");
+            sortTotal.setBounds(520, 15, 20, 20);
+            sortTotal.setMargin(new Insets(0,-1,0,0));
+            sortTotal.setFocusPainted(false);
+            sortTotal.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (e.getSource() == sortTotal) {
+                        if (Objects.equals(sortTotal.getText(), "▲")) {
+                            sortTotal.setText("▼");
+                        } else {
+                            sortTotal.setText("▲");
+                        }
+                    }
+                }
+            });
+
+            attributes = label2.getFont().getAttributes();
+            attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+            label2.setFont(label2.getFont().deriveFont(attributes));
+
+
+            textPanel.add(label1);
+            textPanel.add(label2);
+
+            textPanel.add(sortTotal);
+            textPanel.add(sortNames);
+
+
+            metricsFrame.add(textPanel);
+
+            Box labelBox = Box.createVerticalBox();
+            Box labelBox2 = Box.createVerticalBox();
+
+            ArrayList<String[]> metricsData = new ArrayList<>();
+            // TODO call client version of this
+            String[] data1 = {"Walmart-","Bob: 478","Jim: 7"};
+            String[] data2 = {"Target-","Billy: 700","Bob: 15"};
+            String[] data3 = {"GameStop-","Jimmy: 50","Todd: 30","William: 40"};
+            String[] dataOther = {"Aldi-","Jordan: 500"};
+            String[] dataOther2 = {"GameStop-","Jimmy: 50","Todd: 30","William: 40"};
+            String[] dataOther3 = {"GameStop-","Jimmy: 50","Todd: 30","William: 40"};
+            metricsData.add(data1);
+            metricsData.add(data2);
+            metricsData.add(data3);
+            metricsData.add(dataOther);
+            metricsData.add(dataOther2);
+            metricsData.add(dataOther3);
+
+            // TODO call client for common words
+            String[] data4 = {"the: 221", "a: 195", "product: 137", "sell: 122", "because: 96", "stock: 94", "we: 80", "sale: 73", "cost: 60", "discount: 50"};
+
+            for (String[] s : metricsData) {
+                JPanel tempPanel = new JPanel();
+                textPanel.setLayout(null);
+
+                JLabel labelStore = new JLabel(s[0]);
+                labelStore.setMaximumSize(new Dimension(90, 50));
+                labelStore.setHorizontalAlignment(JLabel.CENTER);
+                labelStore.setLocation(0, 0);
+                labelStore.setFont(new Font("Times New Roman", Font.BOLD, 20));
+
+                tempPanel.add(labelStore);
+                labelBox.add(tempPanel);
+
+                for (int i = 1; i < s.length; i++) {
+                    JPanel tempPanel2 = new JPanel();
+                    textPanel.setLayout(null);
+
+                    JLabel labelCustomer = new JLabel(s[i]);
+                    //labelCustomer.setMaximumSize(new Dimension(60, 20));
+                    labelCustomer.setHorizontalAlignment(JLabel.CENTER);
+                    //labelCustomer.setLocation(0, 0);
+                    labelCustomer.setFont(new Font("Times New Roman", Font.PLAIN, 13));
+
+                    tempPanel2.add(labelCustomer);
+                    labelBox.add(tempPanel2);
+                }
+            }
+
+            JPanel tempPanel3 = new JPanel();
+            textPanel.setLayout(null);
+
+            for (int i = 0; i < data4.length; i++) {
+                JPanel tempPanel4 = new JPanel();
+                textPanel.setLayout(null);
+
+                JLabel labelListOfWords = new JLabel(data4[i]);
+                labelListOfWords.setMaximumSize(new Dimension(90, 50));
+                labelListOfWords.setHorizontalAlignment(JLabel.CENTER);
+                labelListOfWords.setLocation(0, 0);
+                labelListOfWords.setFont(new Font("Times New Roman", Font.BOLD, 15));
+
+                tempPanel4.add(labelListOfWords);
+                labelBox2.add(tempPanel4);
+            }
+
+            JScrollPane metricsPanel = new JScrollPane(labelBox, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            JScrollPane metricsPanel2 = new JScrollPane(labelBox2, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            metricsPanel.setBounds(0, 50, 300, 510);
+            metricsPanel.setBorder(BorderFactory.createLineBorder(Color.white));
+            metricsPanel2.setBounds(300, 50, 285, 510);
+            metricsPanel2.setBorder(BorderFactory.createLineBorder(Color.white));
+            metricsFrame.add(metricsPanel);
+            metricsFrame.add(metricsPanel2);
+
         } else {
             popupMenu1.setVisible(false);
             popupMenu2.setVisible(false);
