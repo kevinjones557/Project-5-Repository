@@ -382,6 +382,11 @@ public class MessageGui extends Client implements Runnable{
                 if (e.getSource() == sendButton) {
                     ArrayList<String> unblockedUsers = getUsersSignal(1, username, isUserSeller);
                     System.out.println("blocked" + unblockedUsers);
+                    if (recipient == null) {
+                        JOptionPane.showMessageDialog(null, "Please select a recipient first"
+                        , "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
                     if (!unblockedUsers.contains(recipient)) {
                         JOptionPane.showMessageDialog(null, "Sorry, this user has blocked you"
                         , "Error", JOptionPane.ERROR_MESSAGE);
