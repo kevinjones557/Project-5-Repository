@@ -11,7 +11,7 @@ import java.util.*;
 
 /**
  * This class sets up the GUI for the Client
- * A child class of Client it will use Client method calls to send and recieve message from server
+ * A child class of Client it will use Client method calls to send and receive message from server
  *
  * @author Kevin Jones
  * @version 11/20
@@ -74,7 +74,7 @@ public class MessageGui extends Client implements Runnable{
         }
         ArrayList<String> allMessages = super.getConversationsFromUser(this.username);
         System.out.println(allMessages);
-        System.out.println("as;dflj " + availableMessages);
+        System.out.println("messages " + availableMessages);
 
         topLeft.setLayout(null);
         topLeft.setBounds(0, 0, 165, 45);
@@ -162,16 +162,13 @@ public class MessageGui extends Client implements Runnable{
                         }
                         JButton tempButton = new JButton(buyer);
                         tempButton.setFocusable(false);
-                        ActionListener tempListener = new ActionListener() {
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-                                if (e.getSource() == tempButton) {
-                                    isUserStore = true;
-                                    isRecipientStore = false;
-                                    chooseRecipient(buyer, store);
-                                }
-                                // TODO call client function with recipient to get message info
+                        ActionListener tempListener = e -> {
+                            if (e.getSource() == tempButton) {
+                                isUserStore = true;
+                                isRecipientStore = false;
+                                chooseRecipient(buyer, store);
                             }
+                            // TODO call client function with recipient to get message info
                         };
                         tempButton.addActionListener(tempListener);
                         tempButton.setMinimumSize(new Dimension(165, 50));
@@ -211,45 +208,39 @@ public class MessageGui extends Client implements Runnable{
         searchForUserButton.setMaximumSize(new Dimension(165,74));
         searchForUserButton.setFocusable(false);
         bottomButtonPanel.add(searchForUserButton);
-        searchForUserButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (e.getSource() == searchForUserButton) {
-                    String user = username;
-                    // if user is a seller allow option to choose account to message from
-                    if (isUserSeller) {
-                        //first choose which account to start message from
-                        ArrayList<String> sellerStores = MessageGui.super.getStoresFromSeller(username);
-                        sellerStores.add(0, username);
-                        String[] accounts = sellerStores.toArray(new String[0]);
-                        user = (String) JOptionPane.showInputDialog(null, "Choose account " +
-                                        "to message from", "Select Account", JOptionPane.PLAIN_MESSAGE, null,
-                                accounts, null);
-                        isUserStore = user != null && !user.equals(username);
-                    }
-                    if (user != null) {
-                        ArrayList<String> availableMessages = getUsersSignal(0, username, isUserSeller);
-                        System.out.println("searching " + availableMessages);
-                        String newChatRecipient = (String) JOptionPane.showInputDialog(null,
-                                "Enter the name of a " + ((isUserSeller) ? "buyer:" : "seller:"),
-                                "Start New Chat", JOptionPane.PLAIN_MESSAGE);
-                        if (!availableMessages.contains(newChatRecipient)) {
-                            JOptionPane.showMessageDialog(null, "Sorry, no user found " +
-                                    "with this name!","Error",JOptionPane.ERROR_MESSAGE);
-                        } else {
-                            MessageGui.super.checkIfMessageExists(newChatRecipient, isRecipientStore, isUserSeller,
-                                    user, isUserStore);
-                            chooseRecipient(newChatRecipient, user);
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    System.out.println("remaking");
-                                    myFrame.invalidate();
-                                    createLeftPanel();
-                                    myFrame.revalidate();
-                                }
-                            });
-                        }
+        searchForUserButton.addActionListener(e -> {
+            if (e.getSource() == searchForUserButton) {
+                String user = username;
+                // if user is a seller allow option to choose account to message from
+                if (isUserSeller) {
+                    //first choose which account to start message from
+                    ArrayList<String> sellerStores = MessageGui.super.getStoresFromSeller(username);
+                    sellerStores.add(0, username);
+                    String[] accounts = sellerStores.toArray(new String[0]);
+                    user = (String) JOptionPane.showInputDialog(null, "Choose account " +
+                                    "to message from", "Select Account", JOptionPane.PLAIN_MESSAGE, null,
+                            accounts, null);
+                    isUserStore = user != null && !user.equals(username);
+                }
+                if (user != null) {
+                    ArrayList<String> availableMessages1 = getUsersSignal(0, username, isUserSeller);
+                    System.out.println("searching " + availableMessages1);
+                    String newChatRecipient = JOptionPane.showInputDialog(null,
+                            "Enter the name of a " + ((isUserSeller) ? "buyer:" : "seller:"),
+                            "Start New Chat", JOptionPane.PLAIN_MESSAGE);
+                    if (!availableMessages1.contains(newChatRecipient)) {
+                        JOptionPane.showMessageDialog(null, "Sorry, no user found " +
+                                "with this name!","Error",JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        MessageGui.super.checkIfMessageExists(newChatRecipient, isRecipientStore, isUserSeller,
+                                user, isUserStore);
+                        chooseRecipient(newChatRecipient, user);
+                        SwingUtilities.invokeLater(() -> {
+                            System.out.println("remaking");
+                            myFrame.invalidate();
+                            createLeftPanel();
+                            myFrame.revalidate();
+                        });
                     }
                 }
             }
@@ -259,56 +250,50 @@ public class MessageGui extends Client implements Runnable{
         seeListOfUsersButton.setMaximumSize(new Dimension(165,74));
         seeListOfUsersButton.setFocusable(false);
         bottomButtonPanel.add(seeListOfUsersButton);
-        seeListOfUsersButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (e.getSource() == seeListOfUsersButton) {
-                    String user = username;
-                    // if user is a seller allow option to choose account to message from
+        seeListOfUsersButton.addActionListener(e -> {
+            if (e.getSource() == seeListOfUsersButton) {
+                String user = username;
+                // if user is a seller allow option to choose account to message from
+                if (isUserSeller) {
+                    //first choose which account to start message from
+                    ArrayList<String> sellerStores = MessageGui.super.getStoresFromSeller(username);
+                    sellerStores.add(0, username);
+                    String[] accounts = sellerStores.toArray(new String[0]);
+                    user = (String) JOptionPane.showInputDialog(null, "Choose account " +
+                                    "to message from", "Select Account", JOptionPane.PLAIN_MESSAGE, null,
+                            accounts, null);
+                    isUserStore = user != null && !user.equals(username);
+                }
+                if (user != null) {
+                    ArrayList<String> options;
                     if (isUserSeller) {
-                        //first choose which account to start message from
-                        ArrayList<String> sellerStores = MessageGui.super.getStoresFromSeller(username);
-                        sellerStores.add(0, username);
-                        String[] accounts = sellerStores.toArray(new String[0]);
-                        user = (String) JOptionPane.showInputDialog(null, "Choose account " +
-                                        "to message from", "Select Account", JOptionPane.PLAIN_MESSAGE, null,
-                                accounts, null);
-                        isUserStore = user != null && !user.equals(username);
+                        options = MessageGui.super.getUsersSignal(0, username, true);
+                    } else {
+                        options = MessageGui.super.getUsersSignal(2, username, false);
                     }
-                    if (user != null) {
-                        ArrayList<String> options;
-                        if (isUserSeller) {
-                            options = MessageGui.super.getUsersSignal(0, username, true);
-                        } else {
-                            options = MessageGui.super.getUsersSignal(2, username, false);
-                        }
-                        // TODO call client version of this getavailable
-                        String newChatRecipient;
-                        if (options.get(0).length() > 0) {
-                            newChatRecipient = (String) JOptionPane.showInputDialog(null,
-                                    "Choose a " + ((isUserSeller) ? "buyer:" : "store:"), "Start New Chat",
-                                    JOptionPane.PLAIN_MESSAGE, null, options.toArray(), null);
-                        } else {
-                            newChatRecipient = null;
-                            JOptionPane.showMessageDialog(null, "No options available!");
-                        }
+                    // TODO call client version of this getAvailable
+                    String newChatRecipient;
+                    if (options.get(0).length() > 0) {
+                        newChatRecipient = (String) JOptionPane.showInputDialog(null,
+                                "Choose a " + ((isUserSeller) ? "buyer:" : "store:"), "Start New Chat",
+                                JOptionPane.PLAIN_MESSAGE, null, options.toArray(), null);
+                    } else {
+                        newChatRecipient = null;
+                        JOptionPane.showMessageDialog(null, "No options available!");
+                    }
 
-                        if (newChatRecipient != null) {
-                            // here we know that the user is a buyer, so they must choose a store
-                            isRecipientStore = !isUserSeller;
-                            MessageGui.super.checkIfMessageExists(newChatRecipient, isRecipientStore, isUserSeller,
-                                    user, isUserStore);
-                            chooseRecipient(newChatRecipient, user);
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    System.out.println("remaking");
-                                    myFrame.invalidate();
-                                    createLeftPanel();
-                                    myFrame.revalidate();
-                                }
-                            });
-                        }
+                    if (newChatRecipient != null) {
+                        // here we know that the user is a buyer, so they must choose a store
+                        isRecipientStore = !isUserSeller;
+                        MessageGui.super.checkIfMessageExists(newChatRecipient, isRecipientStore, isUserSeller,
+                                user, isUserStore);
+                        chooseRecipient(newChatRecipient, user);
+                        SwingUtilities.invokeLater(() -> {
+                            System.out.println("remaking");
+                            myFrame.invalidate();
+                            createLeftPanel();
+                            myFrame.revalidate();
+                        });
                     }
                 }
             }
@@ -325,12 +310,9 @@ public class MessageGui extends Client implements Runnable{
         metricsButton.setMaximumSize(new Dimension(165,74));
         metricsButton.setFocusable(false);
         bottomButtonPanel.add(metricsButton);
-        metricsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (e.getSource() == metricsButton) {
-                    createStatisticsGUI();
-                }
+        metricsButton.addActionListener(e -> {
+            if (e.getSource() == metricsButton) {
+                createStatisticsGUI();
             }
         });
         if (initialSetup) {
@@ -420,6 +402,17 @@ public class MessageGui extends Client implements Runnable{
                         }
                     });
                 }
+                if (!textField.getText().isBlank() && recipient != null) {
+                    System.out.println(textField.getText().trim());
+                    MessageGui.super.appendOrDeleteSignal(false, username, recipient, (storeName == null)?
+                            "nil" : storeName, !isUserSeller, textField.getText().trim());
+                }
+                textField.setText("");
+                SwingUtilities.invokeLater(() -> {
+                    myFrame.invalidate();
+                    createMessageGUI();
+                    myFrame.revalidate();
+                });
             }
         });
 
@@ -496,33 +489,29 @@ public class MessageGui extends Client implements Runnable{
         importFileButton.setLayout(null);
         importFileButton.setBounds(0, 45, 410, 45);
         importFileButton.setFocusable(false);
-        importFileButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (recipient != null) {
-                    if (e.getSource() == importFileButton) {
-                        String filename = getImportFile();
-                        if (!(filename == null) && !filename.endsWith(".txt")) {
-                            JOptionPane.showMessageDialog(null, "File must be a text file",
-                                    "Invalid File", JOptionPane.ERROR_MESSAGE);
-                        } else if (filename != null) {
-                            MessageGui.super.importFile(filename, recipient, username, isUserSeller,
-                                    isUserStore, isRecipientStore);
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    createMessageGUI();
-                                    myFrame.revalidate();
-                                }
-                            });
-                        }
+        importFileButton.addActionListener(e -> {
+            if (recipient != null) {
+                if (e.getSource() == importFileButton) {
+                    String filename = getImportFile();
+                    if (!(filename == null) && !filename.endsWith(".txt")) {
+                        JOptionPane.showMessageDialog(null, "File must be a text file",
+                                "Invalid File", JOptionPane.ERROR_MESSAGE);
+                    } else if (filename != null) {
+                        System.out.println("here with " + recipient + userPanel + isRecipientStore);
+                        MessageGui.super.importFile(filename, isRecipientStore? storeName : recipient,
+                                isUserStore? storeName : username, isUserSeller,
+                                isUserStore, isRecipientStore);
+                        SwingUtilities.invokeLater(() -> {
+                            createMessageGUI();
+                            myFrame.revalidate();
+                        });
                     }
-                } else {
-                    JOptionPane.showMessageDialog(null, "Please choose a recipient first"
-                            , "Error", JOptionPane.ERROR_MESSAGE);
                 }
-
+            } else {
+                JOptionPane.showMessageDialog(null, "Please choose a recipient first"
+                        , "Error", JOptionPane.ERROR_MESSAGE);
             }
+
         });
         topPanel.add(importFileButton);
 
@@ -536,31 +525,28 @@ public class MessageGui extends Client implements Runnable{
         exportFileButton.setLayout(null);
         exportFileButton.setFocusable(false);
         exportFileButton.setBounds(410, 45, 410, 45);
-        exportFileButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (e.getSource() == exportFileButton) {
-                    if (recipient == null) {
-                        JOptionPane.showMessageDialog(null, "Please select a recipient first",
-                                "Error", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                    JFileChooser directoryChooser = new JFileChooser();
-                    directoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                    directoryChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-                    int result = directoryChooser.showOpenDialog(myFrame);
-                    if (result == JFileChooser.APPROVE_OPTION) {
-                        String directory = directoryChooser.getSelectedFile().getAbsolutePath();
-                        if (recipient != null) {
-                            MessageGui.super.exportFile(recipient, username, isUserSeller, isUserStore, directory);
-                            JOptionPane.showMessageDialog(null, "Export Successful");
-                        } else {
-                            JOptionPane.showMessageDialog(null, "Please choose a recipient first"
-                                    , "Error", JOptionPane.ERROR_MESSAGE);
-                        }
-                    }
-
+        exportFileButton.addActionListener(e -> {
+            if (e.getSource() == exportFileButton) {
+                if (recipient == null) {
+                    JOptionPane.showMessageDialog(null, "Please select a recipient first",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
+                JFileChooser directoryChooser = new JFileChooser();
+                directoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                directoryChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+                int result = directoryChooser.showOpenDialog(myFrame);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    String directory = directoryChooser.getSelectedFile().getAbsolutePath();
+                    if (recipient != null) {
+                        MessageGui.super.exportFile(recipient, username, isUserSeller, isUserStore, directory);
+                        JOptionPane.showMessageDialog(null, "Export Successful");
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Please choose a recipient first"
+                                , "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+
             }
         });
         topPanel.add(exportFileButton);
@@ -583,7 +569,7 @@ public class MessageGui extends Client implements Runnable{
 
             for (String s : messages) {
                 int numLines = 1 + s.length() / 160; // sets a factor for how many lines are needed
-                JTextArea tempLabel = new JTextArea(s);;
+                JTextArea tempLabel = new JTextArea(s);
                 tempLabel.setMaximumSize(new Dimension(820, numLines * 18));
                 tempLabel.setEditable(false);
                 tempLabel.setLineWrap(true);
@@ -600,23 +586,17 @@ public class MessageGui extends Client implements Runnable{
                             for (ActionListener al : deleteOption.getActionListeners()) {
                                 deleteOption.removeActionListener(al);
                             }
-                            deleteOption.addActionListener(new ActionListener() {
-                                @Override
-                                public void actionPerformed(ActionEvent e) {
-                                    if (e.getSource() == deleteOption) {
-                                        popupMenu1.setVisible(false);
-                                        MessageGui.super.appendOrDeleteSignal(true, username, recipient,
-                                                (storeName == null)? "nil" : storeName, !isUserSeller,
-                                                tempLabel.getText());
-                                        SwingUtilities.invokeLater(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                myFrame.invalidate();
-                                                createMessageGUI();
-                                                myFrame.revalidate();
-                                            }
-                                        });
-                                    }
+                            deleteOption.addActionListener(e1 -> {
+                                if (e1.getSource() == deleteOption) {
+                                    popupMenu1.setVisible(false);
+                                    MessageGui.super.appendOrDeleteSignal(true, username, recipient,
+                                            (storeName == null)? "nil" : storeName, !isUserSeller,
+                                            tempLabel.getText());
+                                    SwingUtilities.invokeLater(() -> {
+                                        myFrame.invalidate();
+                                        createMessageGUI();
+                                        myFrame.revalidate();
+                                    });
                                 }
                             });
 
@@ -625,40 +605,31 @@ public class MessageGui extends Client implements Runnable{
                             for (ActionListener al : editOption.getActionListeners()) {
                                 editOption.removeActionListener(al);
                             }
-                            editOption.addActionListener(new ActionListener() {
-                                @Override
-                                public void actionPerformed(ActionEvent e) {
-                                    if (e.getSource() == editOption) {
-                                        popupMenu1.setVisible(false);
-                                        String newMessage = JOptionPane.showInputDialog("Current Message: " +
-                                                tempLabel.getText().substring(s.indexOf("-") + 2) +
-                                                "\nWhat would you like the new " +
-                                                "message to say?");
-                                        if (newMessage != null) {
-                                            MessageGui.super.editSignal(false, username, recipient,
-                                                    (storeName == null)? "nil":storeName, !isUserSeller,
-                                                    tempLabel.getText(), newMessage);
-                                        }
-                                        SwingUtilities.invokeLater(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                myFrame.invalidate();
-                                                createMessageGUI();
-                                                myFrame.revalidate();
-                                            }
-                                        });
+                            editOption.addActionListener(e12 -> {
+                                if (e12.getSource() == editOption) {
+                                    popupMenu1.setVisible(false);
+                                    String newMessage = JOptionPane.showInputDialog("Current Message: " +
+                                            tempLabel.getText().substring(s.indexOf("-") + 2) +
+                                            "\nWhat would you like the new " +
+                                            "message to say?");
+                                    if (newMessage != null) {
+                                        MessageGui.super.editSignal(false, username, recipient,
+                                                (storeName == null)? "nil":storeName, !isUserSeller,
+                                                tempLabel.getText(), newMessage);
                                     }
+                                    SwingUtilities.invokeLater(() -> {
+                                        myFrame.invalidate();
+                                        createMessageGUI();
+                                        myFrame.revalidate();
+                                    });
                                 }
                             });
 
                             cancelOption.setLayout(null);
                             cancelOption.setMaximumSize(new Dimension(74, 28));
-                            cancelOption.addActionListener(new ActionListener() {
-                                @Override
-                                public void actionPerformed(ActionEvent e) {
-                                    if (e.getSource() == cancelOption) {
-                                        popupMenu1.setVisible(false);
-                                    }
+                            cancelOption.addActionListener(e13 -> {
+                                if (e13.getSource() == cancelOption) {
+                                    popupMenu1.setVisible(false);
                                 }
                             });
                             popupMenu1.add(deleteOption);
@@ -707,19 +678,16 @@ public class MessageGui extends Client implements Runnable{
         System.out.println("recipient " + this.recipient);
         System.out.println("store " + this.storeName);
 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                createTopPanel();
-                createMessageGUI();
-                myFrame.revalidate();
-            }
+        SwingUtilities.invokeLater(() -> {
+            createTopPanel();
+            createMessageGUI();
+            myFrame.revalidate();
         });
 
     }
 
     public MessageGui(String username, boolean isUserSeller, Socket socket) {
-        super(username, socket);
+        super(socket);
         this.username = username;
         this.isUserSeller = isUserSeller;
         if (isUserSeller) {
@@ -742,15 +710,12 @@ public class MessageGui extends Client implements Runnable{
         for (ActionListener al : invisibleOption.getActionListeners()) {
             invisibleOption.removeActionListener(al);
         }
-        invisibleOption.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (e.getSource() == invisibleOption) {
-                    popupMenu2.setVisible(false);
-                    System.out.println("invisible");
-                    // TODO call make invisible
-                    sendBlockInvisibleSignal("invisible", username, Boolean.toString(isUserSeller), receiver);
-                }
+        invisibleOption.addActionListener(e1 -> {
+            if (e1.getSource() == invisibleOption) {
+                popupMenu2.setVisible(false);
+                System.out.println("invisible");
+                // TODO call make invisible
+                sendBlockInvisibleSignal("invisible", username, Boolean.toString(isUserSeller), receiver);
             }
         });
 
@@ -759,15 +724,12 @@ public class MessageGui extends Client implements Runnable{
         for (ActionListener al : becomeVisibleOption.getActionListeners()) {
             becomeVisibleOption.removeActionListener(al);
         }
-        becomeVisibleOption.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (e.getSource() == becomeVisibleOption) {
-                    popupMenu2.setVisible(false);
-                    System.out.println("visible");
-                    // TODO call make visible again
-                    sendBlockInvisibleSignal("visible", username, Boolean.toString(isUserSeller), receiver);
-                }
+        becomeVisibleOption.addActionListener(e12 -> {
+            if (e12.getSource() == becomeVisibleOption) {
+                popupMenu2.setVisible(false);
+                System.out.println("visible");
+                // TODO call make visible again
+                sendBlockInvisibleSignal("visible", username, Boolean.toString(isUserSeller), receiver);
             }
         });
 
@@ -776,15 +738,12 @@ public class MessageGui extends Client implements Runnable{
         for (ActionListener al : blockOption.getActionListeners()) {
             blockOption.removeActionListener(al);
         }
-        blockOption.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (e.getSource() == blockOption) {
-                    popupMenu2.setVisible(false);
-                    System.out.println("blocking");
-                    // TODO block the user
-                    sendBlockInvisibleSignal("block", username, Boolean.toString(isUserSeller), receiver);
-                }
+        blockOption.addActionListener(e13 -> {
+            if (e13.getSource() == blockOption) {
+                popupMenu2.setVisible(false);
+                System.out.println("blocking");
+                // TODO block the user
+                sendBlockInvisibleSignal("block", username, Boolean.toString(isUserSeller), receiver);
             }
         });
 
@@ -793,26 +752,20 @@ public class MessageGui extends Client implements Runnable{
         for (ActionListener al : unblockOption.getActionListeners()) {
             unblockOption.removeActionListener(al);
         }
-        unblockOption.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (e.getSource() == unblockOption) {
-                    popupMenu2.setVisible(false);
-                    System.out.println("unblocking");
-                    // TODO unblock the user
-                    sendBlockInvisibleSignal("unblock", username, Boolean.toString(isUserSeller), receiver);
-                }
+        unblockOption.addActionListener(e14 -> {
+            if (e14.getSource() == unblockOption) {
+                popupMenu2.setVisible(false);
+                System.out.println("unblocking");
+                // TODO unblock the user
+                sendBlockInvisibleSignal("unblock", username, Boolean.toString(isUserSeller), receiver);
             }
         });
 
         cancelOption.setLayout(null);
         cancelOption.setMaximumSize(new Dimension(200, 28));
-        cancelOption.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (e.getSource() == cancelOption) {
-                    popupMenu2.setVisible(false);
-                }
+        cancelOption.addActionListener(e15 -> {
+            if (e15.getSource() == cancelOption) {
+                popupMenu2.setVisible(false);
             }
         });
         boolean isBlocked = isBlockedOrCannotSee(0, username, Boolean.toString(isUserSeller),
@@ -1010,7 +963,7 @@ public class MessageGui extends Client implements Runnable{
             label1.setHorizontalAlignment(JLabel.CENTER);
 
 
-            Map attributes = label1.getFont().getAttributes();
+            Map<TextAttribute, Integer> attributes = (Map<TextAttribute, Integer>) label1.getFont().getAttributes();
             attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
             label1.setFont(label1.getFont().deriveFont(attributes));
 
@@ -1018,25 +971,19 @@ public class MessageGui extends Client implements Runnable{
             sortNames.setBounds(90, 15, 20, 20);
             sortNames.setMargin(new Insets(0,-1,0,0));
             sortNames.setFocusPainted(false);
-            sortNames.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (e.getSource() == sortNames) {
-                        if (sortNames.getText().equals("▲")) {
-                            sortNames.setText("▼");
-                            sortType = 1;
-                        } else {
-                            sortNames.setText("▲");
-                            sortType = 0;
-                        }
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                createStatisticsGUI();
-                                metricsFrame.revalidate();
-                            }
-                        });
+            sortNames.addActionListener(e -> {
+                if (e.getSource() == sortNames) {
+                    if (sortNames.getText().equals("▲")) {
+                        sortNames.setText("▼");
+                        sortType = 1;
+                    } else {
+                        sortNames.setText("▲");
+                        sortType = 0;
                     }
+                    SwingUtilities.invokeLater(() -> {
+                        createStatisticsGUI();
+                        metricsFrame.revalidate();
+                    });
                 }
             });
 
@@ -1049,29 +996,23 @@ public class MessageGui extends Client implements Runnable{
             sortTotal.setBounds(330, 15, 20, 20);
             sortTotal.setMargin(new Insets(0,-1,0,0));
             sortTotal.setFocusPainted(false);
-            sortTotal.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (e.getSource() == sortTotal) {
-                        if (Objects.equals(sortTotal.getText(), "▲")) {
-                            sortTotal.setText("▼");
-                            sortType = 2;
-                        } else {
-                            sortTotal.setText("▲");
-                            sortType = 3;
-                        }
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                createStatisticsGUI();
-                                metricsFrame.revalidate();
-                            }
-                        });
+            sortTotal.addActionListener(e -> {
+                if (e.getSource() == sortTotal) {
+                    if (Objects.equals(sortTotal.getText(), "▲")) {
+                        sortTotal.setText("▼");
+                        sortType = 2;
+                    } else {
+                        sortTotal.setText("▲");
+                        sortType = 3;
                     }
+                    SwingUtilities.invokeLater(() -> {
+                        createStatisticsGUI();
+                        metricsFrame.revalidate();
+                    });
                 }
             });
 
-            attributes = label2.getFont().getAttributes();
+            attributes = (Map<TextAttribute, Integer>) label2.getFont().getAttributes();
             attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
             label2.setFont(label2.getFont().deriveFont(attributes));
 
@@ -1084,30 +1025,23 @@ public class MessageGui extends Client implements Runnable{
             sortPersonal.setBounds(560, 15, 20, 20);
             sortPersonal.setMargin(new Insets(0,-1,0,0));
             sortPersonal.setFocusPainted(false);
-            sortPersonal.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (e.getSource() == sortPersonal) {
-                        if (Objects.equals(sortPersonal.getText(), "▲")) {
-                            sortPersonal.setText("▼");
-                            sortType = 4;
-                        } else {
-                            sortPersonal.setText("▲");
-                            sortType = 5;
-                        }
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                metricsFrame.invalidate();
-                                createStatisticsGUI();
-                                metricsFrame.revalidate();
-                            }
-                        });
+            sortPersonal.addActionListener(e -> {
+                if (e.getSource() == sortPersonal) {
+                    if (Objects.equals(sortPersonal.getText(), "▲")) {
+                        sortPersonal.setText("▼");
+                        sortType = 4;
+                    } else {
+                        sortPersonal.setText("▲");
+                        sortType = 5;
                     }
+                    SwingUtilities.invokeLater(() -> {
+                        metricsFrame.invalidate();
+                        createStatisticsGUI();
+                        metricsFrame.revalidate();
+                    });
                 }
             });
-
-            attributes = label3.getFont().getAttributes();
+            attributes = (Map<TextAttribute, Integer>) label3.getFont().getAttributes();
             attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
             label3.setFont(label3.getFont().deriveFont(attributes));
 
@@ -1178,8 +1112,8 @@ public class MessageGui extends Client implements Runnable{
     public static void main(String[] args) throws IOException {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {}
-        SwingUtilities.invokeLater(new MessageGui("mulan", false, new Socket("localhost", 2000)));
+        } catch (Exception ignored) {}
+        SwingUtilities.invokeLater(new MessageGui("Buyer", false, new Socket("localhost", 2000)));
     }
 
 }
@@ -1195,6 +1129,4 @@ seller -> buyer         false or true. Username is always itself, recipient is a
  */
 //TODO bugs
 //todo metrics manager issue when deleting
-//todo update the buttons when a user adds a new chat
 //todo write test cases and record video and write readme
-//todo edit storeName

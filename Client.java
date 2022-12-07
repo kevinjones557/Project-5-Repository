@@ -7,21 +7,18 @@ import java.util.Arrays;
 /**
  * This is a class that sets up the client for each messenger, it is the parent class of the GUI and its functions
  * will be called from the GUI to send and recieve data to and from the server and hand it back to the GUI
- *
  * Its methods will be called by the MessageGUI and will in tern send information to and form server
  *
  * @author Kevin Jones
  * @version 11/20
  */
 public class Client {
-    private String name;
     private BufferedReader reader;
     private PrintWriter writer;
 
-    private Socket socket;
+    private final Socket socket;
 
-    public Client (String name, Socket socket) {
-        this.name = name;
+    public Client (Socket socket) {
         try {
             this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.writer = new PrintWriter(socket.getOutputStream());
@@ -90,7 +87,7 @@ public class Client {
 
 
     public void appendOrDeleteSignal(boolean delete, String sender, String recipient, String storeName,
-                                            boolean isBuyer, String message){
+                                     boolean isBuyer, String message){
         String buyer = (isBuyer)? "true" : "false";
 
         String sendData = "delete";
@@ -115,7 +112,7 @@ public class Client {
     }
 
     public void editSignal(boolean delete, String sender, String recipient, String storeName,
-                                  boolean isBuyer, String messageToEdit, String edit) {
+                           boolean isBuyer, String messageToEdit, String edit) {
         String buyer = "false";
         if(isBuyer) {
             buyer = "true";
@@ -156,7 +153,7 @@ public class Client {
      * @author John Brooks
      */
     public ArrayList<String> displaySignal(String sender, String recipient, String storeName,
-                                                   boolean isBuyer) {
+                                           boolean isBuyer) {
         String buyer = Boolean.toString(isBuyer);
 
         String sendData = "display";
@@ -184,7 +181,7 @@ public class Client {
         return null;
 
     }
-    
+
     public void importFile(String path, String recipient, String username, boolean isSeller,
                            boolean isUserStore, boolean isRecipientStore) {
         writer.println("importFile;" + path + ";" + recipient + ";" + username + ";" + isSeller + ";" +

@@ -19,6 +19,7 @@ public class UserManager {
         try {
             File f = new File(FileManager.getDirectoryFromUsername(username));
             String[] allFiles = f.list();
+            assert allFiles != null;
             for (String file : allFiles) {
                 if (Files.isDirectory(Paths.get(FileManager.getDirectoryFromUsername(username)
                         + "/" + file))) {
@@ -231,7 +232,7 @@ public class UserManager {
             String line = bfr.readLine();
             ArrayList<String> fileContents = new ArrayList<>();
             while (line != null && !line.isBlank()) {
-                if (line.substring(0, oldUsername.length()).equals(oldUsername)) {
+                if (line.startsWith(oldUsername)) {
                     line = newUsername + line.substring(oldUsername.length());
                 }
                 fileContents.add(line);
