@@ -487,7 +487,7 @@ public class LogInGui {
                             options[0] = "Yes";
                             options[1] = "No";
                             int deletionInput = JOptionPane.showOptionDialog(null,
-                                    "Do you really want to delete your account?" +
+                                    "Do you really want to delete your account? " +
                                             "This cannot be undone.",
                                     "Messaging program", 0,
                                     JOptionPane.QUESTION_MESSAGE, null, options, null);
@@ -544,7 +544,6 @@ public class LogInGui {
                                 newNameStatus = checkName(user, false, newUser);
                             }
                             writer.println("moveUsername;" + user + ";" + newUser);
-                            //TODO this isn't working
                             writer.flush();
                             //TODO MarketUser calls
                             //MarketUser.changeUsername(user, newUser);
