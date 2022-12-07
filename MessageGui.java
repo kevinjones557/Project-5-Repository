@@ -781,6 +781,152 @@ public class MessageGui extends Client implements Runnable{
             popupMenu1.setVisible(false);
             popupMenu2.setVisible(false);
             //TODO seller statistics gui
+            JPanel textPanel = new JPanel();
+            textPanel.setLayout(null);
+            textPanel.setBounds(0,0,600,50);
+
+            JLabel label1 = new JLabel("Stores and Customers");
+            label1.setFont(new Font("Times New Roman", Font.BOLD, 12));
+            label1.setBounds(20,0, 250, 50);
+            label1.setHorizontalAlignment(JLabel.CENTER);
+
+
+            Map attributes = label1.getFont().getAttributes();
+            attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+            label1.setFont(label1.getFont().deriveFont(attributes));
+
+            JButton sortNames = new JButton("▲");
+            sortNames.setBounds(215, 15, 20, 20);
+            sortNames.setMargin(new Insets(0,-1,0,0));
+            sortNames.setFocusPainted(false);
+            sortNames.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (e.getSource() == sortNames) {
+                        if (sortNames.getText().equals("▲")) {
+                            sortNames.setText("▼");
+                        } else {
+                            sortNames.setText("▲");
+                        }
+                    }
+                    sortNames.revalidate();
+                    textPanel.revalidate();
+                }
+            });
+
+            JLabel label2 = new JLabel("Most Common Overall Words");
+            label2.setFont(new Font("Times New Roman", Font.BOLD, 12));
+            label2.setBounds(280,0, 225, 50);
+            label2.setHorizontalAlignment(JLabel.RIGHT);
+
+            JButton sortTotal = new JButton("▲");
+            sortTotal.setBounds(520, 15, 20, 20);
+            sortTotal.setMargin(new Insets(0,-1,0,0));
+            sortTotal.setFocusPainted(false);
+            sortTotal.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (e.getSource() == sortTotal) {
+                        if (Objects.equals(sortTotal.getText(), "▲")) {
+                            sortTotal.setText("▼");
+                        } else {
+                            sortTotal.setText("▲");
+                        }
+                    }
+                }
+            });
+
+            attributes = label2.getFont().getAttributes();
+            attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
+            label2.setFont(label2.getFont().deriveFont(attributes));
+
+
+            textPanel.add(label1);
+            textPanel.add(label2);
+
+            textPanel.add(sortTotal);
+            textPanel.add(sortNames);
+
+
+            metricsFrame.add(textPanel);
+
+            Box labelBox = Box.createVerticalBox();
+            Box labelBox2 = Box.createVerticalBox();
+
+            ArrayList<String[]> metricsData = new ArrayList<>();
+            // TODO call client version of this
+            String[] data1 = {"Walmart-","Bob: 478","Jim: 7"};
+            String[] data2 = {"Target-","Billy: 700","Bob: 15"};
+            String[] data3 = {"GameStop-","Jimmy: 50","Todd: 30","William: 40"};
+            String[] dataOther = {"Aldi-","Jordan: 500"};
+            String[] dataOther2 = {"GameStop-","Jimmy: 50","Todd: 30","William: 40"};
+            String[] dataOther3 = {"GameStop-","Jimmy: 50","Todd: 30","William: 40"};
+            metricsData.add(data1);
+            metricsData.add(data2);
+            metricsData.add(data3);
+            metricsData.add(dataOther);
+            metricsData.add(dataOther2);
+            metricsData.add(dataOther3);
+
+            // TODO call client for common words
+            String[] data4 = {"the: 221", "a: 195", "product: 137", "sell: 122", "because: 96", "stock: 94", "we: 80", "sale: 73", "cost: 60", "discount: 50"};
+
+            for (String[] s : metricsData) {
+                JPanel tempPanel = new JPanel();
+                textPanel.setLayout(null);
+
+                JLabel labelStore = new JLabel(s[0]);
+                labelStore.setMaximumSize(new Dimension(90, 50));
+                labelStore.setHorizontalAlignment(JLabel.CENTER);
+                labelStore.setLocation(0, 0);
+                labelStore.setFont(new Font("Times New Roman", Font.BOLD, 20));
+
+                tempPanel.add(labelStore);
+                labelBox.add(tempPanel);
+
+                for (int i = 1; i < s.length; i++) {
+                    JPanel tempPanel2 = new JPanel();
+                    textPanel.setLayout(null);
+
+                    JLabel labelCustomer = new JLabel(s[i]);
+                    //labelCustomer.setMaximumSize(new Dimension(60, 20));
+                    labelCustomer.setHorizontalAlignment(JLabel.CENTER);
+                    //labelCustomer.setLocation(0, 0);
+                    labelCustomer.setFont(new Font("Times New Roman", Font.PLAIN, 13));
+
+                    tempPanel2.add(labelCustomer);
+                    labelBox.add(tempPanel2);
+                }
+            }
+
+            JPanel tempPanel3 = new JPanel();
+            textPanel.setLayout(null);
+
+            for (int i = 0; i < data4.length; i++) {
+                JPanel tempPanel4 = new JPanel();
+                textPanel.setLayout(null);
+
+                JLabel labelListOfWords = new JLabel(data4[i]);
+                labelListOfWords.setMaximumSize(new Dimension(90, 50));
+                labelListOfWords.setHorizontalAlignment(JLabel.CENTER);
+                labelListOfWords.setLocation(0, 0);
+                labelListOfWords.setFont(new Font("Times New Roman", Font.BOLD, 15));
+
+                tempPanel4.add(labelListOfWords);
+                labelBox2.add(tempPanel4);
+            }
+
+            JScrollPane metricsPanel = new JScrollPane(labelBox, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            JScrollPane metricsPanel2 = new JScrollPane(labelBox2, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            metricsPanel.setBounds(0, 50, 300, 510);
+            metricsPanel.setBorder(BorderFactory.createLineBorder(Color.white));
+            metricsPanel2.setBounds(300, 50, 285, 510);
+            metricsPanel2.setBorder(BorderFactory.createLineBorder(Color.white));
+            metricsFrame.add(metricsPanel);
+            metricsFrame.add(metricsPanel2);
+
         } else {
             popupMenu1.setVisible(false);
             popupMenu2.setVisible(false);
