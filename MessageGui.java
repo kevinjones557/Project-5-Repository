@@ -19,6 +19,7 @@ import java.util.*;
 public class MessageGui extends Client implements Runnable{
     //Gui initializations
     private final JFrame myFrame = new JFrame();
+    private final JFrame glassFrame = new JFrame();
     private final JFrame metricsFrame = new JFrame();
     private final JPanel topLeft = new JPanel();
     private final JScrollPane messagePanel = new JScrollPane();
@@ -37,6 +38,7 @@ public class MessageGui extends Client implements Runnable{
     private final JButton blockOption = new JButton("Block User");
     private final JButton unblockOption = new JButton("Unblock User");
     private final JLabel connectedLabel = new JLabel();
+    private final JPopupMenu popUpSetting = new JPopupMenu();
     private int sortType = 0;
     JLabel topLabel3 = new JLabel();
 
@@ -87,7 +89,7 @@ public class MessageGui extends Client implements Runnable{
         topLabel3.setText("Personal Chats ");
         topLabel3.setHorizontalTextPosition(SwingConstants.LEFT);
         topLabel3.setIcon(i);
-        topLabel3.setFont(new Font("Times New Roman", Font.BOLD, 18));
+        topLabel3.setFont(new Font("Arial", Font.BOLD, 18));
         topLabel3.setHorizontalAlignment(JLabel.CENTER);
         topLabel3.setMaximumSize(new Dimension(165, 45));
         userPanel.add(topLabel3, Component.LEFT_ALIGNMENT);
@@ -151,7 +153,7 @@ public class MessageGui extends Client implements Runnable{
                 System.out.println("hi"+store + buyerConversations);
                 if (buyerConversations.size() != 0) {
                     JLabel storeLabel = new JLabel(store + ":");
-                    storeLabel.setFont(new Font("Times New Roman", Font.BOLD, 25));
+                    storeLabel.setFont(new Font("Arial", Font.BOLD, 25));
                     storeLabel.setMaximumSize(new Dimension(165, 30));
                     storeLabel.setHorizontalAlignment(JLabel.CENTER);
                     userPanel.add(storeLabel);
@@ -352,7 +354,7 @@ public class MessageGui extends Client implements Runnable{
 
         //creating a label for the panel
         JLabel label = new JLabel("Type Message Here:");
-        label.setFont(new Font("Times New Roman", Font.BOLD, 25));
+        label.setFont(new Font("Arial", Font.BOLD, 20));
         label.setBounds(10,10,250,50); //171
         textPanel.add(label);
 
@@ -362,7 +364,7 @@ public class MessageGui extends Client implements Runnable{
         textField.setLineWrap(true);
         textField.setWrapStyleWord(true);
         JScrollPane typingSpace = new JScrollPane(textField);
-        typingSpace.setBounds(250, 8, 350, 55);
+        typingSpace.setBounds(220, 8, 380, 55);
         textPanel.add(typingSpace);
 
         ImageIcon i1 = new ImageIcon("ImageIcon/send.png");
@@ -456,23 +458,50 @@ public class MessageGui extends Client implements Runnable{
         } else if (this.storeName != null) {
             connectedLabel.setText("Connected with " + this.recipient + " through " + this.storeName);
         }
-        connectedLabel.setFont(new Font("Times New Roman", Font.BOLD, 25));
+        connectedLabel.setFont(new Font("Arial", Font.BOLD, 25));
         connectedLabel.setBounds(0, 0, 600, 45);
-        ImageIcon i = new ImageIcon("ImageIcon/info.png");
 
+        ImageIcon j = new ImageIcon("ImageIcon/settings.png");
+        Image image9 = j.getImage();
+        Image rescaled9 = image9.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
+        j = new ImageIcon(rescaled9);
+
+        JLabel setting = new JLabel(j);
+        setting.setBounds(770, 5, 40, 40);
+
+        JButton settingButton = new JButton();
+        settingButton.setFocusable(false);
+        settingButton.setBounds(770, 8, 40, 40);
+        settingButton.setOpaque(false);
+        settingButton.setContentAreaFilled(false);
+        settingButton.setBorderPainted(false);
+        settingButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(e.getSource() == settingButton) {
+                    createPopUpSetting();
+                }
+            }
+        });
+
+
+
+        ImageIcon i = new ImageIcon("ImageIcon/info.png");
         Image image = i.getImage();
         Image rescaled = image.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
         i = new ImageIcon(rescaled);
         JLabel info = new JLabel(i);
         info.setToolTipText("Right click on a message to edit");
         info.setHorizontalAlignment(SwingConstants.RIGHT);
-        info.setBounds(780, 8, 40, 30);
+        info.setBounds(720, 8, 40, 30);
         connectedLabel.setHorizontalAlignment(JLabel.LEFT);
-        connectedLabel.setBorder(new EmptyBorder(10, 30, 10, 10));
+        connectedLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
         if (initialSetup) {
             topPanel.add(connectedLabel);
         }
         topPanel.add(info);
+        topPanel.add(settingButton);
+        topPanel.add(setting);
 
         ImageIcon i2 = new ImageIcon("ImageIcon/import.png");
 
@@ -698,6 +727,51 @@ public class MessageGui extends Client implements Runnable{
         // if not username is seller's name and storeName = null
     }
 
+    public void createPopUpSetting() {
+        glassFrame.setBounds(300, 10, 1000, 800);
+        glassFrame.setResizable(false);
+        glassFrame.setBackground(Color.BLACK);
+        JButton filter = new JButton("Message Filter");
+        filter.setFont(new Font("Arial", Font.PLAIN, 30));
+        filter.setMaximumSize(new Dimension(400, 50));
+        filter.setFocusable(false);
+
+        JButton vanish = new JButton("Vanish Mode");
+        vanish.setFont(new Font("Arial", Font.PLAIN, 30));
+        vanish.setMaximumSize(new Dimension(400, 50));
+        vanish.setFocusable(false);
+        vanish.setToolTipText("Feature coming in next update!");
+
+        ImageIcon bye = new ImageIcon("ImageIcon/exit.png");
+        JButton exit = new JButton("Exit", bye);
+        exit.setFont(new Font("Arial", Font.PLAIN, 30));
+        exit.setMaximumSize(new Dimension(400, 50));
+        exit.setFocusable(false);
+        exit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                glassFrame.dispose();
+                popUpSetting.removeAll();
+                popUpSetting.setVisible(false);
+            }
+        });
+
+        System.out.println("Button Clickable");
+        popUpSetting.add(filter);
+        popUpSetting.add(vanish);
+        popUpSetting.add(exit);
+        popUpSetting.setLocation(700, 300);
+        popUpSetting.setMaximumSize(new Dimension(800, 50));
+        popUpSetting.setMinimumSize(new Dimension(800, 50));
+        popUpSetting.setVisible(true);
+
+        glassFrame.dispose();
+        glassFrame.setUndecorated(true);
+        glassFrame.setOpacity(0.9f);
+        glassFrame.setVisible(true);
+
+        //myFrame.add(popUpSetting);
+    }
     public void createPopUpBlockInvisible(MouseEvent e, String receiver) {
         popupMenu1.setVisible(false);
         invisibleOption.setMaximumSize(new Dimension(200, 28));
@@ -803,7 +877,7 @@ public class MessageGui extends Client implements Runnable{
             textPanel.setBounds(0,0,600,50);
 
             JLabel label1 = new JLabel("Stores and Customers");
-            label1.setFont(new Font("Times New Roman", Font.BOLD, 12));
+            label1.setFont(new Font("Arial", Font.BOLD, 12));
             label1.setBounds(20,0, 250, 50);
             label1.setHorizontalAlignment(JLabel.CENTER);
 
@@ -829,7 +903,7 @@ public class MessageGui extends Client implements Runnable{
             });
 
             JLabel label2 = new JLabel("Most Common Overall Words");
-            label2.setFont(new Font("Times New Roman", Font.BOLD, 12));
+            label2.setFont(new Font("Arial", Font.BOLD, 12));
             label2.setBounds(280,0, 225, 50);
             label2.setHorizontalAlignment(JLabel.RIGHT);
 
@@ -890,7 +964,7 @@ public class MessageGui extends Client implements Runnable{
                 labelStore.setMaximumSize(new Dimension(90, 50));
                 labelStore.setHorizontalAlignment(JLabel.CENTER);
                 labelStore.setLocation(0, 0);
-                labelStore.setFont(new Font("Times New Roman", Font.BOLD, 20));
+                labelStore.setFont(new Font("Arial", Font.BOLD, 20));
 
                 tempPanel.add(labelStore);
                 labelBox.add(tempPanel);
@@ -903,7 +977,7 @@ public class MessageGui extends Client implements Runnable{
                     //labelCustomer.setMaximumSize(new Dimension(60, 20));
                     labelCustomer.setHorizontalAlignment(JLabel.CENTER);
                     //labelCustomer.setLocation(0, 0);
-                    labelCustomer.setFont(new Font("Times New Roman", Font.PLAIN, 13));
+                    labelCustomer.setFont(new Font("Arial", Font.PLAIN, 13));
 
                     tempPanel2.add(labelCustomer);
                     labelBox.add(tempPanel2);
@@ -920,7 +994,7 @@ public class MessageGui extends Client implements Runnable{
                 labelListOfWords.setMaximumSize(new Dimension(90, 50));
                 labelListOfWords.setHorizontalAlignment(JLabel.CENTER);
                 labelListOfWords.setLocation(0, 0);
-                labelListOfWords.setFont(new Font("Times New Roman", Font.BOLD, 15));
+                labelListOfWords.setFont(new Font("Arial", Font.BOLD, 15));
 
                 tempPanel4.add(labelListOfWords);
                 labelBox2.add(tempPanel4);
@@ -946,7 +1020,7 @@ public class MessageGui extends Client implements Runnable{
             textPanel.setBounds(0,0,600,50);
 
             JLabel label1 = new JLabel("Store Name");
-            label1.setFont(new Font("Times New Roman", Font.BOLD, 12));
+            label1.setFont(new Font("Arial", Font.BOLD, 12));
             label1.setBounds(0,0, 90, 50);
             label1.setHorizontalAlignment(JLabel.CENTER);
 
@@ -976,7 +1050,7 @@ public class MessageGui extends Client implements Runnable{
             });
 
             JLabel label2 = new JLabel("Total Messages Received by Store");
-            label2.setFont(new Font("Times New Roman", Font.BOLD, 12));
+            label2.setFont(new Font("Arial", Font.BOLD, 12));
             label2.setBounds(100,0, 225, 50);
             label2.setHorizontalAlignment(JLabel.RIGHT);
 
@@ -1005,7 +1079,7 @@ public class MessageGui extends Client implements Runnable{
             label2.setFont(label2.getFont().deriveFont(attributes));
 
             JLabel label3 = new JLabel("Number of Messages Sent to Store");
-            label3.setFont(new Font("Times New Roman", Font.BOLD, 12));
+            label3.setFont(new Font("Arial", Font.BOLD, 12));
             label3.setBounds(350,0, 225, 50);
             label3.setHorizontalAlignment(JLabel.CENTER);
 
@@ -1059,17 +1133,17 @@ public class MessageGui extends Client implements Runnable{
                 JLabel labelStore = new JLabel(s[0]);
                 labelStore.setHorizontalAlignment(JLabel.CENTER);
                 labelStore.setBounds(0, 0, 110, 50);
-                labelStore.setFont(new Font("Times New Roman", Font.BOLD, 20));
+                labelStore.setFont(new Font("Arial", Font.BOLD, 20));
 
                 JLabel labelTotal = new JLabel(s[1]);
                 labelTotal.setHorizontalAlignment(JLabel.CENTER);
                 labelTotal.setBounds(110, 0, 225, 50);
-                labelTotal.setFont(new Font("Times New Roman", Font.BOLD, 20));
+                labelTotal.setFont(new Font("Arial", Font.BOLD, 20));
 
                 JLabel labelPersonal = new JLabel(s[2]);
                 labelPersonal.setHorizontalAlignment(JLabel.CENTER);
                 labelPersonal.setBounds(350,0, 225, 50);
-                labelPersonal.setFont(new Font("Times New Roman", Font.BOLD, 20));
+                labelPersonal.setFont(new Font("Arial", Font.BOLD, 20));
 
 
                 tempPanel.add(labelStore);
