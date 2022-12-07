@@ -1118,3 +1118,7 @@ seller -> buyer         false or true. Username is always itself, recipient is a
 //TODO bugs
 //todo metrics manager issue when deleting
 //todo write test cases and record video and write readme
+//todo synchronize and document everything
+//todo combine login and messaging
+//todo sort seller metrics
+//todo get seller metrics from server
