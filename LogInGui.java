@@ -76,6 +76,10 @@ public class LogInGui {
             } else {
                 nameChecked = false;
             }
+            if (name.equals("") || name.length() < 4
+                    || name.length() > 16) {
+                return ("invalid");
+            }
             if (!nameChecked) {
                 return ("inUse");
             }
@@ -83,11 +87,6 @@ public class LogInGui {
                 deleteUserInProgress(user);
                 return (null);
             }
-            if (name.equals("") || name.length() < 4
-                    || name.length() > 16) {
-                return ("invalid");
-            }
-            //TODO finish for stores
         } else {
             writer.println("checkUsername;" + user);
             writer.flush();
@@ -98,7 +97,7 @@ public class LogInGui {
                 e.printStackTrace();
             }
             if (result.equals("inUse") || result.equals("invalid")) {
-                return(result);
+                return (result);
             }
         }
         String notAllowed = "`~!@#$%^&*()+-=[]{}\\|;:\"\'>.<,?/";
@@ -343,6 +342,7 @@ public class LogInGui {
                                                     "Messaging program", JOptionPane.PLAIN_MESSAGE);
                                             String storeStatus = checkName(storeName, true, user);
                                             if (storeStatus == null) {
+                                                deleteUserInProgress(user);
                                                 return;
                                             } else if (storeStatus.equals("inUse")) {
                                                 JOptionPane.showMessageDialog(null,
@@ -556,7 +556,7 @@ public class LogInGui {
                             writer.println("getUsersStores;" + user);
                             writer.flush();
                             String stores = reader.readLine();
-                            if (stores != null) {
+                            if (!stores.equals("null")) {
                                 List<String> storesArray = Arrays.asList(stores.split(", "));
                                 String[] storeOptions = new String[storesArray.size()];
                                 int index = 0;
@@ -586,6 +586,7 @@ public class LogInGui {
                                                     "Store name constraints: " +
                                                             "\n- Cannot be blank " +
                                                             "\n- Must be in between 4 and 16 characters inclusive " +
+                                                            "\n- Must not include symbols " +
                                                             "\nPlease enter a valid store name.",
                                                     "Messaging program", JOptionPane.ERROR_MESSAGE);
                                         } else if (storeStatus.equals("inUse")) {
@@ -610,11 +611,11 @@ public class LogInGui {
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
+                            } else {
+                                JOptionPane.showMessageDialog(null,
+                                        "You are not a seller!",
+                                        "Messaging program", JOptionPane.ERROR_MESSAGE);
                             }
-                        } else {
-                            JOptionPane.showMessageDialog(null,
-                                    "You are not a seller!",
-                                    "Messaging program", JOptionPane.ERROR_MESSAGE);
                         }
                     } else {
                         return;
