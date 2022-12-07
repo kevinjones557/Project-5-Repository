@@ -38,7 +38,6 @@ public class MessageGui extends Client implements Runnable{
     private final JButton unblockOption = new JButton("Unblock User");
     private final JLabel connectedLabel = new JLabel();
     private int sortType = 0;
-    JLabel info = new JLabel();
     JLabel topLabel3 = new JLabel();
 
     // characteristics of chat
@@ -376,36 +375,19 @@ public class MessageGui extends Client implements Runnable{
         sendButton.setFocusable(false);
         sendButton.setLayout(null);
         sendButton.setBounds(610, 10, 100, 50); //150
-        sendButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (e.getSource() == sendButton) {
-                    ArrayList<String> unblockedUsers = getUsersSignal(1, username, isUserSeller);
-                    System.out.println("blocked" + unblockedUsers);
-                    if (recipient == null) {
-                        JOptionPane.showMessageDialog(null, "Please select a recipient first"
-                        , "Error", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                    if (!unblockedUsers.contains(recipient)) {
-                        JOptionPane.showMessageDialog(null, "Sorry, this user has blocked you"
-                        , "Error", JOptionPane.ERROR_MESSAGE);
-                        return;
-                    }
-                    if (!textField.getText().isBlank() && recipient != null) {
-                        System.out.println(textField.getText().trim());
-                        MessageGui.super.appendOrDeleteSignal(false, username, recipient, (storeName == null)?
-                                "nil" : storeName, !isUserSeller, textField.getText().trim());
-                    }
-                    textField.setText("");
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            myFrame.invalidate();
-                            createMessageGUI();
-                            myFrame.revalidate();
-                        }
-                    });
+        sendButton.addActionListener(e -> {
+            if (e.getSource() == sendButton) {
+                ArrayList<String> unblockedUsers = getUsersSignal(1, username, isUserSeller);
+                System.out.println("blocked" + unblockedUsers);
+                if (recipient == null) {
+                    JOptionPane.showMessageDialog(null, "Please select a recipient first"
+                    , "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (!unblockedUsers.contains(recipient)) {
+                    JOptionPane.showMessageDialog(null, "Sorry, this user has blocked you"
+                    , "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
                 if (!textField.getText().isBlank() && recipient != null) {
                     System.out.println(textField.getText().trim());
@@ -419,6 +401,17 @@ public class MessageGui extends Client implements Runnable{
                     myFrame.revalidate();
                 });
             }
+            if (!textField.getText().isBlank() && recipient != null) {
+                System.out.println(textField.getText().trim());
+                MessageGui.super.appendOrDeleteSignal(false, username, recipient, (storeName == null)?
+                        "nil" : storeName, !isUserSeller, textField.getText().trim());
+            }
+            textField.setText("");
+            SwingUtilities.invokeLater(() -> {
+                myFrame.invalidate();
+                createMessageGUI();
+                myFrame.revalidate();
+            });
         });
 
         textPanel.add(sendButton);
@@ -433,12 +426,9 @@ public class MessageGui extends Client implements Runnable{
         clear.setFocusable(false);
         clear.setLayout(null);
         clear.setBounds(710, 10, 100, 50);
-        clear.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if(e.getSource() == clear) {
-                    textField.setText("");
-                }
+        clear.addActionListener(e -> {
+            if(e.getSource() == clear) {
+                textField.setText("");
             }
         });
         textPanel.add(clear);
@@ -826,19 +816,16 @@ public class MessageGui extends Client implements Runnable{
             sortNames.setBounds(215, 15, 20, 20);
             sortNames.setMargin(new Insets(0,-1,0,0));
             sortNames.setFocusPainted(false);
-            sortNames.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (e.getSource() == sortNames) {
-                        if (sortNames.getText().equals("▲")) {
-                            sortNames.setText("▼");
-                        } else {
-                            sortNames.setText("▲");
-                        }
+            sortNames.addActionListener(e -> {
+                if (e.getSource() == sortNames) {
+                    if (sortNames.getText().equals("▲")) {
+                        sortNames.setText("▼");
+                    } else {
+                        sortNames.setText("▲");
                     }
-                    sortNames.revalidate();
-                    textPanel.revalidate();
                 }
+                sortNames.revalidate();
+                textPanel.revalidate();
             });
 
             JLabel label2 = new JLabel("Most Common Overall Words");
@@ -850,15 +837,12 @@ public class MessageGui extends Client implements Runnable{
             sortTotal.setBounds(520, 15, 20, 20);
             sortTotal.setMargin(new Insets(0,-1,0,0));
             sortTotal.setFocusPainted(false);
-            sortTotal.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    if (e.getSource() == sortTotal) {
-                        if (Objects.equals(sortTotal.getText(), "▲")) {
-                            sortTotal.setText("▼");
-                        } else {
-                            sortTotal.setText("▲");
-                        }
+            sortTotal.addActionListener(e -> {
+                if (e.getSource() == sortTotal) {
+                    if (Objects.equals(sortTotal.getText(), "▲")) {
+                        sortTotal.setText("▼");
+                    } else {
+                        sortTotal.setText("▲");
                     }
                 }
             });
@@ -926,14 +910,13 @@ public class MessageGui extends Client implements Runnable{
                 }
             }
 
-            JPanel tempPanel3 = new JPanel();
             textPanel.setLayout(null);
 
-            for (int i = 0; i < data4.length; i++) {
+            for (String s : data4) {
                 JPanel tempPanel4 = new JPanel();
                 textPanel.setLayout(null);
 
-                JLabel labelListOfWords = new JLabel(data4[i]);
+                JLabel labelListOfWords = new JLabel(s);
                 labelListOfWords.setMaximumSize(new Dimension(90, 50));
                 labelListOfWords.setHorizontalAlignment(JLabel.CENTER);
                 labelListOfWords.setLocation(0, 0);
@@ -1118,7 +1101,7 @@ public class MessageGui extends Client implements Runnable{
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ignored) {}
-        SwingUtilities.invokeLater(new MessageGui("Buyer", false, new Socket("localhost", 2000)));
+        SwingUtilities.invokeLater(new MessageGui("mulan", false, new Socket("localhost", 2000)));
     }
 
 }

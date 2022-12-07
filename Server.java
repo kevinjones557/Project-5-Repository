@@ -3,9 +3,7 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * This will be a class that sets up the server for the messaging system
@@ -32,6 +30,9 @@ public class Server extends Thread {
     }
 
     public static void main(String[] args) throws IOException {
+        //create folder for filter message
+        File filterRoot = new File("filter");
+        filterRoot.mkdir();
         while (true) {
             Server server = new Server(serverSocket.accept());
             server.start();
@@ -47,13 +48,18 @@ public class Server extends Thread {
             while (true) {
                 String request = reader.readLine();
                 System.out.println("all " + request);
-                String instruction = request.substring(0, request.indexOf(';'));
+                String instruction = "";
+                try {
+                    instruction = request.substring(0, request.indexOf(';'));
+                } catch (IndexOutOfBoundsException e) {
+                    System.out.println("Not to worry");
+                }
                 System.out.println("instruction " + instruction);
                 String contents = "";
                 try {
                     contents = request.substring(request.indexOf(";") + 1);
                 } catch (IndexOutOfBoundsException e) {
-                    continue;
+                    System.out.println("Not to worry");
                 }
                 System.out.println("contents " + contents);
                 // TODO: convert this to a switch and make logic into individual methods to improve readability
@@ -117,46 +123,46 @@ public class Server extends Thread {
                 } else if (instruction.equals("getConversationsFromUser")) {
                     writer.println(String.join(";", FileManager.getConversationsFromUser(contents)));
                     writer.flush();
-                } else if (instruction.equals("removeRenamedStore")) {
-                    handleRemoveRenamedStore(contents, socket, writer);
+                } else if (instruction.equals("removeNamedStore")) {
+                    handleRemoveNamedStore(request, socket);
                 } else if (instruction.equals("isSeller")) {
-                    handleIsSeller(contents, socket, writer);
-                } else if (instruction.equals("getUsersStores")) {
-                    handleGetUsersStores(contents, socket, writer);
+                    handleIsSeller(request, socket);
+                } else if (instruction.equals("getUserStores")) {
+                    handleGetUserStores(request, socket);
                 } else if (instruction.equals("appendStoreList")) {
-                    handleAppendStoreList(contents, socket, writer);
+                    handleAppendStoreList(request, socket);
                 } else if (instruction.equals("readPassword")) {
-                    handleReadPassword(contents, socket, writer);
-                } else if (instruction.equals("writeFile")) { // with append param
-                    handleWriteFileAppend(contents, socket, writer);
+                    handleReadPassword(request, socket);
+                } else if (instruction.equals("writeFile1")) { // without append param
+                    handleWriteFileNoAppend(request, socket);
+                } else if (instruction.equals("writeFile2")) { // with append param
+                    handleWriteFileAppend(request, socket);
                 } else if (instruction.equals("encryptFile")) {
-                    handleEncryptFile(contents, socket, writer);
+                    handleEncryptFile(request, socket);
                 } else if (instruction.equals("checkStoreList")) {
-                    handleCheckStoreList(contents, socket, writer);
-                } else if (instruction.equals("checkUsername")) {
-                    handleCheckUsername(contents, socket, writer);
+                    handleCheckStoreList(request, socket);
+                } else if (instruction.equals("checkName")) {
+                    handleCheckName(request, socket);
                 } else if (instruction.equals("deleteUserInProgress")) {
-                    handleDeleteUserInProgress(contents, socket, writer);
+                    handleDeleteUserInProgress(request, socket);
                 } else if (instruction.equals("createUser")) {
-                    handleCreateUser(contents, socket, writer);
+                    handleCreateUser(request, socket);
                 } else if (instruction.equals("checkPassword")) {
-                    handleCheckPassword(contents, socket, writer);
+                    handleCheckPassword(request, socket);
                 } else if (instruction.equals("moveUsername")) {
-                    handleMoveUsername(contents, socket, writer);
-                } else if (instruction.equals("changeStoreName")) {
-                    handleChangeStoreName(contents, socket, writer);
+                    handleMoveUsername(request, socket);
                 } else if (instruction.equals("checkUserExists")) {
-                    handleCheckUserExists(contents, socket, writer);
+                    handleCheckUserExists(request, socket);
                 } else if (instruction.equals("updateStoreList")) {
-                    handleUpdateStoreList(contents, socket, writer);
-                } else if (instruction.equals("append")) {
+                    handleUpdateStoreList(request, socket);
+                } else if (request.equals("append")) {
                     appendReceive(reader);
-                } else if (instruction.equals("delete")) {
+                } else if (request.equals("delete")) {
                     deleteReceive(reader);
-                } else if (instruction.equals("edit")) {
+                } else if (request.equals("edit")) {
                     editReceive(reader);
-                } else if (instruction.equals("display")) {
-                    displayReceive(reader, writer);
+                } else if (request.equals("display")) {
+                    displayReceive(reader, socket);
                 } else if (instruction.equals("invisible")) {
                     Invisible.becomeInvisibleToUser(request.split(";")[1], request.split(";")[3],
                             Boolean.parseBoolean(request.split(";")[2]));
@@ -182,6 +188,7 @@ public class Server extends Thread {
                     writer.println(sendBack);
                     writer.flush();
                 } else if (instruction.equals("getAvailableUsers")){
+                    System.out.println("hi");
                     String[] ins = request.split(";");
                     String sendBack = String.join(";", Invisible.getAvailableUsers(ins[1],
                             Boolean.parseBoolean(ins[2])));
@@ -193,12 +200,90 @@ public class Server extends Thread {
                             Boolean.parseBoolean(ins[2])));
                     writer.println(sendBack);
                     writer.flush();
-                }else if (instruction.equals("getBuyerMetricData")) {
+                } else if (instruction.equals("getAvailableStores")){
+                    String[] ins = request.split(";");
+                    String sendBack = String.join(";", Invisible.getAvailableStores(ins[1]));
+                    System.out.println(sendBack);
+                    writer.println(sendBack);
+                    writer.flush();
+                } else if (instruction.equals("getMessageAbleStores")) {
+                    String[] ins = request.split(";");
+                    String sendBack = String.join(";", Blocking.getMessageAbleStores(ins[1]));
+                    writer.println(sendBack);
+                    writer.flush();
+                } else if (instruction.equals("getBuyerMetricData")) {
                     ArrayList<String[]> data = handleGetBuyerMetricData(request, storeNameMap);
                     ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
                     outputStream.writeObject(data);
                     outputStream.flush();
+                } else if (instruction.equals("getFilteringList")) {
+                    String sendBack = String.join(";",(String[])
+                            Filtering.censoredList(request.split(";")[1]).toArray());
+                    writer.println(sendBack);
+                    writer.flush();
+                } else if (instruction.equals("addFilter")) {
+                    String[] ins = request.split(";");
+                    try {
+                        Filtering.addFilter(ins[1], ins[2], ins[3]);
+                    } catch(Exception e) {
 
+                    }
+                } else if (instruction.equals("deleteFilter")) {
+                    String[] ins = request.split(";");
+                    try {
+                        Filtering.deleteFilter(ins[1], ins[2]);
+                    } catch (Exception e) {
+
+                    }
+                } else if (instruction.equals("editFilter")) {
+                    String[] ins = request.split(";");
+                    try {
+                        Filtering.editFilter(ins[1], ins[2], ins[3]);
+                    } catch (Exception e) {
+
+                    }
+                } else if (instruction.equals("editUsername")) {
+                    //sample request: editUsername;<oldUsername>;<newUsername>
+                    UserManager.changeUsername(contents.substring(0, contents.indexOf(";")),
+                            contents.substring(contents.indexOf(";") + 1));
+                } else if (instruction.equals("deleteUser")) {
+                    //sample request: deleteUser;<username>
+                    UserManager.deleteUsername(contents);
+                } else if (instruction.equals("changeStoreName")) {
+                    //sample request: editUsername;<oldStoreName>;<newStoreName>
+                    UserManager.changeStoreName(contents.substring(0, contents.indexOf(";")),
+                            contents.substring(contents.indexOf(";") + 1));
+                } else if (instruction.equals("sortMetrics")) {
+                    String username = contents.substring(0, contents.indexOf(';'));
+                    String index = contents.substring(contents.indexOf(';') + 1);
+                    ArrayList<String[]> data = handleGetBuyerMetricData(username, storeNameMap);
+                    ObjectOutputStream ois = new ObjectOutputStream(socket.getOutputStream());
+                    switch (index) {
+                        case "0" ->  // alphabetical
+                                sortAlphabetically(data);
+                        case "1" -> {  // reverse alphabetical
+                            sortAlphabetically(data);
+                            Collections.reverse(data);
+                        }
+                        case "2" ->  // numerical by total
+                                sortNumerically(data, 1);
+                        case "3" -> {  // reverse numerical by total
+                            sortNumerically(data, 1);
+                            Collections.reverse(data);
+                        }
+                        case "4" ->  // numerical by personal
+                                sortNumerically(data, 2);
+                        case "5" -> {  // reverse numerical by personal
+                            sortNumerically(data, 2);
+                            Collections.reverse(data);
+                        }
+                    }
+                    for (String[] s : data) {
+                        System.out.println(Arrays.toString(s));
+                    }
+                    System.out.println();
+                    ois.writeObject(data);
+                    ois.flush();
                 }
             }
         } catch (IOException e) {
@@ -206,17 +291,52 @@ public class Server extends Thread {
         }
     }
 
-    private static ArrayList<String[]> handleGetBuyerMetricData(String request, LinkedHashMap<String, String> storeNameMap) throws IOException{
+    public static void sortAlphabetically (ArrayList<String[]> arr) {
+        String[] temp;
+        for (int i = 0; i < arr.size(); i++) {
+            for (int j = i + 1; j < arr.size(); j++) {
+                // to compare one string with other strings
+                if (arr.get(1)[0].compareTo(arr.get(j)[0]) > 0) {
+                    // swapping
+                    temp = arr.get(i);
+                    arr.set(i, arr.get(j));
+                    arr.set(j, temp);
+                }
+            }
+        }
+        for (String[] s : arr) {
+            System.out.println("in sort " + Arrays.toString(s));
+        }
+        System.out.println();
+    }
+
+    public static void sortNumerically (ArrayList<String[]> arr, int index) {
+        String[] temp;
+        for (int i = 0; i < arr.size(); i++) {
+            for (int j = i + 1; j < arr.size(); j++) {
+                // to compare one string with other strings
+                if (Integer.parseInt(arr.get(i)[index]) > Integer.parseInt(arr.get(j)[index])) {
+                    // swapping
+                    temp = arr.get(i);
+                    arr.set(i, arr.get(j));
+                    arr.set(j, temp);
+                }
+            }
+        }
+    }
+
+    private static ArrayList<String[]> handleGetBuyerMetricData(String request, LinkedHashMap<String,
+            String> storeNameMap) throws IOException{
         // parameters:
         // request; buyer's name
-        String username = request.substring(request.indexOf(";"));
+        String username = request.substring(request.indexOf(";") + 1);
         // return an arraylist of string arrays
         // each string array goes as follows
         // Store Name, Total Messages, Individual DMs
         ArrayList<String[]> metricData = new ArrayList<>();
         storeNameMap.forEach((store, seller) -> {
-            File metrics = new File(String.format("data/%s/%s/metrics.txt", seller, store));
-            File userMetrics = new File(String.format("data/%s/%s/%s" + "metrics.txt", seller, store, username));
+            File metrics = new File(String.format("data/sellers/%s/%s/metrics.txt", seller, store));
+            File userMetrics = new File(String.format("data/sellers/%s/%s/%s" + "metrics.txt", seller, store, username));
             try {
                 ArrayList<String> storeMetricsData = FileManager.readFile(metrics);
                 ArrayList<String> userMetricsData = FileManager.readFile(userMetrics);
@@ -232,147 +352,72 @@ public class Server extends Thread {
         });
         return metricData;
     }
-    private static void handleUpdateStoreList(String contents, Socket socket, PrintWriter writer) {
-        LogIn.updateStoreList(contents);
-    }
-
-    private static void handleCheckUserExists(String contents, Socket socket, PrintWriter writer) {
-        System.out.println(contents);
-        boolean exists = LogIn.checkUserExists(contents);
-        String s = "";
-        if (exists)
-            s = "true";
-        else {
-            s = "false";
-        }
-        writer.println(s);
-        writer.flush();
-    }
-
-    private static void handleChangeStoreName(String contents, Socket socket, PrintWriter pw) {
-        String array = contents.substring(0, contents.indexOf(";"));
-        array = array.substring(1, array.length() - 1) + ",";
-        List<String> storesArray = new ArrayList<String>();
-        while (array.contains(",")) {
-            storesArray.add(array.substring(0, array.indexOf(",")));
-            array = array.substring(array.indexOf(",") + 1);
-        }
-        String user = contents.substring(contents.indexOf(";") + 1);
-        try (BufferedReader br = new BufferedReader(new FileReader("users/" + user + "/" + user))) {
-            ArrayList<String> fileContents = new ArrayList<>();
-            String line = br.readLine();
-            while (line != null) {
-                fileContents.add(line);
-                line = br.readLine();
-            }
-            fileContents.set(3, storesArray.toString());
-            LogIn.writeFile(user);
-            for (int i = 0; i < fileContents.size(); i++) {
-                if (i != 0) {
-                    LogIn.writeFile(user, fileContents.get(i));
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void handleMoveUsername(String contents, Socket socket, PrintWriter pw) {
-        String user = contents.substring(0, contents.indexOf(";"));
-        String newUser = contents.substring(contents.indexOf(";") + 1);
-        LogIn.moveUsername(user, newUser);
-    }
-
-    private static void handleCheckPassword(String request, Socket socket, PrintWriter pw) {
+    private static void handleUpdateStoreList(String request, Socket socket) {
 
     }
 
-    private static void handleCreateUser(String contents, Socket socket, PrintWriter pw) {
-        LogIn.createUser(contents);
+    private static void handleCheckUserExists(String request, Socket socket) {
+
     }
 
-    private static void handleDeleteUserInProgress(String contents, Socket socket, PrintWriter pw) {
-        String user = contents;
-        LogIn.deleteUserInProgress(user);
+    private static void handleChangeStoreName(String request, Socket socket) {
+
     }
 
-    private static void handleCheckUsername(String contents, Socket socket, PrintWriter pw) {
-        String user = contents;
-        try {
-            File f;
-            File dir = new File("users/" + user);
-            if (!dir.createNewFile()) {
-                dir.delete();
-                pw.println("inUse");
-                pw.flush();
-                return;
-            }
-            if (user.equals("") || user.length() < 6 ||
-                    user.length() > 16 || user.contains(" ")) {
-                dir.delete();
-                pw.println("invalid");
-                pw.flush();
-                return;
-            }
-            pw.println("");
-            pw.flush();
-            dir.delete();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    private static void handleMoveUsername(String request, Socket socket) {
+
     }
 
-    private static void handleCheckStoreList(String contents, Socket socket, PrintWriter pw) {
-        String storeName = contents;
-        boolean result = LogIn.checkStoreList(storeName);
-        if (result) {
-            pw.println("true");
-            pw.flush();
-        } else {
-            pw.println("false");
-            pw.flush();
-        }
+    private static void handleCheckPassword(String request, Socket socket) {
+
     }
 
-    private static void handleEncryptFile(String contents, Socket socket, PrintWriter pw) {
-        String user = contents.substring(0, contents.indexOf(";"));
-        String password = contents.substring(contents.indexOf(";") + 1);
+    private static void handleCreateUser(String request, Socket socket) {
+
     }
 
-    private static void handleWriteFileAppend(String contents, Socket socket, PrintWriter pw) {
-        String user = contents.substring(0, contents.indexOf(";"));
-        String toAppend = contents.substring(contents.indexOf(";") + 1);
-        LogIn.writeFile(user, toAppend);
+    private static void handleDeleteUserInProgress(String request, Socket socket) {
+
     }
 
-    private static void handleReadPassword(String contents, Socket socket, PrintWriter pw) {
-        String password = LogIn.readPassword(contents);
-        pw.println(password);
-        pw.flush();
+    private static void handleCheckName(String request, Socket socket) {
+
     }
 
-    private static void handleAppendStoreList(String contents, Socket socket, PrintWriter pw) {
-        LogIn.appendStoreList(contents);
+    private static void handleCheckStoreList(String request, Socket socket) {
+
     }
 
-    private static void handleGetUsersStores(String contents, Socket socket, PrintWriter pw) {
-        String user = contents;
-        String toReturn = LogIn.getUsersStores(user);
-        System.out.println(toReturn);
-        pw.println(toReturn);
-        pw.flush();
+    private static void handleEncryptFile(String request, Socket socket) {
+
     }
 
-    private static void handleIsSeller(String contents, Socket socket, PrintWriter pw) {
-        String isSeller = LogIn.isSeller(contents);
-        pw.println(isSeller);
-        pw.flush();
+    private static void handleWriteFileAppend(String request, Socket socket) {
+
     }
 
-    private static void handleRemoveRenamedStore(String contents, Socket socket, PrintWriter pw) {
-        String storeToChange = contents.substring(0, contents.indexOf(";"));
-        String storeName = contents.substring(contents.indexOf(";") + 1);
-        LogIn.removeRenamedStore(storeToChange, storeName);
+    private static void handleWriteFileNoAppend(String request, Socket socket) {
+
+    }
+
+    private static void handleReadPassword(String request, Socket socket) {
+
+    }
+
+    private static void handleAppendStoreList(String request, Socket socket) {
+
+    }
+
+    private static void handleGetUserStores(String request, Socket socket) {
+
+    }
+
+    private static void handleIsSeller(String request, Socket socket) {
+
+    }
+
+    private static void handleRemoveNamedStore(String request, Socket socket) {
+
     }
 
     public static void checkIfMessageExists(String recipient, boolean isRecipientStore, boolean isSeller,
@@ -424,17 +469,17 @@ public class Server extends Thread {
     }
     public static void appendReceive(BufferedReader reader) {
         try {
+            System.out.println("appending message");
             String personData = reader.readLine();
+            System.out.println(personData);
             String sender = personData.substring(0, personData.indexOf(","));
             personData = personData.substring(personData.indexOf(",") + 1);
             String recipient = personData.substring(0, personData.indexOf(","));
             personData = personData.substring(personData.indexOf(",") + 1);
             String storeName = personData.substring(0, personData.indexOf(","));
             personData = personData.substring(personData.indexOf(",") + 1);
-            String buyer = personData.substring(0, personData.indexOf(","));
-            boolean isBuyer = false;
-            if (buyer.equals("true"))
-                isBuyer = true;
+            String buyer = personData;
+            boolean isBuyer = buyer.equals("true");
 
             String message = reader.readLine();
 
@@ -454,10 +499,8 @@ public class Server extends Thread {
             personData = personData.substring(personData.indexOf(",") + 1);
             String storeName = personData.substring(0, personData.indexOf(","));
             personData = personData.substring(personData.indexOf(",") + 1);
-            String buyer = personData.substring(0, personData.indexOf(","));
-            boolean isBuyer = false;
-            if (buyer.equals("true"))
-                isBuyer = true;
+            String buyer = personData;
+            boolean isBuyer = buyer.equals("true");
 
             String message = reader.readLine();
 
@@ -477,10 +520,8 @@ public class Server extends Thread {
             personData = personData.substring(personData.indexOf(",") + 1);
             String storeName = personData.substring(0, personData.indexOf(","));
             personData = personData.substring(personData.indexOf(",") + 1);
-            String buyer = personData.substring(0, personData.indexOf(","));
-            boolean isBuyer = false;
-            if (buyer.equals("true"))
-                isBuyer = true;
+            String buyer = personData;
+            boolean isBuyer = buyer.equals("true");
 
             String messageToEdit = reader.readLine();
             String edit = reader.readLine();
@@ -491,8 +532,9 @@ public class Server extends Thread {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
-    
-    public static void displayReceive(BufferedReader reader, PrintWriter writer) {
+
+    public static void displayReceive(BufferedReader reader, Socket socket) {
+        System.out.println("dislpaying");
         try {
             String personData = reader.readLine();
             String sender = personData.substring(0, personData.indexOf(","));
@@ -501,25 +543,19 @@ public class Server extends Thread {
             personData = personData.substring(personData.indexOf(",") + 1);
             String storeName = personData.substring(0, personData.indexOf(","));
             personData = personData.substring(personData.indexOf(",") + 1);
-            String buyer = personData.substring(0, personData.indexOf(","));
-            boolean isBuyer = false;
-            if (buyer.equals("true"))
-                isBuyer = true;
+            String buyer = personData;
+            boolean isBuyer = buyer.equals("true");
 
             ArrayList<String> messageContents = Message.displayMessage(sender, recipient, storeName, isBuyer);
-            String returnedContents = "";
-            for (int i = 0; i < messageContents.size(); i++) {
-                returnedContents = returnedContents + messageContents.get(i) + ": : : :";
-            }
-            writer.write(returnedContents);
-            writer.println();
-            writer.flush();
+            ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+            outputStream.writeObject(messageContents);
+            outputStream.flush();
         } catch (IOException e) {
             JOptionPane.showMessageDialog(null, "The data could not be handled.", "Messaging System",
                     JOptionPane.ERROR_MESSAGE);
         }
     }
-    
+
 
     public synchronized void importFile(String path, String recipient, String username, boolean isSeller,
                                         boolean isUserStore, boolean isRecipientStore,
@@ -586,7 +622,7 @@ public class Server extends Thread {
     }
 
     public void exportFile(String recipient, String username, boolean isSeller, boolean isUserStore,
-                         String path, LinkedHashMap<String, String> storeNameMap) {
+                           String path, LinkedHashMap<String, String> storeNameMap) {
         if (!path.endsWith("/")) {
             path += "/";
         }
