@@ -87,7 +87,7 @@ public class Client {
 
 
     public void appendOrDeleteSignal(boolean delete, String sender, String recipient, String storeName,
-                                            boolean isBuyer, String message){
+                                     boolean isBuyer, String message){
         String buyer = (isBuyer)? "true" : "false";
 
         String sendData = "delete";
@@ -112,7 +112,7 @@ public class Client {
     }
 
     public void editSignal(boolean delete, String sender, String recipient, String storeName,
-                                  boolean isBuyer, String messageToEdit, String edit) {
+                           boolean isBuyer, String messageToEdit, String edit) {
         String buyer = "false";
         if(isBuyer) {
             buyer = "true";
@@ -153,7 +153,7 @@ public class Client {
      * @author John Brooks
      */
     public ArrayList<String> displaySignal(String sender, String recipient, String storeName,
-                                                   boolean isBuyer) {
+                                           boolean isBuyer) {
         String buyer = Boolean.toString(isBuyer);
 
         String sendData = "display";
@@ -181,7 +181,7 @@ public class Client {
         return null;
 
     }
-    
+
     public void importFile(String path, String recipient, String username, boolean isSeller,
                            boolean isUserStore, boolean isRecipientStore) {
         writer.println("importFile;" + path + ";" + recipient + ";" + username + ";" + isSeller + ";" +
