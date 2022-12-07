@@ -78,7 +78,7 @@ public class MessageGui extends Client implements Runnable{
         topLeft.setLayout(null);
         topLeft.setBounds(0, 0, 165, 45);
 
-        ImageIcon i = new ImageIcon("info.png");
+        ImageIcon i = new ImageIcon("ImageIcon/info.png");
         Image image = i.getImage();
         Image rescaled = image.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
         i = new ImageIcon(rescaled);
@@ -197,7 +197,7 @@ public class MessageGui extends Client implements Runnable{
         topTextPanel.add(topLabel2);
         // creating buttons for bottom panel
 
-        ImageIcon i4 = new ImageIcon("search.jpg");
+        ImageIcon i4 = new ImageIcon("ImageIcon/search.jpg");
 
         Image image4 = i4.getImage();
         Image rescaled4 = image4.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
@@ -298,7 +298,7 @@ public class MessageGui extends Client implements Runnable{
             }
         });
 
-        ImageIcon i5 = new ImageIcon("statistic.png");
+        ImageIcon i5 = new ImageIcon("ImageIcon/statistic.png");
 
         Image image5 = i5.getImage();
         Image rescaled5 = image5.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
@@ -365,7 +365,7 @@ public class MessageGui extends Client implements Runnable{
         typingSpace.setBounds(250, 8, 350, 55);
         textPanel.add(typingSpace);
 
-        ImageIcon i1 = new ImageIcon("send.png");
+        ImageIcon i1 = new ImageIcon("ImageIcon/send.png");
 
         Image image = i1.getImage();
         Image rescaled = image.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
@@ -416,7 +416,7 @@ public class MessageGui extends Client implements Runnable{
 
         textPanel.add(sendButton);
 
-        ImageIcon i = new ImageIcon("clear.png");
+        ImageIcon i = new ImageIcon("ImageIcon/clear.png");
 
         Image image1 = i.getImage();
         Image rescaled1 = image1.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
@@ -458,7 +458,7 @@ public class MessageGui extends Client implements Runnable{
         }
         connectedLabel.setFont(new Font("Times New Roman", Font.BOLD, 25));
         connectedLabel.setBounds(0, 0, 600, 45);
-        ImageIcon i = new ImageIcon("info.png");
+        ImageIcon i = new ImageIcon("ImageIcon/info.png");
 
         Image image = i.getImage();
         Image rescaled = image.getScaledInstance(40, 40, Image.SCALE_SMOOTH);
@@ -474,7 +474,7 @@ public class MessageGui extends Client implements Runnable{
         }
         topPanel.add(info);
 
-        ImageIcon i2 = new ImageIcon("import.png");
+        ImageIcon i2 = new ImageIcon("ImageIcon/import.png");
 
         Image image2 = i2.getImage();
         Image rescaled2 = image2.getScaledInstance(30, 30, Image.SCALE_SMOOTH);
@@ -510,7 +510,7 @@ public class MessageGui extends Client implements Runnable{
         });
         topPanel.add(importFileButton);
 
-        ImageIcon i3 = new ImageIcon("export.png");
+        ImageIcon i3 = new ImageIcon("ImageIcon/export.png");
 
         Image image3 = i3.getImage();
         Image rescaled3 = image3.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
