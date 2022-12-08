@@ -114,10 +114,10 @@ public class MessageGui extends Client implements Runnable {
                             replacement = JOptionPane.showInputDialog(myFrame, "Enter the replacement",
                                     "Add Filter", JOptionPane.PLAIN_MESSAGE);
 
-                            if (replacement.isEmpty() || replacement == null) {
+                            if (replacement == null || replacement.isEmpty()) {
                                 JOptionPane.showMessageDialog(myFrame, "Word/Phrase cannot be empty!");
                             }
-                        } while (replacement.isEmpty() || replacement == null);
+                        } while (replacement == null || replacement.isEmpty());
                     }
                     boolean success = filteringSignal(0, username, censoredWord, replacement);
                     if (!success) {
@@ -196,7 +196,7 @@ public class MessageGui extends Client implements Runnable {
                     String censoredWord;
                     String replacement;
                     censoredWord = (String) JOptionPane.showInputDialog(myFrame,
-                            "Please choose a word to cancel censoring", "Delete Filter",
+                            "Please choose a word to edit replacement", "Edit Filter",
                             JOptionPane.PLAIN_MESSAGE, null, theList, theList[0]);
                     if (censoredWord != null) {
                         int isDefault = JOptionPane.showConfirmDialog(myFrame, "Do you want to use custom replacement?",
@@ -208,10 +208,10 @@ public class MessageGui extends Client implements Runnable {
                                 replacement = JOptionPane.showInputDialog(myFrame, "Enter the new replacement",
                                         "Edit Filter", JOptionPane.PLAIN_MESSAGE);
 
-                                if (replacement.isEmpty() || replacement == null) {
+                                if (replacement == null || replacement.isEmpty()) {
                                     JOptionPane.showMessageDialog(myFrame, "Word/Phrase cannot be empty!");
                                 }
-                            } while (replacement.isEmpty() || replacement == null);
+                            } while (replacement == null || replacement.isEmpty());
                         }
                         boolean success = filteringSignal(2, username, censoredWord, replacement);
                         if (!success) {

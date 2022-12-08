@@ -181,10 +181,10 @@ public class Filtering{
      * @param
      * @return
      */
-    public static String absoluteFilter(String message, ArrayList<String[]> censoredWordsPairs) {
+    public static String easyFilter(String message, ArrayList<String[]> censoredWordsPairs) {
         String ans = message;
         for (String[] censoredWordPair : censoredWordsPairs) {
-            ans = ans.replace(censoredWordPair[0], censoredWordPair[1]);
+            ans = ans.replaceAll( "(?i)" + censoredWordPair[0], censoredWordPair[1]);
         }
         return ans;
     }

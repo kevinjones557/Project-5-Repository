@@ -136,6 +136,8 @@ public class LogInGui {
         writer.println("removeRenamedStore;" + storeToChange + ";" + storeName);
         writer.flush();
         //TODO MarketUser calls
+        writer.write("changeStoreName;" + storeToChange +  ";" + storeName);
+        writer.flush();
         //MarketUser.changeStoreName(storeToChange, newName);
     }
 
@@ -226,7 +228,6 @@ public class LogInGui {
                             writer.flush();
                             String password = reader.readLine();
                             if (encrypt(passwordInput).equals(password)) {
-                                //TODO user logged in successfully
                                 JOptionPane.showMessageDialog(null,
                                         "Welcome!",
                                         "Messaging program", JOptionPane.PLAIN_MESSAGE);
@@ -460,7 +461,6 @@ public class LogInGui {
                 //TODO MarketUser calls
                 //MarketUser currentUser = new MarketUser(user, isSeller);
                 boolean running = true;
-                //boolean userDeleted = false;
                 while (running) {
                     options[0] = "User Interaction";
                     options[1] = "Account Changes";
@@ -469,13 +469,15 @@ public class LogInGui {
                             "Messaging program", 0,
                             JOptionPane.PLAIN_MESSAGE, null, options, null);
                     if (input == 0) {
-                        //currentUser.message();
+                        MessageGui messaging = new MessageGui(user, isSeller, s);
+                        messaging.run();
+                        return;
                     } else if (input == 1) {
                         String[] newOptions = new String[4];
                         newOptions[0] = "Edit your name";
                         newOptions[1] = "Delete your account";
                         newOptions[2] = "Change a store name";
-                        newOptions[3] = "Exit";
+                        newOptions[3] = "Exit to main menu";
                         input = JOptionPane.showOptionDialog(null,
                                 "Please choose an option.",
                                 "Messaging program", 0,
@@ -602,8 +604,6 @@ public class LogInGui {
                                         }
                                         storeStatus = checkName(storeName, true, user);
                                     }
-                                    //TODO I don't think this is needed
-                                    //removeRenamedStore(storeToChange, storeName);
                                     changeStoreName(storesArray, storeToChange, storeName, user);
                                     JOptionPane.showMessageDialog(null,
                                             "Name change successful!",
@@ -620,12 +620,6 @@ public class LogInGui {
                     } else {
                         return;
                     }
-                }
-                input = JOptionPane.showConfirmDialog(null,
-                        "Would you like to continue using the program?",
-                        "Messaging program", JOptionPane.YES_NO_OPTION);
-                if (input != 0) {
-                    return;
                 }
             } finally {
                 JOptionPane.showMessageDialog(null,
