@@ -12,81 +12,89 @@ import java.util.Scanner;
  * @version November 7 2022
  */
 public class Filtering{
-
+    public static final Object OBJ = new Object();
     public static ArrayList<String[]> censoredList(String username) {
-        ArrayList<String[]> censoredPairs = new ArrayList<>();
-        try {
-            File userFilter = new File("filter/" + username);
-            BufferedReader bfr = new BufferedReader(new FileReader(userFilter));
-            String line;
-            while ((line = bfr.readLine()) != null) {
-                censoredPairs.add(line.split(";"));
-            }
-            bfr.close();
-        } catch (IOException e) {
+        synchronized (OBJ) {
+            ArrayList<String[]> censoredPairs = new ArrayList<>();
+            try {
+                File userFilter = new File("filter/" + username);
+                BufferedReader bfr = new BufferedReader(new FileReader(userFilter));
+                String line;
+                while ((line = bfr.readLine()) != null) {
+                    censoredPairs.add(line.split(";"));
+                }
+                bfr.close();
+            } catch (IOException e) {
 
+            }
+            return censoredPairs;
         }
-        return censoredPairs;
     }
 
     public static boolean addFilter(String username, String censoredWord, String replacement) throws Exception {
-        File userFilter = new File("filter/" + username);
-        userFilter.createNewFile();
-        BufferedReader bfr = new BufferedReader(new FileReader(userFilter));
-        String line;
-        while((line = bfr.readLine())!= null) {
-            if(line.split(";")[0].equals(censoredWord)) {
-                return false;
+        synchronized (OBJ) {
+            File userFilter = new File("filter/" + username);
+            userFilter.createNewFile();
+            BufferedReader bfr = new BufferedReader(new FileReader(userFilter));
+            String line;
+            while ((line = bfr.readLine()) != null) {
+                if (line.split(";")[0].equals(censoredWord)) {
+                    return false;
+                }
             }
+            bfr.close();
+            PrintWriter wr = new PrintWriter(new FileWriter(userFilter, true));
+            wr.println(censoredWord + ";" + replacement);
+            wr.flush();
+            wr.close();
+            return true;
         }
-        bfr.close();
-        PrintWriter wr = new PrintWriter(new FileWriter(userFilter, true));
-        wr.println(censoredWord + ";" + replacement);
-        wr.flush();
-        wr.close();
-        return true;
     }
 
     public static void deleteFilter(String username, String censoredWord) throws Exception {
-        File userFilter = new File("filter/" + username);
-        userFilter.createNewFile();
-        ArrayList<String> newLines = new ArrayList<>();
-        BufferedReader bfr = new BufferedReader(new FileReader(userFilter));
-        String line;
-        while((line = bfr.readLine())!= null) {
-            if(!line.split(";")[0].equals(censoredWord)) {
-                newLines.add(line);
+        synchronized (OBJ) {
+            File userFilter = new File("filter/" + username);
+            userFilter.createNewFile();
+            ArrayList<String> newLines = new ArrayList<>();
+            BufferedReader bfr = new BufferedReader(new FileReader(userFilter));
+            String line;
+            while ((line = bfr.readLine()) != null) {
+                if (!line.split(";")[0].equals(censoredWord) && !line.isEmpty()) {
+                    newLines.add(line);
+                }
             }
+            bfr.close();
+            PrintWriter wr = new PrintWriter(new FileWriter(userFilter, false));
+            for (String l : newLines) {
+                wr.println(l);
+                wr.flush();
+            }
+            wr.close();
         }
-        bfr.close();
-        PrintWriter wr = new PrintWriter(new FileWriter(userFilter, false));
-        for(String l: newLines) {
-            wr.println(l);
-            wr.flush();
-        }
-        wr.close();
     }
 
     public static void editFilter(String username, String censoredWord, String newReplacement) throws Exception {
-        File userFilter = new File("filter/" + username);
-        userFilter.createNewFile();
-        ArrayList<String> newLines = new ArrayList<>();
-        BufferedReader bfr = new BufferedReader(new FileReader(userFilter));
-        String line;
-        while((line = bfr.readLine())!= null) {
-            if(line.split(";")[0].equals(censoredWord)) {
-                newLines.add(censoredWord + ";" + newReplacement);
-            } else {
-                newLines.add(line);
+        synchronized (OBJ) {
+            File userFilter = new File("filter/" + username);
+            userFilter.createNewFile();
+            ArrayList<String> newLines = new ArrayList<>();
+            BufferedReader bfr = new BufferedReader(new FileReader(userFilter));
+            String line;
+            while ((line = bfr.readLine()) != null) {
+                if (line.split(";")[0].equals(censoredWord)) {
+                    newLines.add(censoredWord + ";" + newReplacement);
+                } else if(!line.isEmpty()) {
+                    newLines.add(line);
+                }
             }
+            bfr.close();
+            PrintWriter wr = new PrintWriter(new FileWriter(userFilter, false));
+            for (String l : newLines) {
+                wr.println(l);
+                wr.flush();
+            }
+            wr.close();
         }
-        bfr.close();
-        PrintWriter wr = new PrintWriter(new FileWriter(userFilter, false));
-        for(String l: newLines) {
-            wr.println(l);
-            wr.flush();
-        }
-        wr.close();
     }
 
     /**
