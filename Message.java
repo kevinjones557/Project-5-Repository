@@ -32,11 +32,12 @@ public class Message {
                 fileRecipient = "data/buyers/" + recipient + "/" + recipient + sender + ".txt";
             }
         } else {
-            realSender = storeName;
             if (isBuyer) {
+                realSender = sender;
                 fileSender = "data/buyers/" + sender + "/" + sender + storeName + ".txt";
                 fileRecipient = "data/sellers/" + recipient + "/" + storeName + "/" + storeName + sender + ".txt";
             } else {
+                realSender = storeName;
                 fileSender = "data/sellers/" + sender + "/" + storeName + "/" + storeName + recipient + ".txt";
                 fileRecipient = "data/buyers/" + recipient + "/" + recipient + storeName + ".txt";
             }
