@@ -86,10 +86,10 @@ public class MessageGui extends Client implements Runnable{
         i = new ImageIcon(rescaled);
 
         topLabel3.removeAll();
-        topLabel3.setText("Personal Chats ");
+        topLabel3.setText("Personal Chats:");
         topLabel3.setHorizontalTextPosition(SwingConstants.LEFT);
         topLabel3.setIcon(i);
-        topLabel3.setFont(new Font("Arial", Font.BOLD, 18));
+        topLabel3.setFont(new Font("Arial", Font.BOLD, 17));
         topLabel3.setHorizontalAlignment(JLabel.CENTER);
         topLabel3.setMaximumSize(new Dimension(165, 45));
         userPanel.add(topLabel3, Component.LEFT_ALIGNMENT);
