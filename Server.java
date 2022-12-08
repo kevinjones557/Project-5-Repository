@@ -123,38 +123,38 @@ public class Server extends Thread {
                 } else if (instruction.equals("getConversationsFromUser")) {
                     writer.println(String.join(";", FileManager.getConversationsFromUser(contents)));
                     writer.flush();
-                } else if (instruction.equals("removeNamedStore")) {
-                    handleRemoveNamedStore(request, socket);
+                } else if (instruction.equals("removeRenamedStore")) {
+                    handleRemoveRenamedStore(contents, socket, writer);
                 } else if (instruction.equals("isSeller")) {
-                    handleIsSeller(request, socket);
-                } else if (instruction.equals("getUserStores")) {
-                    handleGetUserStores(request, socket);
+                    handleIsSeller(contents, socket, writer);
+                } else if (instruction.equals("getUsersStores")) {
+                    handleGetUsersStores(contents, socket, writer);
                 } else if (instruction.equals("appendStoreList")) {
-                    handleAppendStoreList(request, socket);
+                    handleAppendStoreList(contents, socket, writer);
                 } else if (instruction.equals("readPassword")) {
-                    handleReadPassword(request, socket);
-                } else if (instruction.equals("writeFile1")) { // without append param
-                    handleWriteFileNoAppend(request, socket);
-                } else if (instruction.equals("writeFile2")) { // with append param
-                    handleWriteFileAppend(request, socket);
+                    handleReadPassword(contents, socket, writer);
+                } else if (instruction.equals("writeFile")) { // with append param
+                    handleWriteFileAppend(contents, socket, writer);
                 } else if (instruction.equals("encryptFile")) {
-                    handleEncryptFile(request, socket);
+                    handleEncryptFile(contents, socket, writer);
                 } else if (instruction.equals("checkStoreList")) {
-                    handleCheckStoreList(request, socket);
-                } else if (instruction.equals("checkName")) {
-                    handleCheckName(request, socket);
+                    handleCheckStoreList(contents, socket, writer);
+                } else if (instruction.equals("checkUsername")) {
+                    handleCheckUsername(contents, socket, writer);
                 } else if (instruction.equals("deleteUserInProgress")) {
-                    handleDeleteUserInProgress(request, socket);
+                    handleDeleteUserInProgress(contents, socket, writer);
                 } else if (instruction.equals("createUser")) {
-                    handleCreateUser(request, socket);
+                    handleCreateUser(contents, socket, writer);
                 } else if (instruction.equals("checkPassword")) {
-                    handleCheckPassword(request, socket);
+                    handleCheckPassword(contents, socket, writer);
                 } else if (instruction.equals("moveUsername")) {
-                    handleMoveUsername(request, socket);
+                    handleMoveUsername(contents, socket, writer);
+                } else if (instruction.equals("changeStoreName")) {
+                    handleChangeStoreName(contents, socket, writer);
                 } else if (instruction.equals("checkUserExists")) {
-                    handleCheckUserExists(request, socket);
+                    handleCheckUserExists(contents, socket, writer);
                 } else if (instruction.equals("updateStoreList")) {
-                    handleUpdateStoreList(request, socket);
+                    handleUpdateStoreList(contents, socket, writer);
                 } else if (request.equals("append")) {
                     appendReceive(reader);
                 } else if (request.equals("delete")) {
@@ -364,72 +364,147 @@ public class Server extends Thread {
         });
         return metricData;
     }
-    private static void handleUpdateStoreList(String request, Socket socket) {
+    private static void handleUpdateStoreList(String contents, Socket socket, PrintWriter writer) {
+        LogIn.updateStoreList(contents);
+    }
+
+    private static void handleCheckUserExists(String contents, Socket socket, PrintWriter writer) {
+        System.out.println(contents);
+        boolean exists = LogIn.checkUserExists(contents);
+        String s = "";
+        if (exists)
+            s = "true";
+        else {
+            s = "false";
+        }
+        writer.println(s);
+        writer.flush();
+    }
+
+    private static void handleChangeStoreName(String contents, Socket socket, PrintWriter pw) {
+        String array = contents.substring(0, contents.indexOf(";"));
+        array = array.substring(1, array.length() - 1) + ", ";
+        List<String> storesArray = new ArrayList<String>();
+        while (array.contains(",")) {
+            storesArray.add(array.substring(0, array.indexOf(",")));
+            array = array.substring(array.indexOf(",") + 2);
+        }
+        String user = contents.substring(contents.indexOf(";") + 1);
+        try (BufferedReader br = new BufferedReader(new FileReader("users/" + user + "/" + user))) {
+            ArrayList<String> fileContents = new ArrayList<>();
+            String line = br.readLine();
+            while (line != null) {
+                fileContents.add(line);
+                line = br.readLine();
+            }
+            fileContents.set(3, storesArray.toString());
+            LogIn.writeFile(user);
+            for (int i = 0; i < fileContents.size(); i++) {
+                if (i != 0) {
+                    LogIn.writeFile(user, fileContents.get(i));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void handleMoveUsername(String contents, Socket socket, PrintWriter pw) {
+        String user = contents.substring(0, contents.indexOf(";"));
+        String newUser = contents.substring(contents.indexOf(";") + 1);
+        LogIn.moveUsername(user, newUser);
+    }
+
+    private static void handleCheckPassword(String request, Socket socket, PrintWriter pw) {
 
     }
 
-    private static void handleCheckUserExists(String request, Socket socket) {
-
+    private static void handleCreateUser(String contents, Socket socket, PrintWriter pw) {
+        LogIn.createUser(contents);
     }
 
-    private static void handleChangeStoreName(String request, Socket socket) {
-
+    private static void handleDeleteUserInProgress(String contents, Socket socket, PrintWriter pw) {
+        String user = contents;
+        LogIn.deleteUserInProgress(user);
     }
 
-    private static void handleMoveUsername(String request, Socket socket) {
-
+    private static void handleCheckUsername(String contents, Socket socket, PrintWriter pw) {
+        String user = contents;
+        try {
+            File f;
+            File dir = new File("users/" + user);
+            if (!dir.createNewFile()) {
+                dir.delete();
+                pw.println("inUse");
+                pw.flush();
+                return;
+            }
+            if (user.equals("") || user.length() < 6 ||
+                    user.length() > 16 || user.contains(" ")) {
+                dir.delete();
+                pw.println("invalid");
+                pw.flush();
+                return;
+            }
+            pw.println("");
+            pw.flush();
+            dir.delete();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    private static void handleCheckPassword(String request, Socket socket) {
-
+    private static void handleCheckStoreList(String contents, Socket socket, PrintWriter pw) {
+        String storeName = contents;
+        boolean result = LogIn.checkStoreList(storeName);
+        if (result) {
+            pw.println("true");
+            pw.flush();
+        } else {
+            pw.println("false");
+            pw.flush();
+        }
     }
 
-    private static void handleCreateUser(String request, Socket socket) {
-
+    private static void handleEncryptFile(String contents, Socket socket, PrintWriter pw) {
+        String user = contents.substring(0, contents.indexOf(";"));
+        String password = contents.substring(contents.indexOf(";") + 1);
     }
 
-    private static void handleDeleteUserInProgress(String request, Socket socket) {
-
+    private static void handleWriteFileAppend(String contents, Socket socket, PrintWriter pw) {
+        String user = contents.substring(0, contents.indexOf(";"));
+        String toAppend = contents.substring(contents.indexOf(";") + 1);
+        LogIn.writeFile(user, toAppend);
     }
 
-    private static void handleCheckName(String request, Socket socket) {
-
+    private static void handleReadPassword(String contents, Socket socket, PrintWriter pw) {
+        String password = LogIn.readPassword(contents);
+        pw.println(password);
+        pw.flush();
     }
 
-    private static void handleCheckStoreList(String request, Socket socket) {
-
+    private static void handleAppendStoreList(String contents, Socket socket, PrintWriter pw) {
+        LogIn.appendStoreList(contents);
     }
 
-    private static void handleEncryptFile(String request, Socket socket) {
-
+    private static void handleGetUsersStores(String contents, Socket socket, PrintWriter pw) {
+        String user = contents;
+        String toReturn = LogIn.getUsersStores(user);
+        System.out.println(toReturn);
+        pw.println(toReturn);
+        pw.flush();
     }
 
-    private static void handleWriteFileAppend(String request, Socket socket) {
-
+    private static void handleIsSeller(String contents, Socket socket, PrintWriter pw) {
+        String isSeller = LogIn.isSeller(contents);
+        pw.println(isSeller);
+        pw.flush();
     }
 
-    private static void handleWriteFileNoAppend(String request, Socket socket) {
-
-    }
-
-    private static void handleReadPassword(String request, Socket socket) {
-
-    }
-
-    private static void handleAppendStoreList(String request, Socket socket) {
-
-    }
-
-    private static void handleGetUserStores(String request, Socket socket) {
-
-    }
-
-    private static void handleIsSeller(String request, Socket socket) {
-
-    }
-
-    private static void handleRemoveNamedStore(String request, Socket socket) {
-
+    private static void handleRemoveRenamedStore(String contents, Socket socket, PrintWriter pw) {
+        String storeToChange = contents.substring(0, contents.indexOf(";"));
+        String storeName = contents.substring(contents.indexOf(";") + 1);
+        LogIn.removeRenamedStore(storeToChange, storeName);
     }
 
     public static void checkIfMessageExists(String recipient, boolean isRecipientStore, boolean isSeller,
