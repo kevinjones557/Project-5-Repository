@@ -16,7 +16,7 @@ import java.util.*;
  * @author Kevin Jones
  * @version 11/20
  */
-public class MessageGui extends Client implements Runnable{
+public class MessageGui extends Client implements Runnable {
     //Gui initializations
     private final JFrame myFrame = new JFrame();
     private final JFrame glassFrame = new JFrame();
@@ -29,7 +29,7 @@ public class MessageGui extends Client implements Runnable{
     private final Box labelBox = Box.createVerticalBox();
 
     private final JPopupMenu popupMenu1 = new JPopupMenu();
-    private final JPopupMenu popupMenu2 =  new JPopupMenu();
+    private final JPopupMenu popupMenu2 = new JPopupMenu();
     private final JButton editOption = new JButton("Edit");
     private final JButton deleteOption = new JButton("Delete");
     private final JButton cancelOption = new JButton("Cancel");
@@ -39,6 +39,7 @@ public class MessageGui extends Client implements Runnable{
     private final JButton unblockOption = new JButton("Unblock User");
     private final JLabel connectedLabel = new JLabel();
     private final JPopupMenu popUpSetting = new JPopupMenu();
+    private final JPopupMenu filterMain = new JPopupMenu();
     private int sortType = 0;
     JLabel topLabel3 = new JLabel();
 
@@ -51,6 +52,206 @@ public class MessageGui extends Client implements Runnable{
 
     private boolean isUserStore;
     private boolean initialSetup = true;
+
+    public void createFilterMain() {
+        popUpSetting.removeAll();
+        popUpSetting.setVisible(false);
+        ImageIcon i = new ImageIcon("ImageIcon/info.png");
+        Image image = i.getImage();
+        Image rescaled = image.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+        i = new ImageIcon(rescaled);
+
+        JButton instruction = new JButton("Instruction", i);
+        instruction.setFont(new Font("Arial", Font.PLAIN, 30));
+        instruction.setMaximumSize(new Dimension(400, 50));
+        instruction.setFocusable(false);
+        instruction.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                filterMain.setVisible(false);
+                String toDisplay = """
+                        Warning: intentionally messing with the filtering system may result
+                        in messages being extremely hard to read!
+                                                
+                        There are 3 options:
+                        1. Add filter: Add a word/phrase to censored and its replacement
+                        2. Delete filter: Remove the censoring of a word/phrase
+                        3. Edit filter: Edit a replacement of a censored word/phrase
+                        """;
+                JOptionPane.showConfirmDialog(myFrame, toDisplay, "Instructions",
+                        JOptionPane.DEFAULT_OPTION);
+                filterMain.setVisible(true);
+            }
+        });
+
+        JButton addFilter = new JButton("Add new filter");
+        addFilter.setFont(new Font("Arial", Font.PLAIN, 30));
+        addFilter.setMaximumSize(new Dimension(400, 50));
+        addFilter.setFocusable(false);
+        addFilter.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                filterMain.setVisible(false);
+                String censoredWord;
+                String replacement;
+                do {
+                    censoredWord = JOptionPane.showInputDialog(myFrame, "Enter word/phrase for censoring",
+                            "Add Filter", JOptionPane.PLAIN_MESSAGE);
+                    if (censoredWord == null) {
+                        break;
+                    }
+                    if (censoredWord.isEmpty()) {
+                        JOptionPane.showMessageDialog(myFrame, "Word/Phrase cannot be empty!");
+                    }
+                } while (censoredWord.isEmpty());
+                if (censoredWord != null) {
+                    int isDefault = JOptionPane.showConfirmDialog(myFrame, "Do you want to use custom replacement?",
+                            "Default", JOptionPane.YES_NO_OPTION);
+                    if (isDefault == 0) {
+                        replacement = "*".repeat(censoredWord.length());
+                    } else {
+                        do {
+                            replacement = JOptionPane.showInputDialog(myFrame, "Enter the replacement",
+                                    "Add Filter", JOptionPane.PLAIN_MESSAGE);
+
+                            if (replacement.isEmpty() || replacement == null) {
+                                JOptionPane.showMessageDialog(myFrame, "Word/Phrase cannot be empty!");
+                            }
+                        } while (replacement.isEmpty() || replacement == null);
+                    }
+                    boolean success = filteringSignal(0, username, censoredWord, replacement);
+                    if (!success) {
+                        String failMessage = """
+                                Add filter failed because either
+                                1. Word/Phrase to censor already existed
+                                2. Unexpected error occurred
+                                """;
+                        JOptionPane.showMessageDialog(myFrame, failMessage, "Error", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(myFrame,
+                                "Successfully censored " + "\"" + censoredWord + "\"", "Success",
+                                JOptionPane.INFORMATION_MESSAGE);
+                    }
+                }
+                filterMain.setVisible(true);
+            }
+        });
+
+
+        JButton deleteFilter = new JButton("Delete a filter");
+        deleteFilter.setFont(new Font("Arial", Font.PLAIN, 30));
+        deleteFilter.setMaximumSize(new Dimension(400, 50));
+        deleteFilter.setFocusable(false);
+        deleteFilter.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ArrayList<String> censoredList = getCensoredList(username);
+                String[] theList = new String[censoredList.size()];
+                for (int i = 0; i < theList.length; i++) {
+                    theList[i] = censoredList.get(i).split("@")[0];
+                }
+                filterMain.setVisible(false);
+                if (censoredList.size() == 0 || censoredList == null || censoredList.get(0).isEmpty()) {
+                    JOptionPane.showMessageDialog(myFrame, "This user hasn't added any words for censoring",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    String censoredWord;
+                    censoredWord = (String) JOptionPane.showInputDialog(myFrame,
+                            "Please choose a word to cancel censoring", "Delete Filter",
+                            JOptionPane.PLAIN_MESSAGE, null, theList, theList[0]);
+                    if (!(censoredWord == null)) {
+                        boolean success = filteringSignal(1, username, censoredWord, "");
+                        if (!success) {
+                            String failMessage = "An unexpected error occurred";
+                            JOptionPane.showMessageDialog(myFrame, failMessage, "Error", JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(myFrame,
+                                    "Successfully uncensored " + "\"" + censoredWord + "\"", "Success",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    }
+                }
+
+                filterMain.setVisible(true);
+            }
+        });
+
+        JButton editFilter = new JButton("Edit a filter");
+        editFilter.setFont(new Font("Arial", Font.PLAIN, 30));
+        editFilter.setMaximumSize(new Dimension(400, 50));
+        editFilter.setFocusable(false);
+        editFilter.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ArrayList<String> censoredList = getCensoredList(username);
+                String[] theList = new String[censoredList.size()];
+                for (int i = 0; i < theList.length; i++) {
+                    theList[i] = censoredList.get(i).split("@")[0];
+                }
+                filterMain.setVisible(false);
+                if (censoredList.size() == 0 || censoredList == null || censoredList.get(0).isEmpty()) {
+                    JOptionPane.showMessageDialog(myFrame, "This user hasn't added any words for censoring",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    String censoredWord;
+                    String replacement;
+                    censoredWord = (String) JOptionPane.showInputDialog(myFrame,
+                            "Please choose a word to cancel censoring", "Delete Filter",
+                            JOptionPane.PLAIN_MESSAGE, null, theList, theList[0]);
+                    if (censoredWord != null) {
+                        int isDefault = JOptionPane.showConfirmDialog(myFrame, "Do you want to use custom replacement?",
+                                "Default", JOptionPane.YES_NO_OPTION);
+                        if (isDefault == 0) {
+                            replacement = "*".repeat(censoredWord.length());
+                        } else {
+                            do {
+                                replacement = JOptionPane.showInputDialog(myFrame, "Enter the new replacement",
+                                        "Edit Filter", JOptionPane.PLAIN_MESSAGE);
+
+                                if (replacement.isEmpty() || replacement == null) {
+                                    JOptionPane.showMessageDialog(myFrame, "Word/Phrase cannot be empty!");
+                                }
+                            } while (replacement.isEmpty() || replacement == null);
+                        }
+                        boolean success = filteringSignal(2, username, censoredWord, replacement);
+                        if (!success) {
+                            String failMessage = "Unexpected error occurred";
+                            JOptionPane.showMessageDialog(myFrame, failMessage, "Error", JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(myFrame,
+                                    "Successfully edit replacement to " + "\"" + replacement
+                                    + "\"", "Success",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    }
+                }
+                filterMain.setVisible(true);
+            }
+        });
+
+        ImageIcon bye = new ImageIcon("ImageIcon/exit.png");
+        JButton exit = new JButton("Exit", bye);
+        exit.setFont(new Font("Arial", Font.PLAIN, 30));
+        exit.setMaximumSize(new Dimension(400, 50));
+        exit.setFocusable(false);
+        exit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                glassFrame.dispose();
+                filterMain.removeAll();
+                filterMain.setVisible(false);
+            }
+        });
+
+        filterMain.add(instruction);
+        filterMain.add(addFilter);
+        filterMain.add(deleteFilter);
+        filterMain.add(editFilter);
+        filterMain.add(exit);
+        filterMain.setLocation(700, 250);
+        filterMain.setVisible(true);
+
+    }
 
     private void createLeftPanel() {
         ToolTipManager.sharedInstance().setInitialDelay(0);
@@ -138,8 +339,8 @@ public class MessageGui extends Client implements Runnable{
                 }
             };
             tempButton.addMouseListener(tempListener);
-            tempButton.setMinimumSize(new Dimension(165,50));
-            tempButton.setMaximumSize(new Dimension(165,50));
+            tempButton.setMinimumSize(new Dimension(165, 50));
+            tempButton.setMaximumSize(new Dimension(165, 50));
             userPanel.add(tempButton);
         }
 
@@ -150,7 +351,7 @@ public class MessageGui extends Client implements Runnable{
                     break;
                 }
                 ArrayList<String> buyerConversations = super.getConversationsFromStore(this.username, store);
-                System.out.println("hi"+store + buyerConversations);
+                System.out.println("hi" + store + buyerConversations);
                 if (buyerConversations.size() != 0) {
                     JLabel storeLabel = new JLabel(store + ":");
                     storeLabel.setFont(new Font("Arial", Font.BOLD, 25));
@@ -184,7 +385,7 @@ public class MessageGui extends Client implements Runnable{
 
         JPanel topTextPanel = new JPanel();
         Box bottomButtonPanel = Box.createVerticalBox();
-        bottomButtonPanel.setBounds(0,590,165,172);
+        bottomButtonPanel.setBounds(0, 590, 165, 172);
         //setting the panel layout as null
         topTextPanel.setLayout(null);
         //adding a label element to the panel
@@ -205,8 +406,8 @@ public class MessageGui extends Client implements Runnable{
         Image rescaled4 = image4.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
         i4 = new ImageIcon(rescaled4);
 
-        JButton searchForUserButton = new JButton("Search for a " + ((isUserSeller)? "buyer" : "seller"), i4);
-        searchForUserButton.setMaximumSize(new Dimension(165,74));
+        JButton searchForUserButton = new JButton("Search for a " + ((isUserSeller) ? "buyer" : "seller"), i4);
+        searchForUserButton.setMaximumSize(new Dimension(165, 74));
         searchForUserButton.setFocusable(false);
         bottomButtonPanel.add(searchForUserButton);
         searchForUserButton.addActionListener(e -> {
@@ -231,7 +432,7 @@ public class MessageGui extends Client implements Runnable{
                             "Start New Chat", JOptionPane.PLAIN_MESSAGE);
                     if (!availableMessages1.contains(newChatRecipient)) {
                         JOptionPane.showMessageDialog(null, "Sorry, no user found " +
-                                "with this name!","Error",JOptionPane.ERROR_MESSAGE);
+                                "with this name!", "Error", JOptionPane.ERROR_MESSAGE);
                     } else {
                         MessageGui.super.checkIfMessageExists(newChatRecipient, isRecipientStore, isUserSeller,
                                 user, isUserStore);
@@ -247,8 +448,8 @@ public class MessageGui extends Client implements Runnable{
             }
         });
 
-        JButton seeListOfUsersButton = new JButton("See a list of " + ((isUserSeller)? "buyers" : "stores"), i4);
-        seeListOfUsersButton.setMaximumSize(new Dimension(165,74));
+        JButton seeListOfUsersButton = new JButton("See a list of " + ((isUserSeller) ? "buyers" : "stores"), i4);
+        seeListOfUsersButton.setMaximumSize(new Dimension(165, 74));
         seeListOfUsersButton.setFocusable(false);
         bottomButtonPanel.add(seeListOfUsersButton);
         seeListOfUsersButton.addActionListener(e -> {
@@ -308,7 +509,7 @@ public class MessageGui extends Client implements Runnable{
 
         JButton metricsButton = new JButton("View Statistics", i5);
         metricsButton.setFocusable(false);
-        metricsButton.setMaximumSize(new Dimension(165,74));
+        metricsButton.setMaximumSize(new Dimension(165, 74));
         metricsButton.setFocusable(false);
         bottomButtonPanel.add(metricsButton);
         metricsButton.addActionListener(e -> {
@@ -328,7 +529,7 @@ public class MessageGui extends Client implements Runnable{
         //Panel 4
 
         //top text label
-        topTextPanel.setBounds(0,0,165,90);
+        topTextPanel.setBounds(0, 0, 165, 90);
 
         // Panel border
         scrollPane.setBorder(BorderFactory.createLineBorder(Color.black));
@@ -355,7 +556,7 @@ public class MessageGui extends Client implements Runnable{
         //creating a label for the panel
         JLabel label = new JLabel("Type Message Here:");
         label.setFont(new Font("Arial", Font.BOLD, 20));
-        label.setBounds(10,10,250,50); //171
+        label.setBounds(10, 10, 250, 50); //171
         textPanel.add(label);
 
 
@@ -383,17 +584,17 @@ public class MessageGui extends Client implements Runnable{
                 System.out.println("blocked" + unblockedUsers);
                 if (recipient == null) {
                     JOptionPane.showMessageDialog(null, "Please select a recipient first"
-                    , "Error", JOptionPane.ERROR_MESSAGE);
+                            , "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 if (!unblockedUsers.contains(recipient)) {
                     JOptionPane.showMessageDialog(null, "Sorry, this user has blocked you"
-                    , "Error", JOptionPane.ERROR_MESSAGE);
+                            , "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
                 if (!textField.getText().isBlank() && recipient != null) {
                     System.out.println(textField.getText().trim());
-                    MessageGui.super.appendOrDeleteSignal(false, username, recipient, (storeName == null)?
+                    MessageGui.super.appendOrDeleteSignal(false, username, recipient, (storeName == null) ?
                             "nil" : storeName, !isUserSeller, textField.getText().trim());
                 }
                 textField.setText("");
@@ -405,7 +606,7 @@ public class MessageGui extends Client implements Runnable{
             }
             if (!textField.getText().isBlank() && recipient != null) {
                 System.out.println(textField.getText().trim());
-                MessageGui.super.appendOrDeleteSignal(false, username, recipient, (storeName == null)?
+                MessageGui.super.appendOrDeleteSignal(false, username, recipient, (storeName == null) ?
                         "nil" : storeName, !isUserSeller, textField.getText().trim());
             }
             textField.setText("");
@@ -429,7 +630,7 @@ public class MessageGui extends Client implements Runnable{
         clear.setLayout(null);
         clear.setBounds(710, 10, 100, 50);
         clear.addActionListener(e -> {
-            if(e.getSource() == clear) {
+            if (e.getSource() == clear) {
                 textField.setText("");
             }
         });
@@ -478,12 +679,11 @@ public class MessageGui extends Client implements Runnable{
         settingButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if(e.getSource() == settingButton) {
+                if (e.getSource() == settingButton) {
                     createPopUpSetting();
                 }
             }
         });
-
 
 
         ImageIcon i = new ImageIcon("ImageIcon/info.png");
@@ -522,8 +722,8 @@ public class MessageGui extends Client implements Runnable{
                                 "Invalid File", JOptionPane.ERROR_MESSAGE);
                     } else if (filename != null) {
                         System.out.println("here with " + recipient + userPanel + isRecipientStore);
-                        MessageGui.super.importFile(filename, isRecipientStore? storeName : recipient,
-                                isUserStore? storeName : username, isUserSeller,
+                        MessageGui.super.importFile(filename, isRecipientStore ? storeName : recipient,
+                                isUserStore ? storeName : username, isUserSeller,
                                 isUserStore, isRecipientStore);
                         SwingUtilities.invokeLater(() -> {
                             createMessageGUI();
@@ -589,7 +789,7 @@ public class MessageGui extends Client implements Runnable{
             labelBox.removeAll();
             System.out.println("username " + this.username + "recipient " + this.recipient + "storeName " + this.storeName);
             ArrayList<String> messages = super.displaySignal(username, recipient,
-                    (storeName == null)? "nil" : storeName, !isUserSeller);
+                    (storeName == null) ? "nil" : storeName, !isUserSeller);
 
             for (String s : messages) {
                 int numLines = 1 + s.length() / 160; // sets a factor for how many lines are needed
@@ -614,7 +814,7 @@ public class MessageGui extends Client implements Runnable{
                                 if (e1.getSource() == deleteOption) {
                                     popupMenu1.setVisible(false);
                                     MessageGui.super.appendOrDeleteSignal(true, username, recipient,
-                                            (storeName == null)? "nil" : storeName, !isUserSeller,
+                                            (storeName == null) ? "nil" : storeName, !isUserSeller,
                                             tempLabel.getText());
                                     SwingUtilities.invokeLater(() -> {
                                         myFrame.invalidate();
@@ -638,7 +838,7 @@ public class MessageGui extends Client implements Runnable{
                                             "message to say?");
                                     if (newMessage != null) {
                                         MessageGui.super.editSignal(false, username, recipient,
-                                                (storeName == null)? "nil":storeName, !isUserSeller,
+                                                (storeName == null) ? "nil" : storeName, !isUserSeller,
                                                 tempLabel.getText(), newMessage);
                                     }
                                     SwingUtilities.invokeLater(() -> {
@@ -735,6 +935,12 @@ public class MessageGui extends Client implements Runnable{
         filter.setFont(new Font("Arial", Font.PLAIN, 30));
         filter.setMaximumSize(new Dimension(400, 50));
         filter.setFocusable(false);
+        filter.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                createFilterMain();
+            }
+        });
 
         JButton vanish = new JButton("Vanish Mode");
         vanish.setFont(new Font("Arial", Font.PLAIN, 30));
@@ -756,7 +962,6 @@ public class MessageGui extends Client implements Runnable{
             }
         });
 
-        System.out.println("Button Clickable");
         popUpSetting.add(filter);
         popUpSetting.add(vanish);
         popUpSetting.add(exit);
@@ -772,6 +977,7 @@ public class MessageGui extends Client implements Runnable{
 
         //myFrame.add(popUpSetting);
     }
+
     public void createPopUpBlockInvisible(MouseEvent e, String receiver) {
         popupMenu1.setVisible(false);
         invisibleOption.setMaximumSize(new Dimension(200, 28));
@@ -842,14 +1048,14 @@ public class MessageGui extends Client implements Runnable{
         boolean cantSeeThisUser = isBlockedOrCannotSee(1, username, Boolean.toString(isUserSeller),
                 Boolean.toString(isRecipientStore), receiver);
 
-        if(isBlocked) {
+        if (isBlocked) {
             popupMenu2.remove(blockOption);
             popupMenu2.add(unblockOption);
         } else {
             popupMenu2.remove(unblockOption);
             popupMenu2.add(blockOption);
         }
-        if(cantSeeThisUser) {
+        if (cantSeeThisUser) {
             popupMenu2.add(becomeVisibleOption);
             popupMenu2.remove(invisibleOption);
         } else {
@@ -865,7 +1071,7 @@ public class MessageGui extends Client implements Runnable{
         metricsFrame.setTitle("Statistics");
         metricsFrame.setLayout(null);
         //setting the bounds for the JFrame
-        metricsFrame.setBounds(500,100,600,600);
+        metricsFrame.setBounds(500, 100, 600, 600);
         metricsFrame.setResizable(false);
 
         if (isUserSeller) {
@@ -874,11 +1080,11 @@ public class MessageGui extends Client implements Runnable{
             //TODO seller statistics gui
             JPanel textPanel = new JPanel();
             textPanel.setLayout(null);
-            textPanel.setBounds(0,0,600,50);
+            textPanel.setBounds(0, 0, 600, 50);
 
             JLabel label1 = new JLabel("Stores and Customers");
             label1.setFont(new Font("Arial", Font.BOLD, 12));
-            label1.setBounds(20,0, 250, 50);
+            label1.setBounds(20, 0, 250, 50);
             label1.setHorizontalAlignment(JLabel.CENTER);
 
 
@@ -888,7 +1094,7 @@ public class MessageGui extends Client implements Runnable{
 
             JButton sortNames = new JButton("▲");
             sortNames.setBounds(215, 15, 20, 20);
-            sortNames.setMargin(new Insets(0,-1,0,0));
+            sortNames.setMargin(new Insets(0, -1, 0, 0));
             sortNames.setFocusPainted(false);
             sortNames.addActionListener(e -> {
                 if (e.getSource() == sortNames) {
@@ -904,12 +1110,12 @@ public class MessageGui extends Client implements Runnable{
 
             JLabel label2 = new JLabel("Most Common Overall Words");
             label2.setFont(new Font("Arial", Font.BOLD, 12));
-            label2.setBounds(280,0, 225, 50);
+            label2.setBounds(280, 0, 225, 50);
             label2.setHorizontalAlignment(JLabel.RIGHT);
 
             JButton sortTotal = new JButton("▲");
             sortTotal.setBounds(520, 15, 20, 20);
-            sortTotal.setMargin(new Insets(0,-1,0,0));
+            sortTotal.setMargin(new Insets(0, -1, 0, 0));
             sortTotal.setFocusPainted(false);
             sortTotal.addActionListener(e -> {
                 if (e.getSource() == sortTotal) {
@@ -940,12 +1146,12 @@ public class MessageGui extends Client implements Runnable{
 
             ArrayList<String[]> metricsData = new ArrayList<>();
             // TODO call client version of this
-            String[] data1 = {"Walmart-","Bob: 478","Jim: 7"};
-            String[] data2 = {"Target-","Billy: 700","Bob: 15"};
-            String[] data3 = {"GameStop-","Jimmy: 50","Todd: 30","William: 40"};
-            String[] dataOther = {"Aldi-","Jordan: 500"};
-            String[] dataOther2 = {"GameStop-","Jimmy: 50","Todd: 30","William: 40"};
-            String[] dataOther3 = {"GameStop-","Jimmy: 50","Todd: 30","William: 40"};
+            String[] data1 = {"Walmart-", "Bob: 478", "Jim: 7"};
+            String[] data2 = {"Target-", "Billy: 700", "Bob: 15"};
+            String[] data3 = {"GameStop-", "Jimmy: 50", "Todd: 30", "William: 40"};
+            String[] dataOther = {"Aldi-", "Jordan: 500"};
+            String[] dataOther2 = {"GameStop-", "Jimmy: 50", "Todd: 30", "William: 40"};
+            String[] dataOther3 = {"GameStop-", "Jimmy: 50", "Todd: 30", "William: 40"};
             metricsData.add(data1);
             metricsData.add(data2);
             metricsData.add(data3);
@@ -1017,11 +1223,11 @@ public class MessageGui extends Client implements Runnable{
 
             JPanel textPanel = new JPanel();
             textPanel.setLayout(null);
-            textPanel.setBounds(0,0,600,50);
+            textPanel.setBounds(0, 0, 600, 50);
 
             JLabel label1 = new JLabel("Store Name");
             label1.setFont(new Font("Arial", Font.BOLD, 12));
-            label1.setBounds(0,0, 90, 50);
+            label1.setBounds(0, 0, 90, 50);
             label1.setHorizontalAlignment(JLabel.CENTER);
 
 
@@ -1031,7 +1237,7 @@ public class MessageGui extends Client implements Runnable{
 
             JButton sortNames = new JButton("▲");
             sortNames.setBounds(90, 15, 20, 20);
-            sortNames.setMargin(new Insets(0,-1,0,0));
+            sortNames.setMargin(new Insets(0, -1, 0, 0));
             sortNames.setFocusPainted(false);
             sortNames.addActionListener(e -> {
                 if (e.getSource() == sortNames) {
@@ -1051,12 +1257,12 @@ public class MessageGui extends Client implements Runnable{
 
             JLabel label2 = new JLabel("Total Messages Received by Store");
             label2.setFont(new Font("Arial", Font.BOLD, 12));
-            label2.setBounds(100,0, 225, 50);
+            label2.setBounds(100, 0, 225, 50);
             label2.setHorizontalAlignment(JLabel.RIGHT);
 
             JButton sortTotal = new JButton("▲");
             sortTotal.setBounds(330, 15, 20, 20);
-            sortTotal.setMargin(new Insets(0,-1,0,0));
+            sortTotal.setMargin(new Insets(0, -1, 0, 0));
             sortTotal.setFocusPainted(false);
             sortTotal.addActionListener(e -> {
                 if (e.getSource() == sortTotal) {
@@ -1080,12 +1286,12 @@ public class MessageGui extends Client implements Runnable{
 
             JLabel label3 = new JLabel("Number of Messages Sent to Store");
             label3.setFont(new Font("Arial", Font.BOLD, 12));
-            label3.setBounds(350,0, 225, 50);
+            label3.setBounds(350, 0, 225, 50);
             label3.setHorizontalAlignment(JLabel.CENTER);
 
             JButton sortPersonal = new JButton("▼");
             sortPersonal.setBounds(560, 15, 20, 20);
-            sortPersonal.setMargin(new Insets(0,-1,0,0));
+            sortPersonal.setMargin(new Insets(0, -1, 0, 0));
             sortPersonal.setFocusPainted(false);
             sortPersonal.addActionListener(e -> {
                 if (e.getSource() == sortPersonal) {
@@ -1142,7 +1348,7 @@ public class MessageGui extends Client implements Runnable{
 
                 JLabel labelPersonal = new JLabel(s[2]);
                 labelPersonal.setHorizontalAlignment(JLabel.CENTER);
-                labelPersonal.setBounds(350,0, 225, 50);
+                labelPersonal.setBounds(350, 0, 225, 50);
                 labelPersonal.setFont(new Font("Arial", Font.BOLD, 20));
 
 
@@ -1174,7 +1380,8 @@ public class MessageGui extends Client implements Runnable{
     public static void main(String[] args) throws IOException {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         SwingUtilities.invokeLater(new MessageGui("mulan", false, new Socket("localhost", 2000)));
     }
 

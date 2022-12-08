@@ -216,32 +216,6 @@ public class Server extends Thread {
                     ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
                     outputStream.writeObject(data);
                     outputStream.flush();
-                } else if (instruction.equals("getFilteringList")) {
-                    String sendBack = String.join(";",(String[])
-                            Filtering.censoredList(request.split(";")[1]).toArray());
-                    writer.println(sendBack);
-                    writer.flush();
-                } else if (instruction.equals("addFilter")) {
-                    String[] ins = request.split(";");
-                    try {
-                        Filtering.addFilter(ins[1], ins[2], ins[3]);
-                    } catch(Exception e) {
-
-                    }
-                } else if (instruction.equals("deleteFilter")) {
-                    String[] ins = request.split(";");
-                    try {
-                        Filtering.deleteFilter(ins[1], ins[2]);
-                    } catch (Exception e) {
-
-                    }
-                } else if (instruction.equals("editFilter")) {
-                    String[] ins = request.split(";");
-                    try {
-                        Filtering.editFilter(ins[1], ins[2], ins[3]);
-                    } catch (Exception e) {
-
-                    }
                 } else if (instruction.equals("editUsername")) {
                     //sample request: editUsername;<oldUsername>;<newUsername>
                     UserManager.changeUsername(contents.substring(0, contents.indexOf(";")),
@@ -253,6 +227,44 @@ public class Server extends Thread {
                     //sample request: editUsername;<oldStoreName>;<newStoreName>
                     UserManager.changeStoreName(contents.substring(0, contents.indexOf(";")),
                             contents.substring(contents.indexOf(";") + 1));
+                } else if (instruction.equals("addFilter")) {
+                    String[] ins = request.split(";");
+                    String sendBack = "false";
+                    try {
+                        sendBack = Boolean.toString(Filtering.addFilter(ins[1], ins[2], ins[3]));
+                    } catch (Exception e) {
+                    }
+                    writer.println(sendBack);
+                    writer.flush();
+
+                } else if (instruction.equals("deleteFilter")) {
+                    String[] ins = request.split(";");
+                    String sendBack = "true";
+                    try {
+                        Filtering.deleteFilter(ins[1], ins[2]);
+                    } catch (Exception e) {
+                        sendBack = "false";
+                    }
+                    writer.println(sendBack);
+                    writer.flush();
+                } else if (instruction.equals("editFilter")) {
+                    String[] ins = request.split(";");
+                    String sendBack = "true";
+                    try {
+                        Filtering.editFilter(ins[1], ins[2], ins[3]);
+                    } catch (Exception e) {
+                        sendBack = "false";
+                    }
+                    writer.println(sendBack);
+                    writer.flush();
+                } else if (instruction.equals("getCensoredList")) {
+                    ArrayList<String[]> ans = Filtering.censoredList(request.split(";")[1]);
+                    ArrayList<String> temp = new ArrayList<>();
+                    for(String[] l : ans) {
+                        temp.add(String.join("@", l));
+                    }
+                    writer.println(String.join(";", temp));
+                    writer.flush();
                 } else if (instruction.equals("sortMetrics")) {
                     String username = contents.substring(0, contents.indexOf(';'));
                     String index = contents.substring(contents.indexOf(';') + 1);

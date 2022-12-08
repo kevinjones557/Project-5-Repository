@@ -258,10 +258,25 @@ public class Client {
         }
     }
 
-    public void filteringSignal(int option, String username, String censoredWord, String replacement) {
+    public boolean filteringSignal(int option, String username, String censoredWord, String replacement) {
         String[] options = {"addFilter", "deleteFilter", "editFilter"};
         writer.println(options[option] + ";" + username + ";" + censoredWord + ";" + replacement);
         writer.flush();
+        try {
+            return Boolean.parseBoolean(reader.readLine());
+        } catch (IOException e) {
+            return true;
+        }
+    }
+
+    public ArrayList<String> getCensoredList(String username) {
+        writer.println("getCensoredList;" + username);
+        writer.flush();
+        try {
+            return new ArrayList<>(Arrays.asList((reader.readLine().split(";"))));
+        } catch (IOException e) {
+            return new ArrayList<>();
+        }
     }
 
    /* public ArrayList<String[]> parseBuyerMetricData() {
