@@ -279,9 +279,15 @@ public class Client {
         }
     }
 
-   /* public ArrayList<String[]> parseBuyerMetricData() {
-        ObjectInputStream objectInputStream = new ObjectInputStream(socket);
+   public ArrayList<String[]> parseMetricData() {
+        try {
+            ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
+            ArrayList<String[]> recievedData = (ArrayList<String[]>) objectInputStream.readObject();
+            return recievedData;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        throw new RuntimeException("An error occurred parsing metric data");
     }
 
-    */
 }
