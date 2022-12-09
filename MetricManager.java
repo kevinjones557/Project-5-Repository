@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
@@ -30,7 +31,7 @@ public class MetricManager {
         } catch (UserNotFoundException e) {
             throw new RuntimeException("User does not exist!");
         }
-        filePath = filePath + "/metrics.txt";
+        filePath = filePath + "metrics.txt";
         Map<String, Integer> fileData = new LinkedHashMap<>();
         /* The formatting for the Metrics file goes as follows:
             Message Count: n
@@ -60,6 +61,7 @@ public class MetricManager {
         // Split along spaces
         // renamed splitString to splitMessage for clarity
         for (String word : splitMessage) { // for every word in the string
+            if (word == "") continue;
             if (data.containsKey(word)) { // check if word exists in the map
                 data.put(word, data.get(word) + 1); // if it does, increment
             } else {
@@ -178,6 +180,7 @@ public class MetricManager {
         // Split along spaces
         // renamed splitString to splitMessage for clarity
         for (String word : splitMessage) { // for every word in the string
+            if (word == "") continue;
             if (firstMessageData.containsKey(word)) { // check if word exists in the map
                 firstMessageData.put(word, firstMessageData.get(word) + 1); // if it does, increment
             } else {
