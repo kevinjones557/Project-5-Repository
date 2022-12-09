@@ -1,4 +1,4 @@
-Message Count: 118
+Message Count: 120
 15 hi
 1 fggfh
 1 qwetr
@@ -105,4 +105,7 @@ Message Count: 118
 1 ok
 1 more
 1 messages
-1 
+1 hjkl
+1 hj
+1 hjk
+1 ukl

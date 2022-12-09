@@ -912,6 +912,10 @@ public class MessageGui extends Client implements Runnable {
 
     public MessageGui(String username, boolean isUserSeller, Socket socket) {
         super(socket);
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ignored) {
+        }
         this.username = username;
         this.isUserSeller = isUserSeller;
         if (isUserSeller) {
@@ -1378,10 +1382,7 @@ public class MessageGui extends Client implements Runnable {
 
 
     public static void main(String[] args) throws IOException {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ignored) {
-        }
+
         SwingUtilities.invokeLater(new MessageGui("mulan", false, new Socket("localhost", 2000)));
     }
 

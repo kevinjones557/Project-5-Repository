@@ -31,7 +31,7 @@ public class MetricManager {
         } catch (UserNotFoundException e) {
             throw new RuntimeException("User does not exist!");
         }
-        filePath = filePath + "/metrics.txt";
+        filePath = filePath + "metrics.txt";
         Map<String, Integer> fileData = new LinkedHashMap<>();
         /* The formatting for the Metrics file goes as follows:
             Message Count: n
