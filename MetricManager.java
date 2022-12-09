@@ -61,7 +61,7 @@ public class MetricManager {
         // Split along spaces
         // renamed splitString to splitMessage for clarity
         for (String word : splitMessage) { // for every word in the string
-            if (word == "") continue;
+            if (Objects.equals(word, "")) continue;
             if (data.containsKey(word)) { // check if word exists in the map
                 data.put(word, data.get(word) + 1); // if it does, increment
             } else {
