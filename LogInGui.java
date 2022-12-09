@@ -114,8 +114,6 @@ public class LogInGui {
         writer.flush();
     }
 
-    //checks the password that the user selects to be their password
-    //TODO with time, reinstate password confirmation
     public static String checkPassword(String password, String user) {
         if (password == null) {
             deleteUserInProgress(user);
@@ -134,10 +132,10 @@ public class LogInGui {
         writer.flush();
         writer.println("removeRenamedStore;" + storeToChange + ";" + storeName);
         writer.flush();
-        //TODO MarketUser calls
-        writer.write("changeStoreName;" + storeToChange +  ";" + storeName);
+        writer.println("changeStoreName;" + storeToChange +  ";" + storeName);
         writer.flush();
-        //MarketUser.changeStoreName(storeToChange, newName);
+        writer.println("changeStoreName;" + storeToChange + ";" + storeName);
+        writer.flush();
     }
 
     private static BufferedReader reader;
@@ -343,10 +341,6 @@ public class LogInGui {
                                 }
                             }
                             encryptFile(user, password);
-                            //TODO do this if time
-                        /* String passwordToCheck = JOptionPane.showInputDialog(null,
-                                "Please enter your password again to confirm it.",
-                                "Messaging program", JOptionPane.PLAIN_MESSAGE); */
                             done = false;
                             while (!done) {
                                 if (isSeller.equalsIgnoreCase("true")) {
@@ -478,8 +472,6 @@ public class LogInGui {
                 writer.println("isSeller;" + user);
                 writer.flush();
                 boolean isSeller = Boolean.parseBoolean(reader.readLine());
-                //TODO MarketUser calls
-                //MarketUser currentUser = new MarketUser(user, isSeller);
                 boolean running = true;
                 while (running) {
                     options[0] = "User Interaction";
@@ -489,8 +481,7 @@ public class LogInGui {
                             "Messaging program", 0,
                             JOptionPane.PLAIN_MESSAGE, null, options, null);
                     if (input == 0) {
-                        MessageGui messaging = new MessageGui(user, isSeller, s);
-                        messaging.run();
+                        SwingUtilities.invokeLater(new MessageGui(user, isSeller, s));
                         return;
                     } else if (input == 1) {
                         String[] newOptions = new String[4];
@@ -521,8 +512,8 @@ public class LogInGui {
                                     writer.println("appendStoreList;" + stores);
                                     writer.flush();
                                 }
-                                //TODO MarketUser calls
-                                //MarketUser.deleteUsername(user);
+                                writer.println("deleteUsername;" + user);
+                                writer.flush();
                                 deleteUserInProgress(user);
                                 return;
                             } else if (deletionInput == -1) {
@@ -567,8 +558,8 @@ public class LogInGui {
                             }
                             writer.println("moveUsername;" + user + ";" + newUser);
                             writer.flush();
-                            //TODO MarketUser calls
-                            //MarketUser.changeUsername(user, newUser);
+                            writer.println("changeUsername;" + user + ";" + newUser);
+                            writer.flush();
                             JOptionPane.showMessageDialog(null,
                                     "Name change successful! " +
                                             "Enjoy your new username, " + newUser + "!",

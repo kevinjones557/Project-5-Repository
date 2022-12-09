@@ -296,6 +296,10 @@ public class Server extends Thread {
                     System.out.println();
                     ois.writeObject(data);
                     ois.flush();
+                } else if (instruction.equals("generateDirectoryFromUsername")) {
+
+                } else if (instruction.equals("generateStoreForSeller")) {
+
                 }
             }
         } catch (IOException e) {
