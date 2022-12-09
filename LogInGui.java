@@ -125,7 +125,6 @@ public class LogInGui {
                 || password.contains(";")) {
             return ("invalid");
         }
-        encryptFile(user, password);
         return ("valid");
     }
 
@@ -310,19 +309,40 @@ public class LogInGui {
                         String passwordCheck = checkPassword(password, user);
                         try {
                             //checking the password
-                            while (!passwordCheck.equals("valid")) {
-                                if (passwordCheck == null) {
-                                    return;
+                            boolean passwordDone = false;
+                            while (!passwordDone) {
+                                while (!passwordCheck.equals("valid")) {
+                                    if (passwordCheck == null) {
+                                        deleteUserInProgress(user);
+                                        return;
+                                    }
+                                    if (passwordCheck.equals("invalid")) {
+                                        password = JOptionPane.showInputDialog(null,
+                                                "Password length must be between 8 and 16 characters\n" +
+                                                        "Password may not contain a ';'\n" +
+                                                        "Please enter a valid password.",
+                                                "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                                    }
+                                    if (passwordCheck.equals("tryAgain")) {
+                                        password = JOptionPane.showInputDialog(null,
+                                                "Please enter a password between 8 and 16 characters.",
+                                                "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                                    }
+                                    passwordCheck = checkPassword(password, user);
                                 }
-                                if (passwordCheck.equals("invalid")) {
-                                    password = JOptionPane.showInputDialog(null,
-                                            "Password length must be between 8 and 16 characters" +
-                                                    "Password may not contain a ';'" +
-                                                    "Please enter a valid password.",
-                                            "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                                String passwordToCheck = JOptionPane.showInputDialog(null,
+                                        "Please confirm your password.",
+                                        "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                                if (passwordToCheck.equals(password)) {
+                                    passwordDone = true;
+                                } else {
+                                    JOptionPane.showMessageDialog(null,
+                                            "Passwords do not match! Please try again.",
+                                            "Messaging Program", JOptionPane.ERROR_MESSAGE);
+                                    passwordCheck = "tryAgain";
                                 }
-                                passwordCheck = checkPassword(password, user);
                             }
+                            encryptFile(user, password);
                             //TODO do this if time
                         /* String passwordToCheck = JOptionPane.showInputDialog(null,
                                 "Please enter your password again to confirm it.",
