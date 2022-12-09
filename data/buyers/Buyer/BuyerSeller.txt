@@ -5,8 +5,6 @@ Buyer 11/19 10:50:56- do you have 5 of the products available?
 Buyer 11/20 03:01:34- new message
 Seller 12/03 19:31:18- new
 Seller 12/03 19:32:47- hi
-Seller 12/05 15:58:03- hi
-Seller 12/05 15:58:56- df
 Buyer 12/05 17:02:33- hey
 Buyer 12/05 17:50:35- hi
 Seller 12/06 20:32:47- hiiiii im doing astronomy

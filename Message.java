@@ -178,15 +178,19 @@ public class Message {
 
                     //read through list, when the message matches the index of the list, changes that index to the edit
                     for (int i = 0; i < readSenderFile.size(); i++) {
-                        if (readSenderFile.get(i).equals(message)) {
+                        if ((readSenderFile.get(i).substring(0, readSenderFile.get(i).indexOf("-"))).equals
+                                (message.substring(0, message.indexOf("-")))) {
                             editedMessage = extractNameAndTime + edit;
                             readSenderFile.set(i, editedMessage);
+                            break;
                         }
                     }
                     for (int i = 0; i < readReceiverFile.size(); i++) {
-                        if (readReceiverFile.get(i).equals(message)) {
+                        if ((readReceiverFile.get(i).substring(0, readReceiverFile.get(i).indexOf("-"))).equals
+                                (message.substring(0, message.indexOf("-")))) {
                             editedMessage = extractNameAndTime + edit;
                             readReceiverFile.set(i, editedMessage);
+                            break;
                         }
                     }
 
@@ -296,7 +300,8 @@ public class Message {
 
                     // read through list, write to file if it is not the deleted message
                     for (int i = 0; i < readSenderFile.size(); i++) {
-                        if (!(readSenderFile.get(i)).equals(message))
+                        if (!(readSenderFile.get(i).substring(0, readSenderFile.get(i).indexOf("-"))).equals
+                                (message.substring(0, message.indexOf("-"))))
                             messageSenderWriter.println(readSenderFile.get(i));
                     }
                     readSend.close();

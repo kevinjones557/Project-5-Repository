@@ -638,6 +638,9 @@ public class Server extends Thread {
             boolean isBuyer = buyer.equals("true");
 
             ArrayList<String> messageContents = Message.displayMessage(sender, recipient, storeName, isBuyer);
+            for (int i = 0; i < messageContents.size(); i++) {
+                messageContents.set(i, Filtering.easyFilter(messageContents.get(i), Filtering.censoredList(sender)));
+            }
             ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
             outputStream.writeObject(messageContents);
             outputStream.flush();

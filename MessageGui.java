@@ -105,7 +105,8 @@ public class MessageGui extends Client implements Runnable {
                     }
                 } while (censoredWord.isEmpty());
                 if (censoredWord != null) {
-                    int isDefault = JOptionPane.showConfirmDialog(myFrame, "Do you want to use custom replacement?",
+                    int isDefault = JOptionPane.showConfirmDialog(myFrame, "Do you want to use " +
+                                    "default replacement (*)?",
                             "Default", JOptionPane.YES_NO_OPTION);
                     if (isDefault == 0) {
                         replacement = "*".repeat(censoredWord.length());
@@ -199,7 +200,8 @@ public class MessageGui extends Client implements Runnable {
                             "Please choose a word to edit replacement", "Edit Filter",
                             JOptionPane.PLAIN_MESSAGE, null, theList, theList[0]);
                     if (censoredWord != null) {
-                        int isDefault = JOptionPane.showConfirmDialog(myFrame, "Do you want to use custom replacement?",
+                        int isDefault = JOptionPane.showConfirmDialog(myFrame, "Do you want to use default" +
+                                        " replacement (*)?",
                                 "Default", JOptionPane.YES_NO_OPTION);
                         if (isDefault == 0) {
                             replacement = "*".repeat(censoredWord.length());
@@ -240,6 +242,13 @@ public class MessageGui extends Client implements Runnable {
                 glassFrame.dispose();
                 filterMain.removeAll();
                 filterMain.setVisible(false);
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        createMessageGUI();
+                        metricsFrame.revalidate();
+                    }
+                });
             }
         });
 
@@ -963,6 +972,13 @@ public class MessageGui extends Client implements Runnable {
                 glassFrame.dispose();
                 popUpSetting.removeAll();
                 popUpSetting.setVisible(false);
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        createMessageGUI();
+                        metricsFrame.revalidate();
+                    }
+                });
             }
         });
 
