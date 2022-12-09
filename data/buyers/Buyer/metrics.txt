@@ -1,7 +1,10 @@
-Message Count: 3
+Message Count: 4
 1 fhgjj
 1 new
 1 message
 1 hi
 1 hey
 1 iiiiiiiiiiiii
+1 df
+1 dfa
+4 

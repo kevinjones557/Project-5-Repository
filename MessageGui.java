@@ -287,10 +287,10 @@ public class MessageGui extends Client implements Runnable {
         i = new ImageIcon(rescaled);
 
         topLabel3.removeAll();
-        topLabel3.setText("Personal Chats ");
+        topLabel3.setText("Personal Chats:");
         topLabel3.setHorizontalTextPosition(SwingConstants.LEFT);
         topLabel3.setIcon(i);
-        topLabel3.setFont(new Font("Arial", Font.BOLD, 18));
+        topLabel3.setFont(new Font("Arial", Font.BOLD, 17));
         topLabel3.setHorizontalAlignment(JLabel.CENTER);
         topLabel3.setMaximumSize(new Dimension(165, 45));
         userPanel.add(topLabel3, Component.LEFT_ALIGNMENT);
@@ -912,6 +912,10 @@ public class MessageGui extends Client implements Runnable {
 
     public MessageGui(String username, boolean isUserSeller, Socket socket) {
         super(socket);
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ignored) {
+        }
         this.username = username;
         this.isUserSeller = isUserSeller;
         if (isUserSeller) {
@@ -1378,11 +1382,7 @@ public class MessageGui extends Client implements Runnable {
 
 
     public static void main(String[] args) throws IOException {
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ignored) {
-        }
-        SwingUtilities.invokeLater(new MessageGui("mulan", false, new Socket("localhost", 2000)));
+        SwingUtilities.invokeLater(new MessageGui("Buyer", false, new Socket("localhost", 2000)));
     }
 
 }
@@ -1399,3 +1399,7 @@ seller -> buyer         false or true. Username is always itself, recipient is a
 //TODO bugs
 //todo metrics manager issue when deleting
 //todo write test cases and record video and write readme
+//todo synchronize and document everything
+//todo combine login and messaging
+//todo sort seller metrics
+//todo get seller metrics from server
