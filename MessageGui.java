@@ -1382,7 +1382,7 @@ public class MessageGui extends Client implements Runnable {
 
 
     public static void main(String[] args) throws IOException {
-        SwingUtilities.invokeLater(new MessageGui("mulan", false, new Socket("localhost", 2000)));
+        SwingUtilities.invokeLater(new MessageGui("Buyer", false, new Socket("localhost", 2000)));
     }
 
 }
