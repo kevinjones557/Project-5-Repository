@@ -267,8 +267,16 @@ public class Server extends Thread {
                     writer.flush();
                 } else if (instruction.equals("sortMetrics")) {
                     String username = contents.substring(0, contents.indexOf(';'));
-                    String index = contents.substring(contents.indexOf(';') + 1);
-                    ArrayList<String[]> data = handleGetBuyerMetricData(username, storeNameMap);
+                    contents = contents.substring(contents.indexOf(";") + 1);
+                    String index = contents.substring(0, contents.indexOf(";"));
+                    contents = contents.substring(contents.indexOf(";") + 1);
+                    boolean isSeller = Boolean.parseBoolean(contents);
+                    ArrayList<String[]> data;
+                    if (isSeller) {
+                        data = StatisticsManager.getMetricDataForStores(username);
+                    } else {
+                        data  = StatisticsManager.getStatisticsDataForBuyers(username);
+                    }
                     ObjectOutputStream ois = new ObjectOutputStream(socket.getOutputStream());
                     switch (index) {
                         case "0" ->  // alphabetical
@@ -291,9 +299,23 @@ public class Server extends Thread {
                         }
                     }
                     for (String[] s : data) {
-                        System.out.println(Arrays.toString(s));
+                        System.out.println("here " + Arrays.toString(s));
                     }
                     System.out.println();
+                    ois.writeObject(data);
+                    ois.flush();
+                } else if (instruction.equals("getMostCommonWords")){
+                    String sellerName = contents.substring(0, contents.indexOf(';'));
+                    contents = contents.substring(contents.indexOf(';') + 1);
+                    String[] data = StatisticsManager.getTenMostCommonWords(sellerName);
+                    if (contents.equals("1")) {
+                        String[] reversedData = new String[data.length];
+                        for (int i = data.length - 1; i >= 0; i--) {
+                            reversedData[data.length - 1 - i] = data[i];
+                        }
+                        data = reversedData;
+                    }
+                    ObjectOutputStream ois = new ObjectOutputStream(socket.getOutputStream());
                     ois.writeObject(data);
                     ois.flush();
                 } else if (instruction.equals("generateDirectoryFromUsername")) {
@@ -312,16 +334,13 @@ public class Server extends Thread {
         for (int i = 0; i < arr.size(); i++) {
             for (int j = i + 1; j < arr.size(); j++) {
                 // to compare one string with other strings
-                if (arr.get(1)[0].compareTo(arr.get(j)[0]) > 0) {
+                if (arr.get(i)[0].compareTo(arr.get(j)[0]) > 0) {
                     // swapping
                     temp = arr.get(i);
                     arr.set(i, arr.get(j));
                     arr.set(j, temp);
                 }
             }
-        }
-        for (String[] s : arr) {
-            System.out.println("in sort " + Arrays.toString(s));
         }
         System.out.println();
     }
@@ -540,9 +559,6 @@ public class Server extends Thread {
                 e.printStackTrace();
             }
         } else {
-            FileManager.generateMetricsAboutUser(username,
-                    "data/sellers/" + storeNameMap.get(recipient)
-                            + "/" + recipient + "/");
             try {
                 File fUser = new File(FileManager.getDirectoryFromUsername(username)
                         + "/" + username + recipient + ".txt");
@@ -694,16 +710,8 @@ public class Server extends Thread {
                 pwReceiver.print(username + " " + timeStamp + "- ");
                 pwReceiver.println(line);
                 pwSender.println(line);
-                if (!isSeller) {
-                    String storePath;
-                    if (FileManager.checkSellerExists(recipient)) {
-                        storePath = null;
-                    } else {
-                        storePath = FileManager.getStoreDirectory(
-                                storeNameMap.get(recipient), recipient);
-                    }
-                    MetricManager.addDeleteMessageData(username, storePath,
-                            line, false);
+                if (!isSeller && isRecipientStore) {
+                    StatisticsManager.addMessage(username, recipient, line);
                 }
                 line = bfr.readLine();
             }
