@@ -9,7 +9,7 @@ public class StatisticsManager {
      * @param storeName name of the store
      * @param message message sent
      */
-    public static void addMessage(String buyerName, String storeName, String message) {
+    public synchronized static void addMessage(String buyerName, String storeName, String message) {
         File metricsFile = new File("data/buyers/" + buyerName + "/" + "metrics.txt");
         try (BufferedReader bfr = new BufferedReader(new FileReader(metricsFile))) {
             /* Example File
@@ -52,7 +52,7 @@ public class StatisticsManager {
      * @param buyerName name of buyer to generate metrics for
      * @return the metrics data
      */
-    public static ArrayList<String[]> getStatisticsDataForBuyers(String buyerName) {
+    public synchronized static ArrayList<String[]> getStatisticsDataForBuyers(String buyerName) {
         try (BufferedReader bfr = new BufferedReader(new FileReader
                 ("data/buyers/" + buyerName + "/metrics.txt"))) {
             ArrayList<String[]> data = new ArrayList<>();
@@ -92,7 +92,7 @@ public class StatisticsManager {
      * @param sellerName name of seller
      * @return returns metrics data
      */
-    public static ArrayList<String[]> getMetricDataForStores(String sellerName) {
+    public synchronized static ArrayList<String[]> getMetricDataForStores(String sellerName) {
         try {
             ArrayList<String> stores = FileManager.getStoresFromSeller(sellerName);
             ArrayList<String[]> allData = new ArrayList<>();
@@ -127,7 +127,7 @@ public class StatisticsManager {
      * @param storeName name of the store that message is sent to
      * @param message the actualy message containing words
      */
-    public static void countWords(String storeName, String message) {
+    public synchronized static void countWords(String storeName, String message) {
         LinkedHashMap<String, String> storeMap = FileManager.mapStoresToSellers();
         String seller = storeMap.get(storeName);
         File metricsFile = new File("data/sellers/" + seller + "/metrics.txt");
@@ -174,7 +174,7 @@ public class StatisticsManager {
      * @param sellerName name of seller to get data for
      * @return array of strings of data
      */
-    public static String[] getTenMostCommonWords (String sellerName) {
+    public synchronized static String[] getTenMostCommonWords (String sellerName) {
         try (BufferedReader bfr = new BufferedReader(new FileReader("data/sellers/" + sellerName + "/"
                 + "metrics.txt"))) {
             ArrayList<String> words = new ArrayList<>();
