@@ -138,9 +138,6 @@ public class FileManager {
         try {
             Path filePath = Paths.get(storePath);
             Path metrics = Files.createFile(Paths.get(filePath + "/" + buyer + "metrics.txt"));
-            try (BufferedWriter bfr = new BufferedWriter(new FileWriter(metrics.toFile()))) {
-                bfr.write("Message Count: 0");
-            }
             return true;
         } catch (FileAlreadyExistsException e) {
             return false; // don't print stacktrace because this is supposed to happen
@@ -215,7 +212,7 @@ public class FileManager {
      * @author Kevin Jones
      */
 
-    public static ArrayList<String> getConversationsFromUser(String username) {
+    public static synchronized ArrayList<String> getConversationsFromUser(String username) {
         try {
             File storeFile = new File(getDirectoryFromUsername(username));
             String[] conversations = storeFile.list();
