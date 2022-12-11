@@ -134,7 +134,7 @@ public class LogInGui {
         writer.flush();
         writer.println("changeStoreName;" + storeToChange +  ";" + storeName);
         writer.flush();
-        writer.println("changeStoreName;" + storeToChange + ";" + storeName);
+        writer.println("changeDataStoreName;" + storeToChange + ";" + storeName);
         writer.flush();
     }
 
@@ -304,6 +304,10 @@ public class LogInGui {
                         String password = JOptionPane.showInputDialog(null,
                                 "Please enter a password between 8 and 16 characters.",
                                 "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                        if (password == null) {
+                            deleteUserInProgress(user);
+                            return;
+                        }
                         String passwordCheck = checkPassword(password, user);
                         try {
                             //checking the password
@@ -320,17 +324,33 @@ public class LogInGui {
                                                         "Password may not contain a ';'\n" +
                                                         "Please enter a valid password.",
                                                 "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                                        if (password == null) {
+                                            deleteUserInProgress(user);
+                                            return;
+                                        }
                                     }
                                     if (passwordCheck.equals("tryAgain")) {
                                         password = JOptionPane.showInputDialog(null,
                                                 "Please enter a password between 8 and 16 characters.",
                                                 "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                                        if (password == null) {
+                                            deleteUserInProgress(user);
+                                            return;
+                                        }
                                     }
                                     passwordCheck = checkPassword(password, user);
+                                    if (passwordCheck == null) {
+                                        deleteUserInProgress(user);
+                                        return;
+                                    }
                                 }
                                 String passwordToCheck = JOptionPane.showInputDialog(null,
                                         "Please confirm your password.",
                                         "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                                if (passwordToCheck == null) {
+                                    deleteUserInProgress(user);
+                                    return;
+                                }
                                 if (passwordToCheck.equals(password)) {
                                     passwordDone = true;
                                 } else {
@@ -512,7 +532,8 @@ public class LogInGui {
                                     writer.println("appendStoreList;" + stores);
                                     writer.flush();
                                 }
-                                writer.println("deleteUsername;" + user);
+                                //TODO make sure that when a user ends when making an account that the main file system is also deleted
+                                writer.println("deleteUser;" + user);
                                 writer.flush();
                                 deleteUserInProgress(user);
                                 return;
