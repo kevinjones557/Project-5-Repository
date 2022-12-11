@@ -319,8 +319,15 @@ public class Server extends Thread {
                     ois.writeObject(data);
                     ois.flush();
                 } else if (instruction.equals("generateDirectoryFromUsername")) {
-
+                    String[] spiltMessage = request.split(";");
+                    String username = spiltMessage[1];
+                    boolean isSeller = Boolean.parseBoolean(spiltMessage[2]);
+                    FileManager.generateDirectoryFromUsername(username, isSeller);
                 } else if (instruction.equals("generateStoreForSeller")) {
+                    String[] spiltMessage = request.split(";");
+                    String username = spiltMessage[1];
+                    String storename = spiltMessage[2];
+                    FileManager.generateStoreForSeller(username, storename);
 
                 }
             }
