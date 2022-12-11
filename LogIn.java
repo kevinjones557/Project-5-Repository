@@ -14,7 +14,7 @@ public class LogIn {
      * @param store    the store being deleted
      * @param newStore the new store name overwriting the old store name
      */
-    public static void removeRenamedStore(String store, String newStore) {
+    public synchronized static void removeRenamedStore(String store, String newStore) {
         try (BufferedReader br = new BufferedReader(new FileReader("users/storeNames"))) {
             List<String> fileContents = new ArrayList<>();
             String line = br.readLine();
@@ -43,7 +43,7 @@ public class LogIn {
      * @param user user's username
      * @return String representation of the user's isSeller status
      */
-    public static String isSeller(String user) {
+    public synchronized static String isSeller(String user) {
         try (BufferedReader br = new BufferedReader(new FileReader("users/" + user + "/" + user))) {
             int lineIndex = 0;
             String line = br.readLine();
@@ -66,7 +66,7 @@ public class LogIn {
      *
      * @param storesString String representation of the user's stores
      */
-    public static void appendStoreList(String storesString) {
+    public synchronized static void appendStoreList(String storesString) {
         try (BufferedReader br = new BufferedReader(new FileReader("users/storeNames"))) {
             java.util.List<String> stores = Arrays.asList(storesString.split(", "));
             List<String> fileContents = new ArrayList<>();
@@ -100,7 +100,7 @@ public class LogIn {
      * @param user the user whose password is being read
      * @return String of the encrypted password
      */
-    public static String readPassword(String user) {
+    public synchronized static String readPassword(String user) {
         try (BufferedReader br = new BufferedReader(new FileReader("users/" + user + "/" + user))) {
             String password = "";
             int index = 0;
@@ -126,7 +126,7 @@ public class LogIn {
      * @param user String of the user's username
      * @return boolean of if file was successfully written or not
      */
-    public static boolean writeFile(String user) {
+    public synchronized static boolean writeFile(String user) {
         try (PrintWriter pw = new PrintWriter(new FileOutputStream("users/" + user + "/" + user, false))) {
             pw.println(user);
             return (true);
@@ -143,7 +143,7 @@ public class LogIn {
      * @param toAppend the parameter that is being appended to the file
      * @return boolean of if the file was successfully written or not
      */
-    public static boolean writeFile(String user, String toAppend) {
+    public synchronized static boolean writeFile(String user, String toAppend) {
         try (PrintWriter pw = new PrintWriter(new FileOutputStream("users/" + user + "/" + user, true))) {
             pw.println(toAppend);
             return (true);
@@ -158,7 +158,7 @@ public class LogIn {
      * @param user user's username
      * @return String representation of the user's stores
      */
-    public static String getUsersStores(String user) {
+    public synchronized static String getUsersStores(String user) {
         try (BufferedReader br = new BufferedReader(new FileReader("users/" + user + "/" + user))) {
             String stores = "";
             int lineIndex = 0;
@@ -187,7 +187,7 @@ public class LogIn {
      * @param storeName the name of the store being checked
      * @return boolean of if the store exists or not for handling in main
      */
-    public static boolean checkStoreList(String storeName) {
+    public synchronized static boolean checkStoreList(String storeName) {
         try (BufferedReader br = new BufferedReader(new FileReader("users/storeNames"))) {
             ArrayList<String> fileContents = new ArrayList<>();
             String line = br.readLine();
@@ -210,7 +210,7 @@ public class LogIn {
         return (true);
     }
 
-    public static void deleteUserInProgress(String user) {
+    public synchronized static void deleteUserInProgress(String user) {
         File userInfo = new File("users/" + user + "/" + user);
         userInfo.delete();
         File userDirectory = new File("users/" + user);
@@ -228,7 +228,7 @@ public class LogIn {
     }
 
     //move username to new location after name change
-    public static void moveUsername(String user, String newUser) {
+    public synchronized static void moveUsername(String user, String newUser) {
         try {
             //this method was retrieved with help from StackOverflow user @kr37
             Path source = Paths.get("users/" + user + "/" + user);
@@ -274,7 +274,7 @@ public class LogIn {
      *
      * @param storeName the store name being appended to the file
      */
-    public static void updateStoreList(String storeName) {
+    public synchronized static void updateStoreList(String storeName) {
         try (PrintWriter pw = new PrintWriter(new FileOutputStream("users/storeNames", true))) {
             pw.println(storeName);
         } catch (Exception e) {

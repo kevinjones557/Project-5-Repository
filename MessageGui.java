@@ -416,6 +416,25 @@ public class MessageGui extends Client implements Runnable {
         topTextPanel.add(topLabel1);
         topTextPanel.add(topLabel2);
         // creating buttons for bottom panel
+        ImageIcon i6 = new ImageIcon("ImageIcon/refresh.png");
+
+        Image image6 = i6.getImage();
+        Image rescaled6 = image6.getScaledInstance(20, 20, Image.SCALE_SMOOTH);
+        i6 = new ImageIcon(rescaled6);
+
+        JButton refreshButton = new JButton("Refresh Chats", i6);
+        refreshButton.setFocusable(false);
+        refreshButton.setMaximumSize(new Dimension(165, 56));
+        refreshButton.setFocusable(false);
+        bottomButtonPanel.add(refreshButton);
+        refreshButton.addActionListener(e -> {
+            if (e.getSource() == refreshButton) {
+                myFrame.invalidate();
+               createLeftPanel();
+               createMessageGUI();
+               myFrame.revalidate();
+            }
+        });
 
         ImageIcon i4 = new ImageIcon("ImageIcon/search.jpg");
 
@@ -424,7 +443,7 @@ public class MessageGui extends Client implements Runnable {
         i4 = new ImageIcon(rescaled4);
 
         JButton searchForUserButton = new JButton("Search for a " + ((isUserSeller) ? "buyer" : "seller"), i4);
-        searchForUserButton.setMaximumSize(new Dimension(165, 74));
+        searchForUserButton.setMaximumSize(new Dimension(165, 56));
         searchForUserButton.setFocusable(false);
         bottomButtonPanel.add(searchForUserButton);
         searchForUserButton.addActionListener(e -> {
@@ -466,7 +485,7 @@ public class MessageGui extends Client implements Runnable {
         });
 
         JButton seeListOfUsersButton = new JButton("See a list of " + ((isUserSeller) ? "buyers" : "stores"), i4);
-        seeListOfUsersButton.setMaximumSize(new Dimension(165, 74));
+        seeListOfUsersButton.setMaximumSize(new Dimension(165, 56));
         seeListOfUsersButton.setFocusable(false);
         bottomButtonPanel.add(seeListOfUsersButton);
         seeListOfUsersButton.addActionListener(e -> {
@@ -526,7 +545,7 @@ public class MessageGui extends Client implements Runnable {
 
         JButton metricsButton = new JButton("View Statistics", i5);
         metricsButton.setFocusable(false);
-        metricsButton.setMaximumSize(new Dimension(165, 74));
+        metricsButton.setMaximumSize(new Dimension(165, 56));
         metricsButton.setFocusable(false);
         bottomButtonPanel.add(metricsButton);
         metricsButton.addActionListener(e -> {
@@ -539,7 +558,7 @@ public class MessageGui extends Client implements Runnable {
             scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             scrollPane.setBounds(0, 45, 165, 545);
             //TODO check this vvv
-            scrollPane.setBounds(0, 0, 165, 600); //xyz y45  height545
+            scrollPane.setBounds(0, 0, 165, 590); //xyz y45  height545
             scrollPane.validate();
             c.add(scrollPane);
         }

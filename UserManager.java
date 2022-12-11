@@ -151,7 +151,7 @@ public class UserManager {
         username, go through files and change all the names and rename files */
     }
 
-    public static void changeStoreName(String oldStoreName, String newStoreName) {
+    public synchronized static void changeStoreName(String oldStoreName, String newStoreName) {
         File sellerDirectories = new File("data/sellers/");
         File buyerDirectories = new File("data/buyers/");
         String[] sellers = sellerDirectories.list();
