@@ -286,6 +286,9 @@ public class LogInGui {
                                 user = JOptionPane.showInputDialog(null,
                                         "Enter your username.",
                                         "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                                if (user == null) {
+                                    return;
+                                }
                             } else if (nameCheck.equals("invalid")) {
                                 JOptionPane.showMessageDialog(null,
                                         "Username constraints: " +
@@ -297,6 +300,9 @@ public class LogInGui {
                                 user = JOptionPane.showInputDialog(null,
                                         "Enter your username.",
                                         "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                                if (user == null) {
+                                    return;
+                                }
                             }
                             nameCheck = checkName(user, false, user);
                         }
@@ -464,12 +470,13 @@ public class LogInGui {
                                         "Please enter an email to be associated with your account.",
                                         "Messaging program", JOptionPane.PLAIN_MESSAGE);
                                 if (email == null) {
-                                    deleteUserInProgress(user);
                                     writer.println("getUsersStores;" + user);
                                     writer.flush();
                                     String stores = reader.readLine();
+                                    System.out.println(stores);
                                     writer.println("appendStoreList;" + stores);
                                     writer.flush();
+                                    deleteUserInProgress(user);
                                     return;
                                 }
                                 if (email.equals("") || !email.contains("@")) {
