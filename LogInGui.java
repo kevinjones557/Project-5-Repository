@@ -370,8 +370,8 @@ public class LogInGui {
                             done = false;
                             while (!done) {
                                 if (isSeller.equalsIgnoreCase("true")) {
-                                    //TODO FileManager calls
-                                    //FileManager.generateDirectoryFromUsername(user, true);
+                                    writer.println("generateDirectoryFromUsername;" + user + ";true");
+                                    writer.flush();
                                     boolean doneStores = false;
                                     ArrayList<String> storeNames = new ArrayList<>();
                                     String storeName = "";
@@ -418,8 +418,7 @@ public class LogInGui {
                                             storeNames.add(storeName);
                                             writer.println("updateStoreList;" + storeName);
                                             writer.flush();
-                                            //TODO FileManager calls
-                                            //FileManager.generateStoreForSeller(user, storeName);
+                                            writer.println("generateStoreForSeller;" + user + ";" + storeName);
                                         } else if (input == -1) {
                                             deleteUserInProgress(user);
                                             return;
@@ -456,8 +455,8 @@ public class LogInGui {
                                     writer.println("writeFile;" + user + ";" + storeNames);
                                     writer.flush();
                                 } else {
-                                    //TODO FileManager calls
-                                    //FileManager.generateDirectoryFromUsername(user, false);
+                                    writer.println("generateDirectoryFromUsername;" + user + ";false");
+                                    writer.flush();
                                     writer.println("writeFile;" + user + ";" + isSeller);
                                     writer.flush();
                                 }
