@@ -67,8 +67,8 @@ public class Client {
         return false;
     }
 
-    public ArrayList<String[]> sortMetricsData(String username, int index) {
-        writer.println("sortMetrics;" + username + ";" + index);
+    public ArrayList<String[]> sortMetricsData(String username, int index, boolean isSeller) {
+        writer.println("sortMetrics;" + username + ";" + index + ";" + isSeller);
         writer.flush();
         try {
             ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
@@ -76,6 +76,18 @@ public class Client {
         } catch (Exception e) {
             e.printStackTrace();
             return null;
+        }
+    }
+
+    public String[] getMostCommonWords(String sellerName, int index) {
+        writer.println("getMostCommonWords;" + sellerName + ";" + index);
+        writer.flush();
+        try {
+            ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
+            return (String[]) ois.readObject();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new String[0];
         }
     }
     public void checkIfMessageExists(String recipient, boolean isRecipientStore, boolean isSeller,

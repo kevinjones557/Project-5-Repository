@@ -27,6 +27,13 @@ public class MessageGui extends Client implements Runnable {
     private final JScrollPane metricsScroll = new JScrollPane();
     private final Box userPanel = Box.createVerticalBox();
     private final Box labelBox = Box.createVerticalBox();
+    private final Box labelBox1 = Box.createVerticalBox();
+
+    JScrollPane metricsPanel = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    JScrollPane metricsPanel2 = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
 
     private final JPopupMenu popupMenu1 = new JPopupMenu();
     private final JPopupMenu popupMenu2 = new JPopupMenu();
@@ -41,6 +48,7 @@ public class MessageGui extends Client implements Runnable {
     private final JPopupMenu popUpSetting = new JPopupMenu();
     private final JPopupMenu filterMain = new JPopupMenu();
     private int sortType = 0;
+    private int sortWords = 0;
     JLabel topLabel3 = new JLabel();
 
     // characteristics of chat
@@ -105,7 +113,8 @@ public class MessageGui extends Client implements Runnable {
                     }
                 } while (censoredWord.isEmpty());
                 if (censoredWord != null) {
-                    int isDefault = JOptionPane.showConfirmDialog(myFrame, "Do you want to use custom replacement?",
+                    int isDefault = JOptionPane.showConfirmDialog(myFrame, "Do you want to use " +
+                                    "default replacement (*)?",
                             "Default", JOptionPane.YES_NO_OPTION);
                     if (isDefault == 0) {
                         replacement = "*".repeat(censoredWord.length());
@@ -199,7 +208,8 @@ public class MessageGui extends Client implements Runnable {
                             "Please choose a word to edit replacement", "Edit Filter",
                             JOptionPane.PLAIN_MESSAGE, null, theList, theList[0]);
                     if (censoredWord != null) {
-                        int isDefault = JOptionPane.showConfirmDialog(myFrame, "Do you want to use custom replacement?",
+                        int isDefault = JOptionPane.showConfirmDialog(myFrame, "Do you want to use default" +
+                                        " replacement (*)?",
                                 "Default", JOptionPane.YES_NO_OPTION);
                         if (isDefault == 0) {
                             replacement = "*".repeat(censoredWord.length());
@@ -240,6 +250,13 @@ public class MessageGui extends Client implements Runnable {
                 glassFrame.dispose();
                 filterMain.removeAll();
                 filterMain.setVisible(false);
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        createMessageGUI();
+                        metricsFrame.revalidate();
+                    }
+                });
             }
         });
 
@@ -519,6 +536,7 @@ public class MessageGui extends Client implements Runnable {
         });
         if (initialSetup) {
             scrollPane.setViewportView(userPanel);
+            scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             scrollPane.setBounds(0, 45, 165, 545);
             //TODO check this vvv
             scrollPane.setBounds(0, 0, 165, 600); //xyz y45  height545
@@ -792,7 +810,7 @@ public class MessageGui extends Client implements Runnable {
                     (storeName == null) ? "nil" : storeName, !isUserSeller);
 
             for (String s : messages) {
-                int numLines = 1 + s.length() / 160; // sets a factor for how many lines are needed
+                int numLines = 1 + s.length() / 145; // sets a factor for how many lines are needed
                 JTextArea tempLabel = new JTextArea(s);
                 tempLabel.setMaximumSize(new Dimension(820, numLines * 18));
                 tempLabel.setEditable(false);
@@ -963,6 +981,13 @@ public class MessageGui extends Client implements Runnable {
                 glassFrame.dispose();
                 popUpSetting.removeAll();
                 popUpSetting.setVisible(false);
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        createMessageGUI();
+                        metricsFrame.revalidate();
+                    }
+                });
             }
         });
 
@@ -1086,7 +1111,7 @@ public class MessageGui extends Client implements Runnable {
             textPanel.setLayout(null);
             textPanel.setBounds(0, 0, 600, 50);
 
-            JLabel label1 = new JLabel("Stores and Customers");
+            JLabel label1 = new JLabel("Messages per Customer");
             label1.setFont(new Font("Arial", Font.BOLD, 12));
             label1.setBounds(20, 0, 250, 50);
             label1.setHorizontalAlignment(JLabel.CENTER);
@@ -1104,12 +1129,16 @@ public class MessageGui extends Client implements Runnable {
                 if (e.getSource() == sortNames) {
                     if (sortNames.getText().equals("▲")) {
                         sortNames.setText("▼");
+                        this.sortType = 1;
                     } else {
                         sortNames.setText("▲");
+                        this.sortType = 0;
                     }
                 }
-                sortNames.revalidate();
-                textPanel.revalidate();
+                SwingUtilities.invokeLater(() -> {
+                    createStatisticsGUI();
+                    metricsFrame.revalidate();
+                });
             });
 
             JLabel label2 = new JLabel("Most Common Overall Words");
@@ -1125,9 +1154,15 @@ public class MessageGui extends Client implements Runnable {
                 if (e.getSource() == sortTotal) {
                     if (Objects.equals(sortTotal.getText(), "▲")) {
                         sortTotal.setText("▼");
+                        sortWords = 1;
                     } else {
                         sortTotal.setText("▲");
+                        sortWords = 0;
                     }
+                    SwingUtilities.invokeLater(() -> {
+                        createStatisticsGUI();
+                        metricsScroll.revalidate();
+                    });
                 }
             });
 
@@ -1145,27 +1180,16 @@ public class MessageGui extends Client implements Runnable {
 
             metricsFrame.add(textPanel);
 
-            Box labelBox = Box.createVerticalBox();
             Box labelBox2 = Box.createVerticalBox();
 
-            ArrayList<String[]> metricsData = new ArrayList<>();
-            // TODO call client version of this
-            String[] data1 = {"Walmart-", "Bob: 478", "Jim: 7"};
-            String[] data2 = {"Target-", "Billy: 700", "Bob: 15"};
-            String[] data3 = {"GameStop-", "Jimmy: 50", "Todd: 30", "William: 40"};
-            String[] dataOther = {"Aldi-", "Jordan: 500"};
-            String[] dataOther2 = {"GameStop-", "Jimmy: 50", "Todd: 30", "William: 40"};
-            String[] dataOther3 = {"GameStop-", "Jimmy: 50", "Todd: 30", "William: 40"};
-            metricsData.add(data1);
-            metricsData.add(data2);
-            metricsData.add(data3);
-            metricsData.add(dataOther);
-            metricsData.add(dataOther2);
-            metricsData.add(dataOther3);
+            labelBox1.removeAll();
+
+            System.out.println(sortType);
+            ArrayList<String[]> metricsData = super.sortMetricsData(this.username, this.sortType, true);
 
             // TODO call client for common words
-            String[] data4 = {"the: 221", "a: 195", "product: 137", "sell: 122", "because: 96", "stock: 94", "we: 80", "sale: 73", "cost: 60", "discount: 50"};
-
+            String[] data4 = super.getMostCommonWords(this.username, sortWords);
+            System.out.println("common words " + Arrays.toString(data4));
             for (String[] s : metricsData) {
                 JPanel tempPanel = new JPanel();
                 textPanel.setLayout(null);
@@ -1173,11 +1197,10 @@ public class MessageGui extends Client implements Runnable {
                 JLabel labelStore = new JLabel(s[0]);
                 labelStore.setMaximumSize(new Dimension(90, 50));
                 labelStore.setHorizontalAlignment(JLabel.CENTER);
-                labelStore.setLocation(0, 0);
                 labelStore.setFont(new Font("Arial", Font.BOLD, 20));
 
                 tempPanel.add(labelStore);
-                labelBox.add(tempPanel);
+                labelBox1.add(tempPanel);
 
                 for (int i = 1; i < s.length; i++) {
                     JPanel tempPanel2 = new JPanel();
@@ -1190,7 +1213,7 @@ public class MessageGui extends Client implements Runnable {
                     labelCustomer.setFont(new Font("Arial", Font.PLAIN, 13));
 
                     tempPanel2.add(labelCustomer);
-                    labelBox.add(tempPanel2);
+                    labelBox1.add(tempPanel2);
                 }
             }
 
@@ -1210,12 +1233,10 @@ public class MessageGui extends Client implements Runnable {
                 labelBox2.add(tempPanel4);
             }
 
-            JScrollPane metricsPanel = new JScrollPane(labelBox, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-            JScrollPane metricsPanel2 = new JScrollPane(labelBox2, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            metricsPanel.setViewportView(labelBox1);
             metricsPanel.setBounds(0, 50, 300, 510);
             metricsPanel.setBorder(BorderFactory.createLineBorder(Color.white));
+            metricsPanel2.setViewportView(labelBox2);
             metricsPanel2.setBounds(300, 50, 285, 510);
             metricsPanel2.setBorder(BorderFactory.createLineBorder(Color.white));
             metricsFrame.add(metricsPanel);
@@ -1329,7 +1350,7 @@ public class MessageGui extends Client implements Runnable {
             labelBox.removeAll();
 
             System.out.println(sortType);
-            ArrayList<String[]> metricsData = MessageGui.super.sortMetricsData(this.username, sortType);
+            ArrayList<String[]> metricsData = MessageGui.super.sortMetricsData(this.username, sortType, false);
             for (String[] s : metricsData) {
                 System.out.print(Arrays.toString(s));
             }

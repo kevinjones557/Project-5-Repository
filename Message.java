@@ -77,16 +77,13 @@ public class Message {
                     messageSenderWriter.close();
                     messageReceiveWriter.close();
                 }
-                message = message.substring(message.indexOf("-") + 2);
-                if (isBuyer) {
-                    String storePath;
-                    if (FileManager.checkSellerExists(recipient)) {
-                        storePath = null;
-                    } else {
-                        storePath = fileRecipient;
-                    }
-                    MetricManager.addDeleteMessageData(
-                            sender, storePath, message, false);
+                long cnt = fileRecipient.codePoints().filter(ch -> ch == '/').count();
+                message = message.substring(message.indexOf("-") + 1);
+                if (isBuyer && cnt == 4) {
+                    String storeBuyer = fileRecipient.substring(fileRecipient.lastIndexOf("/") + 1,
+                            fileRecipient.indexOf("."));
+                    String storeName = storeBuyer.substring(0, storeBuyer.length() - sender.length());
+                    StatisticsManager.addMessage(sender, storeName, message);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -178,15 +175,19 @@ public class Message {
 
                     //read through list, when the message matches the index of the list, changes that index to the edit
                     for (int i = 0; i < readSenderFile.size(); i++) {
-                        if (readSenderFile.get(i).equals(message)) {
+                        if ((readSenderFile.get(i).substring(0, readSenderFile.get(i).indexOf("-"))).equals
+                                (message.substring(0, message.indexOf("-")))) {
                             editedMessage = extractNameAndTime + edit;
                             readSenderFile.set(i, editedMessage);
+                            break;
                         }
                     }
                     for (int i = 0; i < readReceiverFile.size(); i++) {
-                        if (readReceiverFile.get(i).equals(message)) {
+                        if ((readReceiverFile.get(i).substring(0, readReceiverFile.get(i).indexOf("-"))).equals
+                                (message.substring(0, message.indexOf("-")))) {
                             editedMessage = extractNameAndTime + edit;
                             readReceiverFile.set(i, editedMessage);
+                            break;
                         }
                     }
 
@@ -202,19 +203,13 @@ public class Message {
                     messageSenderWriter.close();
                     messageReceiveWriter.close();
                 }
-                message = message.substring(message.indexOf("-") + 2);
-                edit = edit.substring(edit.indexOf("-") + 2);
-                if (isBuyer) {
-                    String storePath;
-                    if (FileManager.checkSellerExists(recipient)) {
-                        storePath = null;
-                    } else {
-                        storePath = fileRecipient;
-                    }
-                    message = message.substring(
-                            message.indexOf("-") + 1);
-                    MetricManager.editMessageData(
-                            sender, storePath, message, edit);
+                long cnt = fileRecipient.codePoints().filter(ch -> ch == '/').count();
+                edit = edit.substring(edit.indexOf("-") + 1);
+                if (isBuyer && cnt == 4) {
+                    String storeBuyer = fileRecipient.substring(fileRecipient.lastIndexOf("/") + 1,
+                            fileRecipient.indexOf("."));
+                    String storeName = storeBuyer.substring(0, storeBuyer.length() - sender.length());
+                    StatisticsManager.countWords(storeName, edit);
                 }
 
             } catch (IOException e) {
@@ -296,23 +291,14 @@ public class Message {
 
                     // read through list, write to file if it is not the deleted message
                     for (int i = 0; i < readSenderFile.size(); i++) {
-                        if (!(readSenderFile.get(i)).equals(message))
+                        if (!(readSenderFile.get(i).substring(0, readSenderFile.get(i).indexOf("-"))).equals
+                                (message.substring(0, message.indexOf("-"))))
                             messageSenderWriter.println(readSenderFile.get(i));
                     }
                     readSend.close();
                     messageSenderWriter.close();
                 }
                 message = message.substring(message.indexOf("-") + 2);
-                if (isBuyer) {
-                    String storePath;
-                    if (FileManager.checkSellerExists(recipient)) {
-                        storePath = null;
-                    } else {
-                        storePath = fileRecipient;
-                    }
-                    MetricManager.addDeleteMessageData(sender, storePath,
-                            message, true);
-                }
 
             } catch (IOException e) {
                 e.printStackTrace();
