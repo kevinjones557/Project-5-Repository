@@ -367,7 +367,7 @@ public class Server extends Thread {
         }
     }
 
-    private static ArrayList<String[]> handleGetBuyerMetricData(String request, LinkedHashMap<String,
+    private synchronized static ArrayList<String[]> handleGetBuyerMetricData(String request, LinkedHashMap<String,
             String> storeNameMap) throws IOException{
         // parameters:
         // request; buyer's name
@@ -411,7 +411,7 @@ public class Server extends Thread {
         writer.flush();
     }
 
-    private static void handleChangeStoreName(String contents, Socket socket, PrintWriter pw) {
+    private synchronized static void handleChangeStoreName(String contents, Socket socket, PrintWriter pw) {
         String array = contents.substring(0, contents.indexOf(";"));
         array = array.substring(1, array.length() - 1) + ", ";
         List<String> storesArray = new ArrayList<String>();
@@ -537,7 +537,7 @@ public class Server extends Thread {
         LogIn.removeRenamedStore(storeToChange, storeName);
     }
 
-    public static void checkIfMessageExists(String recipient, boolean isRecipientStore, boolean isSeller,
+    public synchronized static void checkIfMessageExists(String recipient, boolean isRecipientStore, boolean isSeller,
                                             String username, boolean isUserStore, LinkedHashMap storeNameMap) {
         // check if <username><recipient>.txt exits in directory or not
         if (!isRecipientStore) {
@@ -730,7 +730,7 @@ public class Server extends Thread {
 
     }
 
-    public void exportFile(String recipient, String username, boolean isSeller, boolean isUserStore,
+    public synchronized void exportFile(String recipient, String username, boolean isSeller, boolean isUserStore,
                            String path, LinkedHashMap<String, String> storeNameMap) {
         if (!path.endsWith("/")) {
             path += "/";
@@ -768,5 +768,4 @@ public class Server extends Thread {
             e.printStackTrace();
         }
     }
-
 }
