@@ -63,7 +63,7 @@ public class FileManager {
      * @return an arraylist of Stores that the seller has
      * @author Kevin Jones
      */
-    public static ArrayList<String> getStoresFromSeller(String seller) {
+    public synchronized static ArrayList<String> getStoresFromSeller(String seller) {
         File sellerDirectory = new File("data/sellers/" + seller);
         String[] possibleStores = sellerDirectory.list();
         ArrayList<String> sellerStores = new ArrayList<>();
@@ -90,7 +90,7 @@ public class FileManager {
      * @param isSeller Determines whether the User is a Seller or a Customer.
      * @return true if the directory was created. Returns false if the directory exists, or some other error occurs.
      */
-    public static boolean generateDirectoryFromUsername(String username, boolean isSeller) {
+    public synchronized static boolean generateDirectoryFromUsername(String username, boolean isSeller) {
         try {
             Path filePath;
             if (isSeller) {
@@ -98,10 +98,7 @@ public class FileManager {
             } else {
                 filePath = Files.createDirectory(Paths.get("data/buyers/" + username));
             }
-            Path metrics = Files.createFile(Paths.get(filePath + "/metrics.txt"));
-            try (BufferedWriter bfr = new BufferedWriter(new FileWriter(metrics.toFile()))) {
-                bfr.write("Message Count: 0");
-            }
+            Files.createFile(Paths.get(filePath + "/metrics.txt"));
             Files.createFile(Paths.get(filePath + "/hasBlocked.txt"));
             Files.createFile(Paths.get(filePath + "/isInvisible.txt"));
             return true;
@@ -117,13 +114,9 @@ public class FileManager {
      * @param storeName the name of the Store the Seller wishes to make
      * @return true if the directory was created, false if the directory already exists or an exception occurs.
      */
-    public static boolean generateStoreForSeller(String username, String storeName) {
+    public synchronized static boolean generateStoreForSeller(String username, String storeName) {
         try {
-            Path filePath = Files.createDirectory(Paths.get(getDirectoryFromUsername(username) + storeName));
-            Path metrics = Files.createFile(Paths.get(filePath + "/metrics.txt"));
-            try (BufferedWriter bfr = new BufferedWriter(new FileWriter(metrics.toFile()))) {
-                bfr.write("Message Count: 0");
-            }
+            Files.createDirectory(Paths.get(getDirectoryFromUsername(username) + storeName));
             return true;
         } catch (UserNotFoundException e) {
             System.out.println("Seller not found.");
