@@ -216,15 +216,15 @@ public class Server extends Thread {
                     ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
                     outputStream.writeObject(data);
                     outputStream.flush();
-                } else if (instruction.equals("editUsername")) {
+                } else if (instruction.equals("changeUsername")) {
                     //sample request: editUsername;<oldUsername>;<newUsername>
                     UserManager.changeUsername(contents.substring(0, contents.indexOf(";")),
                             contents.substring(contents.indexOf(";") + 1));
                 } else if (instruction.equals("deleteUser")) {
                     //sample request: deleteUser;<username>
                     UserManager.deleteUsername(contents);
-                } else if (instruction.equals("changeStoreName")) {
-                    //sample request: editUsername;<oldStoreName>;<newStoreName>
+                } else if (instruction.equals("changeDataStoreName")) {
+                    //sample request: changeDataStoreName;<oldStoreName>;<newStoreName>
                     UserManager.changeStoreName(contents.substring(0, contents.indexOf(";")),
                             contents.substring(contents.indexOf(";") + 1));
                 } else if (instruction.equals("addFilter")) {
