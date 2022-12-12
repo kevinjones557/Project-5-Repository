@@ -230,7 +230,7 @@ public class MessageGui extends Client implements Runnable {
                         } else {
                             JOptionPane.showMessageDialog(myFrame,
                                     "Successfully edit replacement to " + "\"" + replacement
-                                    + "\"", "Success",
+                                            + "\"", "Success",
                                     JOptionPane.INFORMATION_MESSAGE);
                         }
                     }
@@ -324,9 +324,12 @@ public class MessageGui extends Client implements Runnable {
         //userPanel.add(topLeft);
 
         // this is run for buyers and sellers, gets personal conversations
-        for (String user : availableMessages) {
+        for (String user : allMessages) {
             if (user.length() == 0) {
                 break;
+            }
+            if (!availableMessages.contains(user)) {
+                continue;
             }
 
             JButton tempButton = new JButton(user);
@@ -338,23 +341,11 @@ public class MessageGui extends Client implements Runnable {
                         if (SwingUtilities.isLeftMouseButton(e)) {
                             // user could be a buyer, seller, or a store
                             if (!isUserSeller) {
-                                chooseRecipient(user, user);
-                                String receiver = recipient;
-                                String receiverPath = "data/sellers/" + recipient + "/" + recipient + username + ".txt";
-                                if(storeName != null) {
-                                    receiver = storeName;
-                                    receiverPath = "data/sellers/" + recipient + "/" + storeName + "/"
-                                            + storeName + username + ".txt";
-                                }
-                                String senderPath = "data/buyers/" + username + "/" + username + receiver + ".txt";
-                                generateMessageFile("generate", senderPath + ";" + receiverPath);
                                 isRecipientStore = MessageGui.super.isRecipientStore(user);
                                 System.out.println(isRecipientStore);
+                                chooseRecipient(user, user);
                             } else {
                                 chooseRecipient(user, null);
-                                String senderPath = "data/sellers/" + username + "/" + username + user + ".txt";
-                                String receiverPath = "data/buyers/" + user + "/" + user + username + ".txt";
-                                generateMessageFile("generate", senderPath + ";" + receiverPath);
                             }
                             isUserStore = false;
                         } else if (SwingUtilities.isRightMouseButton(e)) {
@@ -377,7 +368,6 @@ public class MessageGui extends Client implements Runnable {
                     break;
                 }
                 ArrayList<String> buyerConversations = super.getConversationsFromStore(this.username, store);
-                buyerConversations = availableMessages;
                 System.out.println("hi" + store + buyerConversations);
                 if (buyerConversations.size() != 0) {
                     JLabel storeLabel = new JLabel(store + ":");
@@ -396,10 +386,6 @@ public class MessageGui extends Client implements Runnable {
                                 isUserStore = true;
                                 isRecipientStore = false;
                                 chooseRecipient(buyer, store);
-                                String senderPath = "data/sellers/" + username + "/" + storeName + "/"
-                                        + storeName + recipient + ".txt";
-                                String receiverPath = "data/buyers/" + recipient + "/" + recipient + storeName + ".txt";
-                                generateMessageFile("generate", senderPath + ";" + receiverPath);
                             }
                             // TODO call client function with recipient to get message info
                         };
@@ -444,9 +430,9 @@ public class MessageGui extends Client implements Runnable {
         refreshButton.addActionListener(e -> {
             if (e.getSource() == refreshButton) {
                 myFrame.invalidate();
-               createLeftPanel();
-               createMessageGUI();
-               myFrame.revalidate();
+                createLeftPanel();
+                createMessageGUI();
+                myFrame.revalidate();
             }
         });
 
@@ -1442,7 +1428,7 @@ public class MessageGui extends Client implements Runnable {
 
 
     public static void main(String[] args) throws IOException {
-        SwingUtilities.invokeLater(new MessageGui("Buyer", false    , new Socket("localhost", 2000)));
+        SwingUtilities.invokeLater(new MessageGui("Buyer", false, new Socket("localhost", 2000)));
     }
 
 }
@@ -1451,15 +1437,7 @@ Possible Interactions:
 buyer -> store          for both of these, isUserSeller is false, isUserStore is false, isRecipientStore could be
 buyer -> seller         false or true. Username is always itself, recipient is always a seller name, storeName
                         could be null or a storeName if the recipient is store
-
 store -> buyer          for both of these, isRecipientStore is false, isUserSeller is true, isUserStore could be
 seller -> buyer         false or true. Username is always itself, recipient is always a buyer name, storeName
                         could be null or a storeName if seller is a store
  */
-//TODO bugs
-//todo metrics manager issue when deleting
-//todo write test cases and record video and write readme
-//todo synchronize and document everything
-//todo combine login and messaging
-//todo sort seller metrics
-//todo get seller metrics from server
