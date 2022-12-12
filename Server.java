@@ -581,6 +581,14 @@ public class Server extends Thread {
             }
         }
     }
+
+    /**
+     * Method to receive append signal, parse instructions, and call append
+     *
+     * @param reader reader
+     *
+     * @author John Brooks
+     */
     public static void appendReceive(BufferedReader reader) {
         try {
             System.out.println("appending message");
@@ -604,6 +612,13 @@ public class Server extends Thread {
         }
     }
 
+    /**
+     * Method to receive delete signal, parse instructions, and call delete
+     *
+     * @param reader reader
+     *
+     * @author John Brooks
+     */
     public static void deleteReceive(BufferedReader reader) {
         try {
             String personData = reader.readLine();
@@ -625,6 +640,13 @@ public class Server extends Thread {
         }
     }
 
+    /**
+     * Method to receive signal to edit, parse instructions, and call editing function
+     *
+     * @param reader reader
+     *
+     * @author John Brooks
+     */
     public static void editReceive(BufferedReader reader) {
         try {
             String personData = reader.readLine();
@@ -647,6 +669,14 @@ public class Server extends Thread {
         }
     }
 
+    /**
+     * Method to receive signal for message display, retrieve info, and send back
+     *
+     * @param reader reader
+     * @param socket socket
+     *
+     * @author John Brooks
+     */
     public static void displayReceive(BufferedReader reader, Socket socket) {
         System.out.println("dislpaying");
         try {

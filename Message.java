@@ -2,6 +2,11 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
+/**
+ * This Message class handles all file actions when messagine, editing, or deleting
+ *
+ * @author John Brooks
+ */
 public class Message {
 
     private static final Object SYNCH = new Object();
@@ -128,12 +133,16 @@ public class Message {
     }
 
     /**
-     * Searches file for index that matches one given by the user and changes that line and
-     * writes it back to the file
+     * This method executes the file changes involved in editing messages
      *
-     * @param recipient     receives file
-     * @param fileSender    sender file path
-     * @param fileRecipient recipient file path
+     * @param sender sender
+     * @param recipient recipient
+     * @param isBuyer if buyer
+     * @param fileSender filepath of sender
+     * @param fileRecipient filepath of recipient
+     * @param message message to change
+     * @param edit edit made
+     *
      * @author John Brooks
      */
     public static void editMessageExecute(String sender, String recipient, boolean isBuyer, String fileSender,

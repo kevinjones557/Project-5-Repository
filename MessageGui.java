@@ -1115,6 +1115,12 @@ public class MessageGui extends Client implements Runnable {
         popupMenu2.setLocation(e.getLocationOnScreen());
     }
 
+    /**
+     * Method that creates the GUI for statistics
+     *
+     * @author Kevin Jones, all buyers GUI and sorting part of sellers
+     * @author John Brooks, design of sellers GUI
+     */
     public void createStatisticsGUI() {
         metricsFrame.setTitle("Statistics");
         metricsFrame.setLayout(null);
