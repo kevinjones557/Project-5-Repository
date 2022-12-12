@@ -5,10 +5,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Runs the GUI for log in
+ *
+ * @author riley197
+ * @version 12/12/22
+ */
 public class LogInGui {
 
     /**
-     * Takes a password input by a user attempting to log in and uses the key to encrypt it for comparison
+     * Takes a password input by a user attempting to log in and
+     * uses the key to encrypt it for comparison
      *
      * @param input the password being encrypted
      * @return String of the encrypted password
@@ -55,7 +62,15 @@ public class LogInGui {
         }
     }
 
-    //checks either store names or usernames to see if they're valid
+    /**
+     * Takes a store name or username entered as a new name
+     * and checks to see if it's valid
+     *
+     * @param name the store name or username
+     * @param isStore if the name is a store name
+     * @param user the user attempting to make the change
+     * @return String representation of the validity status of the name
+     */
     public static String checkName(String name, boolean isStore, String user) {
         if (name == null) {
             return (null);
@@ -109,11 +124,24 @@ public class LogInGui {
         return ("valid");
     }
 
+    /**
+     * Deletes the user that is currently being created if the user exits
+     * the program before finishing their account
+     *
+     * @param user the user being deleted
+     */
     public static void deleteUserInProgress(String user) {
         writer.println("deleteUserInProgress;" + user);
         writer.flush();
     }
 
+    /**
+     * Checks the password being input to see if it is valid or not
+     *
+     * @param password the password being tested
+     * @param user the user the password belongs to
+     * @return String representation of validity status
+     */
     public static String checkPassword(String password, String user) {
         if (password == null) {
             deleteUserInProgress(user);
@@ -126,6 +154,14 @@ public class LogInGui {
         return ("valid");
     }
 
+    /**
+     * Changes the store name for a given seller
+     *
+     * @param storesArray the seller's stores
+     * @param storeToChange the store that needs to be changed
+     * @param storeName the new store name
+     * @param user the user changing their store name
+     */
     public static void changeStoreName(List<String> storesArray, String storeToChange, String storeName, String user) {
         storesArray.set(storesArray.indexOf(storeToChange), storeName);
         writer.println("changeStoreName;" + storesArray + ";" + user);
@@ -497,7 +533,6 @@ public class LogInGui {
             writer.println("isSeller;" + user);
             writer.flush();
             boolean isSeller = Boolean.parseBoolean(reader.readLine());
-            System.out.println(isSeller);
             boolean running = true;
             while (running) {
                 options[0] = "User Interaction";
