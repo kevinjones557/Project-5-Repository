@@ -33,18 +33,18 @@ The Filtering class contains static methods used to change data in files relatin
 ###### FileManager
 The FileManager class contains static methods used to handle creation and changes of the project's data files.
 
-##### StatisticsManager
+###### StatisticsManager
 /Write something here Kevin
 
-##### UserManager
+###### UserManager
 /Write something here Kevin
 
-##### LogIn
+###### LogIn
 /Write something here Aden
 
-##### LogInGUI
+###### LogInGUI
 /Write something here Aden
 
-##### UserNotFoundException
+###### UserNotFoundException
 /Write something here Destin or remove it if found unnecessary
 
