@@ -132,7 +132,7 @@ public class LogInGui {
         writer.flush();
         writer.println("removeRenamedStore;" + storeToChange + ";" + storeName);
         writer.flush();
-        writer.println("changeStoreName;" + storeToChange +  ";" + storeName);
+        writer.println("changeStoreName;" + storeToChange + ";" + storeName);
         writer.flush();
         writer.println("changeDataStoreName;" + storeToChange + ";" + storeName);
         writer.flush();
@@ -156,472 +156,239 @@ public class LogInGui {
         try {
             Socket s = new Socket("localhost", 2000);
             LogInGui runLogIn = new LogInGui(s);
-            try {
-                String user = null;
-                boolean done;
-                String[] options = new String[2];
-                options[0] = "Log in";
-                options[1] = "Sign up";
-                int input = JOptionPane.showOptionDialog(null,
-                        "Welcome! Would you like to log in or sign up?",
+            String user = null;
+            boolean done;
+            String[] options = new String[2];
+            options[0] = "Log in";
+            options[1] = "Sign up";
+            int input = JOptionPane.showOptionDialog(null,
+                    "Welcome! Would you like to log in or sign up?",
+                    "Messaging program", 0,
+                    JOptionPane.QUESTION_MESSAGE, null, options, null);
+            if (input == -1) {
+                return;
+            }
+            if (input == 0) {
+                boolean userFound = false;
+                done = false;
+                while (!done) {
+                    user = JOptionPane.showInputDialog(null,
+                            "Enter your username.",
+                            "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                    if (user == null) {
+                        return;
+                    }
+                    if (user.equals("")) {
+                        while (user.equals("")) {
+                            JOptionPane.showMessageDialog(null,
+                                    "Username cannot be blank!",
+                                    "Messaging program", JOptionPane.ERROR_MESSAGE);
+                            user = JOptionPane.showInputDialog(null,
+                                    "Enter your username.",
+                                    "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                            if (user == null) {
+                                return;
+                            }
+                        }
+                    }
+                    writer.println("checkUserExists;" + user);
+                    writer.flush();
+                    boolean checkUser = Boolean.parseBoolean(reader.readLine());
+                    if (!checkUser) {
+                        String[] userOptions = {"Yes", "No"};
+                        String continueUser = (String) JOptionPane.showInputDialog(null,
+                                "User doesn't exist! Would you like to try again?",
+                                "Messaging program", JOptionPane.QUESTION_MESSAGE,
+                                null, userOptions, null);
+                        if (continueUser == null) {
+                            return;
+                        }
+                        if (continueUser.equals("No")) {
+                            return;
+                        }
+                    } else {
+                        userFound = true;
+                        done = true;
+                    }
+                }
+                if (userFound) {
+                    done = false;
+                    while (!done) {
+                        String passwordInput = JOptionPane.showInputDialog(null,
+                                "Enter your password.",
+                                "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                        if (passwordInput == null) {
+                            return;
+                        }
+                        writer.println("readPassword;" + user);
+                        writer.flush();
+                        String password = reader.readLine();
+                        if (encrypt(passwordInput).equals(password)) {
+                            JOptionPane.showMessageDialog(null,
+                                    "Welcome!",
+                                    "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                            done = true;
+                        } else {
+                            boolean continuePassword = false;
+                            while (!continuePassword) {
+                                String[] userOptions = {"Yes", "No"};
+                                String continueUser = (String) JOptionPane.showInputDialog(null,
+                                        "Incorrect Password! Would you like to try again?",
+                                        "Messaging program", JOptionPane.QUESTION_MESSAGE,
+                                        null, userOptions, null);
+                                if (continueUser.equals("No") || continueUser == null) {
+                                    return;
+                                }
+                                continuePassword = true;
+                            }
+                        }
+                    }
+                }
+            } else if (input == 1) {
+                //user makes new account
+                options[0] = "Buyer";
+                options[1] = "Seller";
+                input = JOptionPane.showOptionDialog(null,
+                        "Please choose your account role.",
                         "Messaging program", 0,
                         JOptionPane.QUESTION_MESSAGE, null, options, null);
                 if (input == -1) {
                     return;
                 }
-                if (input == 0) {
-                    boolean userFound = false;
-                    done = false;
-                    while (!done) {
-                        user = JOptionPane.showInputDialog(null,
-                                "Enter your username.",
-                                "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                        if (user == null) {
-                            return;
-                        }
-                        if (user.equals("")) {
-                            while (user.equals("")) {
-                                JOptionPane.showMessageDialog(null,
-                                        "Username cannot be blank!",
-                                        "Messaging program", JOptionPane.ERROR_MESSAGE);
-                                user = JOptionPane.showInputDialog(null,
-                                        "Enter your username.",
-                                        "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                if (user == null) {
-                                    return;
-                                }
-                            }
-                        }
-                        writer.println("checkUserExists;" + user);
-                        writer.flush();
-                        boolean checkUser = Boolean.parseBoolean(reader.readLine());
-                        if (!checkUser) {
-                            String[] userOptions = {"Yes", "No"};
-                            String continueUser = (String) JOptionPane.showInputDialog(null,
-                                    "User doesn't exist! Would you like to try again?",
-                                    "Messaging program", JOptionPane.QUESTION_MESSAGE,
-                                    null, userOptions, null);
-                            if (continueUser == null) {
-                                return;
-                            }
-                            if (continueUser.equals("No")) {
-                                return;
-                            }
-                        } else {
-                            userFound = true;
-                            done = true;
-                        }
-                    }
-                    if (userFound) {
-                        done = false;
-                        while (!done) {
-                            String passwordInput = JOptionPane.showInputDialog(null,
-                                    "Enter your password.",
-                                    "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                            if (passwordInput == null) {
-                                return;
-                            }
-                            writer.println("readPassword;" + user);
-                            writer.flush();
-                            String password = reader.readLine();
-                            if (encrypt(passwordInput).equals(password)) {
-                                JOptionPane.showMessageDialog(null,
-                                        "Welcome!",
-                                        "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                done = true;
-                            } else {
-                                boolean continuePassword = false;
-                                while (!continuePassword) {
-                                    String[] userOptions = {"Yes", "No"};
-                                    String continueUser = (String) JOptionPane.showInputDialog(null,
-                                            "Incorrect Password! Would you like to try again?",
-                                            "Messaging program", JOptionPane.QUESTION_MESSAGE,
-                                            null, userOptions, null);
-                                    if (continueUser.equals("No") || continueUser == null) {
-                                        return;
-                                    }
-                                    continuePassword = true;
-                                }
-                            }
-                        }
-                    }
-                } else if (input == 1) {
-                    //user makes new account
-                    options[0] = "Buyer";
-                    options[1] = "Seller";
-                    input = JOptionPane.showOptionDialog(null,
-                            "Please choose your account role.",
-                            "Messaging program", 0,
-                            JOptionPane.QUESTION_MESSAGE, null, options, null);
-                    if (input == -1) {
-                        return;
-                    }
-                    //value to write for isSeller in file
-                    String isSeller = null;
-                    if (input == 1) {
-                        isSeller = "true";
-                    } else if (input == 0) {
-                        isSeller = "false";
-                    } else {
-                        //user hits exit
-                        return;
-                    }
-                    user = JOptionPane.showInputDialog(null,
-                            "Enter your username.",
-                            "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                    //if the user hits the x
-                    if (user == null) {
-                        return;
-                    }
-                    try {
-                        String nameCheck = checkName(user, false, user);
-                        while (!nameCheck.equals("valid")) {
-                            if (nameCheck == null) {
-                                return;
-                            }
-                            if (nameCheck.equals("inUse")) {
-                                JOptionPane.showMessageDialog(null,
-                                        "Username already exists! Please enter another username.",
-                                        "Messaging program", JOptionPane.ERROR_MESSAGE);
-                                user = JOptionPane.showInputDialog(null,
-                                        "Enter your username.",
-                                        "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                if (user == null) {
-                                    return;
-                                }
-                            } else if (nameCheck.equals("invalid")) {
-                                JOptionPane.showMessageDialog(null,
-                                        "Username constraints: " +
-                                                "\n- Cannot be blank " +
-                                                "\n- Must be in between 6 and 16 characters inclusive " +
-                                                "\n- Cannot contain spaces " +
-                                                "\nPlease enter a valid username.",
-                                        "Messaging program", JOptionPane.ERROR_MESSAGE);
-                                user = JOptionPane.showInputDialog(null,
-                                        "Enter your username.",
-                                        "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                if (user == null) {
-                                    return;
-                                }
-                            }
-                            nameCheck = checkName(user, false, user);
-                        }
-                        writer.println("createUser;" + user);
-                        String password = JOptionPane.showInputDialog(null,
-                                "Please enter a password between 8 and 16 characters.",
-                                "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                        if (password == null) {
-                            deleteUserInProgress(user);
-                            return;
-                        }
-                        String passwordCheck = checkPassword(password, user);
-                        try {
-                            //checking the password
-                            boolean passwordDone = false;
-                            while (!passwordDone) {
-                                while (!passwordCheck.equals("valid")) {
-                                    if (passwordCheck == null) {
-                                        deleteUserInProgress(user);
-                                        return;
-                                    }
-                                    if (passwordCheck.equals("invalid")) {
-                                        password = JOptionPane.showInputDialog(null,
-                                                "Password length must be between 8 and 16 characters\n" +
-                                                        "Password may not contain a ';'\n" +
-                                                        "Please enter a valid password.",
-                                                "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                        if (password == null) {
-                                            deleteUserInProgress(user);
-                                            return;
-                                        }
-                                    }
-                                    if (passwordCheck.equals("tryAgain")) {
-                                        password = JOptionPane.showInputDialog(null,
-                                                "Please enter a password between 8 and 16 characters.",
-                                                "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                        if (password == null) {
-                                            deleteUserInProgress(user);
-                                            return;
-                                        }
-                                    }
-                                    passwordCheck = checkPassword(password, user);
-                                    if (passwordCheck == null) {
-                                        deleteUserInProgress(user);
-                                        return;
-                                    }
-                                }
-                                String passwordToCheck = JOptionPane.showInputDialog(null,
-                                        "Please confirm your password.",
-                                        "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                if (passwordToCheck == null) {
-                                    deleteUserInProgress(user);
-                                    return;
-                                }
-                                if (passwordToCheck.equals(password)) {
-                                    passwordDone = true;
-                                } else {
-                                    JOptionPane.showMessageDialog(null,
-                                            "Passwords do not match! Please try again.",
-                                            "Messaging Program", JOptionPane.ERROR_MESSAGE);
-                                    passwordCheck = "tryAgain";
-                                }
-                            }
-                            encryptFile(user, password);
-                            done = false;
-                            while (!done) {
-                                if (isSeller.equalsIgnoreCase("true")) {
-                                    writer.println("generateDirectoryFromUsername;" + user + ";true");
-                                    writer.flush();
-                                    boolean doneStores = false;
-                                    ArrayList<String> storeNames = new ArrayList<>();
-                                    String storeName = "";
-                                    while (!doneStores) {
-                                        boolean storeCaptured = false;
-                                        while (!storeCaptured) {
-                                            storeName = JOptionPane.showInputDialog(null,
-                                                    "Please enter your store name.",
-                                                    "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                            String storeStatus = checkName(storeName, true, user);
-                                            if (storeStatus == null) {
-                                                deleteUserInProgress(user);
-                                                return;
-                                            } else if (storeStatus.equals("inUse")) {
-                                                JOptionPane.showMessageDialog(null,
-                                                        "Name already in use! Please enter another name.",
-                                                        "Messaging program", JOptionPane.ERROR_MESSAGE);
-                                            } else if (storeStatus.equals("invalid")) {
-                                                JOptionPane.showMessageDialog(null,
-                                                        "Store name constraints: " +
-                                                                "\n- Cannot be blank " +
-                                                                "\n- Must be in between 4 and 16 characters inclusive " +
-                                                                "\n- Must not include symbols " +
-                                                                "\nPlease enter a valid store name.",
-                                                        "Messaging program", JOptionPane.ERROR_MESSAGE);
-                                            } else {
-                                                storeCaptured = true;
-                                            }
-                                        }
-                                        boolean storeInput = false;
-                                        while (!storeInput) {
-                                            input = JOptionPane.showConfirmDialog(null,
-                                                    "Are you sure you want to add this store to your account? " +
-                                                            "This action cannot be undone. " +
-                                                            "\nEnter 'yes' to confirm or 'no' to abort.", "Messaging program",
-                                                    JOptionPane.YES_NO_OPTION);
-                                            if (input == 0 || input == 1) {
-                                                storeInput = true;
-                                            } else {
-                                                return;
-                                            }
-                                        }
-                                        if (input == 0) {
-                                            storeNames.add(storeName);
-                                            writer.println("updateStoreList;" + storeName);
-                                            writer.flush();
-                                            writer.println("generateStoreForSeller;" + user + ";" + storeName);
-                                        } else if (input == -1) {
-                                            deleteUserInProgress(user);
-                                            return;
-                                        }
-                                        input = -1;
-                                        boolean storeInputTaken = false;
-                                        while (!storeInputTaken) {
-                                            input = JOptionPane.showConfirmDialog(null,
-                                                    "Would you like to add another store?",
-                                                    "Messaging program", JOptionPane.YES_NO_OPTION);
-                                            if (input == 0 || input == 1) {
-                                                storeInputTaken = true;
-                                            } else if (input == -1) {
-                                                deleteUserInProgress(user);
-                                                writer.println("getUsersStores;" + user);
-                                                writer.flush();
-                                                String stores = reader.readLine();
-                                                writer.println("appendStoreList;" + stores);
-                                                writer.flush();
-                                                return;
-                                            }
-                                        }
-                                        if (input == 1 && !storeNames.isEmpty()) {
-                                            doneStores = true;
-                                        } else if (input == 1 && storeNames.isEmpty()) {
-                                            JOptionPane.showMessageDialog(null,
-                                                    "Sellers must have at least one store! " +
-                                                            "Please add a store before continuing.",
-                                                    "Messaging program", JOptionPane.ERROR_MESSAGE);
-                                        }
-                                    }
-                                    writer.println("writeFile;" + user + ";" + isSeller);
-                                    writer.flush();
-                                    writer.println("writeFile;" + user + ";" + storeNames);
-                                    writer.flush();
-                                } else {
-                                    writer.println("generateDirectoryFromUsername;" + user + ";false");
-                                    writer.flush();
-                                    writer.println("writeFile;" + user + ";" + isSeller);
-                                    writer.flush();
-                                }
-                                done = true;
-                            }
-                            done = false;
-                            String email = null;
-                            while (!done) {
-                                email = JOptionPane.showInputDialog(null,
-                                        "Please enter an email to be associated with your account.",
-                                        "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                if (email == null) {
-                                    writer.println("getUsersStores;" + user);
-                                    writer.flush();
-                                    String stores = reader.readLine();
-                                    System.out.println(stores);
-                                    writer.println("appendStoreList;" + stores);
-                                    writer.flush();
-                                    deleteUserInProgress(user);
-                                    return;
-                                }
-                                if (email.equals("") || !email.contains("@")) {
-                                    JOptionPane.showMessageDialog(null,
-                                            "Invalid email! Please enter a valid email.",
-                                            "Messaging program", JOptionPane.ERROR_MESSAGE);
-                                } else {
-                                    done = true;
-                                }
-                            }
-                            writer.println("writeFile;" + user + ";" + email);
-                            writer.flush();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                //value to write for isSeller in file
+                String isSeller = null;
+                if (input == 1) {
+                    isSeller = "true";
+                } else if (input == 0) {
+                    isSeller = "false";
+                } else {
+                    //user hits exit
+                    return;
                 }
-                writer.println("isSeller;" + user);
-                writer.flush();
-                boolean isSeller = Boolean.parseBoolean(reader.readLine());
-                boolean running = true;
-                while (running) {
-                    options[0] = "User Interaction";
-                    options[1] = "Account Changes";
-                    input = JOptionPane.showOptionDialog(null,
-                            "Please choose an option.",
-                            "Messaging program", 0,
-                            JOptionPane.PLAIN_MESSAGE, null, options, null);
-                    if (input == 0) {
-                        SwingUtilities.invokeLater(new MessageGui(user, isSeller, s));
-                        return;
-                    } else if (input == 1) {
-                        String[] newOptions = new String[4];
-                        newOptions[0] = "Edit your name";
-                        newOptions[1] = "Delete your account";
-                        newOptions[2] = "Change a store name";
-                        newOptions[3] = "Exit to main menu";
-                        input = JOptionPane.showOptionDialog(null,
-                                "Please choose an option.",
-                                "Messaging program", 0,
-                                JOptionPane.PLAIN_MESSAGE, null, newOptions, null);
-                        if (input == -1) {
+                user = JOptionPane.showInputDialog(null,
+                        "Enter your username.",
+                        "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                //if the user hits the x
+                if (user == null) {
+                    return;
+                }
+                try {
+                    String nameCheck = checkName(user, false, user);
+                    while (!nameCheck.equals("valid")) {
+                        if (nameCheck == null) {
                             return;
                         }
-                        if (input == 1) {
-                            options[0] = "Yes";
-                            options[1] = "No";
-                            int deletionInput = JOptionPane.showOptionDialog(null,
-                                    "Do you really want to delete your account? " +
-                                            "This cannot be undone.",
-                                    "Messaging program", 0,
-                                    JOptionPane.QUESTION_MESSAGE, null, options, null);
-                            if (deletionInput == 0) {
-                                writer.println("getUsersStores;" + user);
-                                writer.flush();
-                                String stores = reader.readLine();
-                                if (stores != null) {
-                                    writer.println("appendStoreList;" + stores);
-                                    writer.flush();
+                        if (nameCheck.equals("inUse")) {
+                            JOptionPane.showMessageDialog(null,
+                                    "Username already exists! Please enter another username.",
+                                    "Messaging program", JOptionPane.ERROR_MESSAGE);
+                            user = JOptionPane.showInputDialog(null,
+                                    "Enter your username.",
+                                    "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                            if (user == null) {
+                                return;
+                            }
+                        } else if (nameCheck.equals("invalid")) {
+                            JOptionPane.showMessageDialog(null,
+                                    "Username constraints: " +
+                                            "\n- Cannot be blank " +
+                                            "\n- Must be in between 6 and 16 characters inclusive " +
+                                            "\n- Cannot contain spaces " +
+                                            "\nPlease enter a valid username.",
+                                    "Messaging program", JOptionPane.ERROR_MESSAGE);
+                            user = JOptionPane.showInputDialog(null,
+                                    "Enter your username.",
+                                    "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                            if (user == null) {
+                                return;
+                            }
+                        }
+                        nameCheck = checkName(user, false, user);
+                    }
+                    writer.println("createUser;" + user);
+                    String password = JOptionPane.showInputDialog(null,
+                            "Please enter a password between 8 and 16 characters.",
+                            "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                    if (password == null) {
+                        deleteUserInProgress(user);
+                        return;
+                    }
+                    String passwordCheck = checkPassword(password, user);
+                    try {
+                        //checking the password
+                        boolean passwordDone = false;
+                        while (!passwordDone) {
+                            while (!passwordCheck.equals("valid")) {
+                                if (passwordCheck == null) {
+                                    deleteUserInProgress(user);
+                                    return;
                                 }
-                                //TODO make sure that when a user ends when making an account that the main file system is also deleted
-                                writer.println("deleteUser;" + user);
-                                writer.flush();
+                                if (passwordCheck.equals("invalid")) {
+                                    password = JOptionPane.showInputDialog(null,
+                                            "Password length must be between 8 and 16 characters\n" +
+                                                    "Password may not contain a ';'\n" +
+                                                    "Please enter a valid password.",
+                                            "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                                    if (password == null) {
+                                        deleteUserInProgress(user);
+                                        return;
+                                    }
+                                }
+                                if (passwordCheck.equals("tryAgain")) {
+                                    password = JOptionPane.showInputDialog(null,
+                                            "Please enter a password between 8 and 16 characters.",
+                                            "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                                    if (password == null) {
+                                        deleteUserInProgress(user);
+                                        return;
+                                    }
+                                }
+                                passwordCheck = checkPassword(password, user);
+                                if (passwordCheck == null) {
+                                    deleteUserInProgress(user);
+                                    return;
+                                }
+                            }
+                            String passwordToCheck = JOptionPane.showInputDialog(null,
+                                    "Please confirm your password.",
+                                    "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                            if (passwordToCheck == null) {
                                 deleteUserInProgress(user);
                                 return;
-                            } else if (deletionInput == -1) {
-                                return;
+                            }
+                            if (passwordToCheck.equals(password)) {
+                                passwordDone = true;
                             } else {
                                 JOptionPane.showMessageDialog(null,
-                                        "We're glad you decided to stay!",
-                                        "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                                        "Passwords do not match! Please try again.",
+                                        "Messaging Program", JOptionPane.ERROR_MESSAGE);
+                                passwordCheck = "tryAgain";
                             }
-                        } else if (input == 0) {
-                            String newUser = JOptionPane.showInputDialog(null,
-                                    "Please enter a new username.",
-                                    "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                            String newNameStatus = "";
-                            //user hits the x
-                            if (newUser == null) {
-                                return;
-                            } else {
-                                newNameStatus = checkName(user, false, newUser);
-                            }
-                            while (!newNameStatus.equals("valid")) {
-                                if (newNameStatus.equals("inUse")) {
-                                    JOptionPane.showMessageDialog(null,
-                                            "Username already exists! Please enter another username.",
-                                            "Messaging program", JOptionPane.ERROR_MESSAGE);
-                                } else if (newNameStatus.equals("invalid")) {
-                                    JOptionPane.showMessageDialog(null,
-                                            "Username constraints: " +
-                                                    "\n- Cannot be blank " +
-                                                    "\n- Must be in between 6 and 16 characters inclusive " +
-                                                    "\n- Cannot contain spaces " +
-                                                    "\nPlease enter a valid username.",
-                                            "Messaging program", JOptionPane.ERROR_MESSAGE);
-                                }
-                                newUser = JOptionPane.showInputDialog(null,
-                                        "Please enter your new username.",
-                                        "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                if (newUser == null) {
-                                    return;
-                                }
-                                newNameStatus = checkName(user, false, newUser);
-                            }
-                            writer.println("moveUsername;" + user + ";" + newUser);
-                            writer.flush();
-                            writer.println("changeUsername;" + user + ";" + newUser);
-                            writer.flush();
-                            JOptionPane.showMessageDialog(null,
-                                    "Name change successful! " +
-                                            "Enjoy your new username, " + newUser + "!",
-                                    "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                            user = newUser;
-                        } else if (input == 2) {
-                            writer.println("getUsersStores;" + user);
-                            writer.flush();
-                            String stores = reader.readLine();
-                            if (!stores.equals("null")) {
-                                List<String> storesArray = Arrays.asList(stores.split(", "));
-                                String[] storeOptions = new String[storesArray.size()];
-                                int index = 0;
-                                for (String string : storesArray) {
-                                    storeOptions[index] = string;
-                                    index++;
-                                }
-                                String storeToChange = null;
-                                try {
-                                    storeToChange = (String) JOptionPane.showInputDialog(null,
-                                            "Please choose a store to change.",
-                                            "Messaging program",
-                                            JOptionPane.PLAIN_MESSAGE, null, storeOptions, null);
-                                    if (storeToChange == null) {
-                                        return;
-                                    }
-                                    String storeName = JOptionPane.showInputDialog(null,
-                                            "Please enter your new store name.",
-                                            "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                    if (storeName == null) {
-                                        return;
-                                    }
-                                    String storeStatus = checkName(storeName, true, user);
-                                    while (!storeStatus.equals("valid")) {
-                                        if (storeStatus.equals("invalid")) {
+                        }
+                        encryptFile(user, password);
+                        done = false;
+                        while (!done) {
+                            if (isSeller.equalsIgnoreCase("true")) {
+                                writer.println("generateDirectoryFromUsername;" + user + ";true");
+                                writer.flush();
+                                boolean doneStores = false;
+                                ArrayList<String> storeNames = new ArrayList<>();
+                                String storeName = "";
+                                while (!doneStores) {
+                                    boolean storeCaptured = false;
+                                    while (!storeCaptured) {
+                                        storeName = JOptionPane.showInputDialog(null,
+                                                "Please enter your store name.",
+                                                "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                                        String storeStatus = checkName(storeName, true, user);
+                                        if (storeStatus == null) {
+                                            deleteUserInProgress(user);
+                                            return;
+                                        } else if (storeStatus.equals("inUse")) {
+                                            JOptionPane.showMessageDialog(null,
+                                                    "Name already in use! Please enter another name.",
+                                                    "Messaging program", JOptionPane.ERROR_MESSAGE);
+                                        } else if (storeStatus.equals("invalid")) {
                                             JOptionPane.showMessageDialog(null,
                                                     "Store name constraints: " +
                                                             "\n- Cannot be blank " +
@@ -629,40 +396,267 @@ public class LogInGui {
                                                             "\n- Must not include symbols " +
                                                             "\nPlease enter a valid store name.",
                                                     "Messaging program", JOptionPane.ERROR_MESSAGE);
-                                        } else if (storeStatus.equals("inUse")) {
-                                            JOptionPane.showMessageDialog(null,
-                                                    "Name already in use! Please enter another name.",
-                                                    "Messaging program", JOptionPane.ERROR_MESSAGE);
+                                        } else {
+                                            storeCaptured = true;
                                         }
-                                        storeName = JOptionPane.showInputDialog(null,
-                                                "Please enter your new store name.",
-                                                "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                        if (storeName == null) {
+                                    }
+                                    boolean storeInput = false;
+                                    while (!storeInput) {
+                                        input = JOptionPane.showConfirmDialog(null,
+                                                "Are you sure you want to add this store to your account? " +
+                                                        "This action cannot be undone. " +
+                                                        "\nEnter 'yes' to confirm or 'no' to abort.", "Messaging program",
+                                                JOptionPane.YES_NO_OPTION);
+                                        if (input == 0 || input == 1) {
+                                            storeInput = true;
+                                        } else {
                                             return;
                                         }
-                                        storeStatus = checkName(storeName, true, user);
                                     }
-                                    changeStoreName(storesArray, storeToChange, storeName, user);
-                                    JOptionPane.showMessageDialog(null,
-                                            "Name change successful!",
-                                            "Messaging program", JOptionPane.PLAIN_MESSAGE);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
+                                    if (input == 0) {
+                                        storeNames.add(storeName);
+                                        writer.println("updateStoreList;" + storeName);
+                                        writer.flush();
+                                        writer.println("generateStoreForSeller;" + user + ";" + storeName);
+                                    } else if (input == -1) {
+                                        deleteUserInProgress(user);
+                                        return;
+                                    }
+                                    input = -1;
+                                    boolean storeInputTaken = false;
+                                    while (!storeInputTaken) {
+                                        input = JOptionPane.showConfirmDialog(null,
+                                                "Would you like to add another store?",
+                                                "Messaging program", JOptionPane.YES_NO_OPTION);
+                                        if (input == 0 || input == 1) {
+                                            storeInputTaken = true;
+                                        } else if (input == -1) {
+                                            deleteUserInProgress(user);
+                                            writer.println("getUsersStores;" + user);
+                                            writer.flush();
+                                            String stores = reader.readLine();
+                                            writer.println("appendStoreList;" + stores);
+                                            writer.flush();
+                                            return;
+                                        }
+                                    }
+                                    if (input == 1 && !storeNames.isEmpty()) {
+                                        doneStores = true;
+                                    } else if (input == 1 && storeNames.isEmpty()) {
+                                        JOptionPane.showMessageDialog(null,
+                                                "Sellers must have at least one store! " +
+                                                        "Please add a store before continuing.",
+                                                "Messaging program", JOptionPane.ERROR_MESSAGE);
+                                    }
                                 }
+                                writer.println("writeFile;" + user + ";" + isSeller);
+                                writer.flush();
+                                writer.println("writeFile;" + user + ";" + storeNames);
+                                writer.flush();
                             } else {
+                                writer.println("generateDirectoryFromUsername;" + user + ";false");
+                                writer.flush();
+                                writer.println("writeFile;" + user + ";" + isSeller);
+                                writer.flush();
+                            }
+                            done = true;
+                        }
+                        done = false;
+                        String email = null;
+                        while (!done) {
+                            email = JOptionPane.showInputDialog(null,
+                                    "Please enter an email to be associated with your account.",
+                                    "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                            if (email == null) {
+                                writer.println("getUsersStores;" + user);
+                                writer.flush();
+                                String stores = reader.readLine();
+                                System.out.println(stores);
+                                writer.println("appendStoreList;" + stores);
+                                writer.flush();
+                                deleteUserInProgress(user);
+                                return;
+                            }
+                            if (email.equals("") || !email.contains("@")) {
                                 JOptionPane.showMessageDialog(null,
-                                        "You are not a seller!",
+                                        "Invalid email! Please enter a valid email.",
                                         "Messaging program", JOptionPane.ERROR_MESSAGE);
+                            } else {
+                                done = true;
                             }
                         }
-                    } else {
+                        writer.println("writeFile;" + user + ";" + email);
+                        writer.flush();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            writer.println("isSeller;" + user);
+            writer.flush();
+            boolean isSeller = Boolean.parseBoolean(reader.readLine());
+            System.out.println(isSeller);
+            boolean running = true;
+            while (running) {
+                options[0] = "User Interaction";
+                options[1] = "Account Changes";
+                input = JOptionPane.showOptionDialog(null,
+                        "Please choose an option.",
+                        "Messaging program", 0,
+                        JOptionPane.PLAIN_MESSAGE, null, options, null);
+                if (input == 0) {
+                    SwingUtilities.invokeLater(new MessageGui(user, isSeller, s));
+                    return;
+                } else if (input == 1) {
+                    String[] newOptions = new String[4];
+                    newOptions[0] = "Edit your name";
+                    newOptions[1] = "Delete your account";
+                    newOptions[2] = "Change a store name";
+                    newOptions[3] = "Exit to main menu";
+                    input = JOptionPane.showOptionDialog(null,
+                            "Please choose an option.",
+                            "Messaging program", 0,
+                            JOptionPane.PLAIN_MESSAGE, null, newOptions, null);
+                    if (input == -1) {
                         return;
                     }
+                    if (input == 1) {
+                        options[0] = "Yes";
+                        options[1] = "No";
+                        int deletionInput = JOptionPane.showOptionDialog(null,
+                                "Do you really want to delete your account? " +
+                                        "This cannot be undone.",
+                                "Messaging program", 0,
+                                JOptionPane.QUESTION_MESSAGE, null, options, null);
+                        if (deletionInput == 0) {
+                            writer.println("getUsersStores;" + user);
+                            writer.flush();
+                            String stores = reader.readLine();
+                            if (stores != null) {
+                                writer.println("appendStoreList;" + stores);
+                                writer.flush();
+                            }
+                            writer.println("deleteUser;" + user);
+                            writer.flush();
+                            deleteUserInProgress(user);
+                            return;
+                        } else if (deletionInput == -1) {
+                            return;
+                        } else {
+                            JOptionPane.showMessageDialog(null,
+                                    "We're glad you decided to stay!",
+                                    "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                        }
+                    } else if (input == 0) {
+                        String newUser = JOptionPane.showInputDialog(null,
+                                "Please enter a new username.",
+                                "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                        String newNameStatus = "";
+                        //user hits the x
+                        if (newUser == null) {
+                            return;
+                        } else {
+                            newNameStatus = checkName(user, false, newUser);
+                        }
+                        while (!newNameStatus.equals("valid")) {
+                            if (newNameStatus.equals("inUse")) {
+                                JOptionPane.showMessageDialog(null,
+                                        "Username already exists! Please enter another username.",
+                                        "Messaging program", JOptionPane.ERROR_MESSAGE);
+                            } else if (newNameStatus.equals("invalid")) {
+                                JOptionPane.showMessageDialog(null,
+                                        "Username constraints: " +
+                                                "\n- Cannot be blank " +
+                                                "\n- Must be in between 6 and 16 characters inclusive " +
+                                                "\n- Cannot contain spaces " +
+                                                "\nPlease enter a valid username.",
+                                        "Messaging program", JOptionPane.ERROR_MESSAGE);
+                            }
+                            newUser = JOptionPane.showInputDialog(null,
+                                    "Please enter your new username.",
+                                    "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                            if (newUser == null) {
+                                return;
+                            }
+                            newNameStatus = checkName(user, false, newUser);
+                        }
+                        writer.println("moveUsername;" + user + ";" + newUser);
+                        writer.flush();
+                        writer.println("changeUsername;" + user + ";" + newUser);
+                        writer.flush();
+                        JOptionPane.showMessageDialog(null,
+                                "Name change successful! " +
+                                        "Enjoy your new username, " + newUser + "!",
+                                "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                        user = newUser;
+                    } else if (input == 2) {
+                        writer.println("getUsersStores;" + user);
+                        writer.flush();
+                        String stores = reader.readLine();
+                        if (!stores.equals("null")) {
+                            List<String> storesArray = Arrays.asList(stores.split(", "));
+                            String[] storeOptions = new String[storesArray.size()];
+                            int index = 0;
+                            for (String string : storesArray) {
+                                storeOptions[index] = string;
+                                index++;
+                            }
+                            String storeToChange = null;
+                            try {
+                                storeToChange = (String) JOptionPane.showInputDialog(null,
+                                        "Please choose a store to change.",
+                                        "Messaging program",
+                                        JOptionPane.PLAIN_MESSAGE, null, storeOptions, null);
+                                if (storeToChange == null) {
+                                    return;
+                                }
+                                String storeName = JOptionPane.showInputDialog(null,
+                                        "Please enter your new store name.",
+                                        "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                                if (storeName == null) {
+                                    return;
+                                }
+                                String storeStatus = checkName(storeName, true, user);
+                                while (!storeStatus.equals("valid")) {
+                                    if (storeStatus.equals("invalid")) {
+                                        JOptionPane.showMessageDialog(null,
+                                                "Store name constraints: " +
+                                                        "\n- Cannot be blank " +
+                                                        "\n- Must be in between 4 and 16 characters inclusive " +
+                                                        "\n- Must not include symbols " +
+                                                        "\nPlease enter a valid store name.",
+                                                "Messaging program", JOptionPane.ERROR_MESSAGE);
+                                    } else if (storeStatus.equals("inUse")) {
+                                        JOptionPane.showMessageDialog(null,
+                                                "Name already in use! Please enter another name.",
+                                                "Messaging program", JOptionPane.ERROR_MESSAGE);
+                                    }
+                                    storeName = JOptionPane.showInputDialog(null,
+                                            "Please enter your new store name.",
+                                            "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                                    if (storeName == null) {
+                                        return;
+                                    }
+                                    storeStatus = checkName(storeName, true, user);
+                                }
+                                changeStoreName(storesArray, storeToChange, storeName, user);
+                                JOptionPane.showMessageDialog(null,
+                                        "Name change successful!",
+                                        "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(null,
+                                    "You are not a seller!",
+                                    "Messaging program", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                } else {
+                    return;
                 }
-            } finally {
-                JOptionPane.showMessageDialog(null,
-                        "Goodbye!",
-                        "Messaging program", JOptionPane.PLAIN_MESSAGE);
             }
         } catch (Exception e) {
             e.printStackTrace();

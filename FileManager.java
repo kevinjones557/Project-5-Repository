@@ -254,4 +254,15 @@ public class FileManager {
         }
         bufferedWriter.close();
     }
+
+    public static synchronized void generateConversation(String senderFilePath, String receiverFilePath) {
+        File sender = new File(senderFilePath);
+        File receiver = new File(receiverFilePath);
+        try {
+            sender.createNewFile();
+            receiver.createNewFile();
+        } catch (IOException e) {
+            System.out.println("failed");
+        }
+    }
 }

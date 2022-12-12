@@ -97,7 +97,18 @@ public class Client {
         writer.flush();
     }
 
-
+    /**
+     * Method to signal appending or deleting to server and provide necessary info to do so
+     *
+     * @param delete if deleting
+     * @param sender sender
+     * @param recipient recipient
+     * @param storeName store name, "nil" if none
+     * @param isBuyer if buyer
+     * @param message message to be either added or deleted
+     *
+     * @author John Brooks
+     */
     public void appendOrDeleteSignal(boolean delete, String sender, String recipient, String storeName,
                                      boolean isBuyer, String message){
         String buyer = (isBuyer)? "true" : "false";
@@ -123,6 +134,19 @@ public class Client {
 
     }
 
+    /**
+     * Method to signal to server for an edit and provide necessary info
+     *
+     * @param delete if deleting
+     * @param sender sender
+     * @param recipient recipient
+     * @param storeName store name, "nil" if none
+     * @param isBuyer if buyer
+     * @param messageToEdit message to be edited
+     * @param edit edit made
+     *
+     * @author John Brooks
+     */
     public void editSignal(boolean delete, String sender, String recipient, String storeName,
                            boolean isBuyer, String messageToEdit, String edit) {
         String buyer = "false";
@@ -302,4 +326,8 @@ public class Client {
         throw new RuntimeException("An error occurred parsing metric data");
     }
 
+    public void generateMessageFile(String command, String info) {
+        writer.println(command + ";" + info);
+        writer.flush();
+    }
 }

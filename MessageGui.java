@@ -324,12 +324,9 @@ public class MessageGui extends Client implements Runnable {
         //userPanel.add(topLeft);
 
         // this is run for buyers and sellers, gets personal conversations
-        for (String user : allMessages) {
+        for (String user : availableMessages) {
             if (user.length() == 0) {
                 break;
-            }
-            if (!availableMessages.contains(user)) {
-                continue;
             }
 
             JButton tempButton = new JButton(user);
@@ -341,11 +338,23 @@ public class MessageGui extends Client implements Runnable {
                         if (SwingUtilities.isLeftMouseButton(e)) {
                             // user could be a buyer, seller, or a store
                             if (!isUserSeller) {
+                                chooseRecipient(user, user);
+                                String receiver = recipient;
+                                String receiverPath = "data/sellers/" + recipient + "/" + recipient + username + ".txt";
+                                if(storeName != null) {
+                                    receiver = storeName;
+                                    receiverPath = "data/sellers/" + recipient + "/" + storeName + "/"
+                                            + storeName + username + ".txt";
+                                }
+                                String senderPath = "data/buyers/" + username + "/" + username + receiver + ".txt";
+                                generateMessageFile("generate", senderPath + ";" + receiverPath);
                                 isRecipientStore = MessageGui.super.isRecipientStore(user);
                                 System.out.println(isRecipientStore);
-                                chooseRecipient(user, user);
                             } else {
                                 chooseRecipient(user, null);
+                                String senderPath = "data/sellers/" + username + "/" + username + user + ".txt";
+                                String receiverPath = "data/buyers/" + user + "/" + user + username + ".txt";
+                                generateMessageFile("generate", senderPath + ";" + receiverPath);
                             }
                             isUserStore = false;
                         } else if (SwingUtilities.isRightMouseButton(e)) {
@@ -368,6 +377,7 @@ public class MessageGui extends Client implements Runnable {
                     break;
                 }
                 ArrayList<String> buyerConversations = super.getConversationsFromStore(this.username, store);
+                buyerConversations = availableMessages;
                 System.out.println("hi" + store + buyerConversations);
                 if (buyerConversations.size() != 0) {
                     JLabel storeLabel = new JLabel(store + ":");
@@ -386,6 +396,10 @@ public class MessageGui extends Client implements Runnable {
                                 isUserStore = true;
                                 isRecipientStore = false;
                                 chooseRecipient(buyer, store);
+                                String senderPath = "data/sellers/" + username + "/" + storeName + "/"
+                                        + storeName + recipient + ".txt";
+                                String receiverPath = "data/buyers/" + recipient + "/" + recipient + storeName + ".txt";
+                                generateMessageFile("generate", senderPath + ";" + receiverPath);
                             }
                             // TODO call client function with recipient to get message info
                         };
@@ -1116,6 +1130,12 @@ public class MessageGui extends Client implements Runnable {
         popupMenu2.setLocation(e.getLocationOnScreen());
     }
 
+    /**
+     * Method that creates the GUI for statistics
+     *
+     * @author Kevin Jones, all buyers GUI and sorting part of sellers
+     * @author John Brooks, design of sellers GUI
+     */
     public void createStatisticsGUI() {
         metricsFrame.setTitle("Statistics");
         metricsFrame.setLayout(null);
@@ -1423,7 +1443,7 @@ public class MessageGui extends Client implements Runnable {
 
 
     public static void main(String[] args) throws IOException {
-        SwingUtilities.invokeLater(new MessageGui("Buyer", false, new Socket("localhost", 2000)));
+        SwingUtilities.invokeLater(new MessageGui("Buyer", false    , new Socket("localhost", 2000)));
     }
 
 }
