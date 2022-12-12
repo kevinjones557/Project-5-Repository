@@ -217,7 +217,12 @@ public class LogIn {
         userDirectory.delete();
     }
 
-    public static void createUser (String user) {
+    /**
+     * Creates the user with the given username
+     *
+     * @param user the user being created
+     */
+    public synchronized static void createUser (String user) {
         try {
             Files.createDirectory(Paths.get("users/" + user));
             File f = new File("users/" + user + "/" + user);
@@ -227,7 +232,12 @@ public class LogIn {
         }
     }
 
-    //move username to new location after name change
+    /**
+     * Moves a user to their new username after they change it
+     *
+     * @param user old username
+     * @param newUser new username
+     */
     public synchronized static void moveUsername(String user, String newUser) {
         try {
             //this method was retrieved with help from StackOverflow user @kr37
@@ -253,7 +263,12 @@ public class LogIn {
         }
     }
 
-    //check if the user exists
+    /**
+     * Checks to see if the given user exists
+     *
+     * @param user the username being checked
+     * @return boolean of if the user exists or not
+     */
     public static boolean checkUserExists(String user) {
         File f = new File("users/" + user);
         try {
