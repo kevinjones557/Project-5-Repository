@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -178,29 +179,29 @@ public class Server extends Thread {
                 } else if (instruction.equals("isRecipientBlocked")) {
                     String[] ins = request.split(";");
                     String sendBack = Boolean.toString(Blocking.isRecipientBlocked(ins[1], Boolean.parseBoolean(ins[2]),
-                            Boolean.parseBoolean(ins[3])? FileManager.mapStoresToSellers().get(ins[4]): ins[4]));
+                            Boolean.parseBoolean(ins[3]) ? FileManager.mapStoresToSellers().get(ins[4]) : ins[4]));
                     writer.println(sendBack);
                     writer.flush();
                 } else if (instruction.equals("recipientCantSeeMe")) {
                     String[] ins = request.split(";");
                     String sendBack = Boolean.toString(Invisible.recipientCantSeeMe(ins[1], Boolean.parseBoolean(ins[2]),
-                            Boolean.parseBoolean(ins[3])? FileManager.mapStoresToSellers().get(ins[4]): ins[4]));
+                            Boolean.parseBoolean(ins[3]) ? FileManager.mapStoresToSellers().get(ins[4]) : ins[4]));
                     writer.println(sendBack);
                     writer.flush();
-                } else if (instruction.equals("getAvailableUsers")){
+                } else if (instruction.equals("getAvailableUsers")) {
                     System.out.println("hi");
                     String[] ins = request.split(";");
                     String sendBack = String.join(";", Invisible.getAvailableUsers(ins[1],
                             Boolean.parseBoolean(ins[2])));
                     writer.println(sendBack);
                     writer.flush();
-                } else if (instruction.equals("getMessageAbleUsers")){
+                } else if (instruction.equals("getMessageAbleUsers")) {
                     String[] ins = request.split(";");
                     String sendBack = String.join(";", Blocking.getMessageAbleUser(ins[1],
                             Boolean.parseBoolean(ins[2])));
                     writer.println(sendBack);
                     writer.flush();
-                } else if (instruction.equals("getAvailableStores")){
+                } else if (instruction.equals("getAvailableStores")) {
                     String[] ins = request.split(";");
                     String sendBack = String.join(";", Invisible.getAvailableStores(ins[1]));
                     System.out.println(sendBack);
@@ -260,7 +261,7 @@ public class Server extends Thread {
                 } else if (instruction.equals("getCensoredList")) {
                     ArrayList<String[]> ans = Filtering.censoredList(request.split(";")[1]);
                     ArrayList<String> temp = new ArrayList<>();
-                    for(String[] l : ans) {
+                    for (String[] l : ans) {
                         temp.add(String.join("@", l));
                     }
                     writer.println(String.join(";", temp));
@@ -275,7 +276,7 @@ public class Server extends Thread {
                     if (isSeller) {
                         data = StatisticsManager.getMetricDataForStores(username);
                     } else {
-                        data  = StatisticsManager.getStatisticsDataForBuyers(username);
+                        data = StatisticsManager.getStatisticsDataForBuyers(username);
                     }
                     ObjectOutputStream ois = new ObjectOutputStream(socket.getOutputStream());
                     switch (index) {
@@ -304,7 +305,7 @@ public class Server extends Thread {
                     System.out.println();
                     ois.writeObject(data);
                     ois.flush();
-                } else if (instruction.equals("getMostCommonWords")){
+                } else if (instruction.equals("getMostCommonWords")) {
                     String sellerName = contents.substring(0, contents.indexOf(';'));
                     contents = contents.substring(contents.indexOf(';') + 1);
                     String[] data = StatisticsManager.getTenMostCommonWords(sellerName);
@@ -336,6 +337,7 @@ public class Server extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
     public static void sortAlphabetically (ArrayList<String[]> arr) {
