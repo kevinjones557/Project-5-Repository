@@ -329,7 +329,9 @@ public class Server extends Thread {
                     String username = spiltMessage[1];
                     String storename = spiltMessage[2];
                     FileManager.generateStoreForSeller(username, storename);
-
+                } else if (instruction.equals("endMessageRun")) {
+                    writer.println("done");
+                    writer.flush();
                 } else if (instruction.equals("generate")) {
                     FileManager.generateConversation(request.split(";")[1], request.split(";")[2]);
                 }
@@ -467,16 +469,16 @@ public class Server extends Thread {
         try {
             File f;
             File dir = new File("users/" + user);
-            if (!dir.createNewFile()) {
-                dir.delete();
-                pw.println("inUse");
-                pw.flush();
-                return;
-            }
             if (user.equals("") || user.length() < 6 ||
                     user.length() > 16 || user.contains(" ")) {
                 dir.delete();
                 pw.println("invalid");
+                pw.flush();
+                return;
+            }
+            if (!dir.createNewFile()) {
+                dir.delete();
+                pw.println("inUse");
                 pw.flush();
                 return;
             }

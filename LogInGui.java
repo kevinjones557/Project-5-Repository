@@ -133,6 +133,8 @@ public class LogInGui {
     public static void deleteUserInProgress(String user) {
         writer.println("deleteUserInProgress;" + user);
         writer.flush();
+        writer.println("deleteUser;" + user);
+        writer.flush();
     }
 
     /**
@@ -362,9 +364,9 @@ public class LogInGui {
                                 if (passwordCheck.equals("invalid")) {
                                     password = JOptionPane.showInputDialog(null,
                                             "Password length must be between 8 and 16 characters\n" +
-                                                    "Password may not contain a ';'\n" +
+                                                    "Password may not contain a ';'\n\n" +
                                                     "Please enter a valid password.",
-                                            "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                                            "Messaging program", JOptionPane.ERROR_MESSAGE);
                                     if (password == null) {
                                         deleteUserInProgress(user);
                                         return;
@@ -373,7 +375,7 @@ public class LogInGui {
                                 if (passwordCheck.equals("tryAgain")) {
                                     password = JOptionPane.showInputDialog(null,
                                             "Please enter a password between 8 and 16 characters.",
-                                            "Messaging program", JOptionPane.PLAIN_MESSAGE);
+                                            "Messaging program", JOptionPane.ERROR_MESSAGE);
                                     if (password == null) {
                                         deleteUserInProgress(user);
                                         return;
@@ -446,6 +448,20 @@ public class LogInGui {
                                         if (input == 0 || input == 1) {
                                             storeInput = true;
                                         } else {
+                                            writer.println("writeFile;" + user + ";" + isSeller);
+                                            writer.flush();
+                                            writer.println("writeFile;" + user + ";" + storeNames);
+                                            writer.flush();
+                                            writer.println("getUsersStores;" + user);
+                                            writer.flush();
+                                            String stores = reader.readLine();
+                                            if (stores != null) {
+                                                writer.println("appendStoreList;" + stores);
+                                                writer.flush();
+                                            }
+                                            writer.println("deleteUser;" + user);
+                                            writer.flush();
+                                            deleteUserInProgress(user);
                                             return;
                                         }
                                     }
@@ -454,9 +470,6 @@ public class LogInGui {
                                         writer.println("updateStoreList;" + storeName);
                                         writer.flush();
                                         writer.println("generateStoreForSeller;" + user + ";" + storeName);
-                                    } else if (input == -1) {
-                                        deleteUserInProgress(user);
-                                        return;
                                     }
                                     input = -1;
                                     boolean storeInputTaken = false;
@@ -467,12 +480,12 @@ public class LogInGui {
                                         if (input == 0 || input == 1) {
                                             storeInputTaken = true;
                                         } else if (input == -1) {
-                                            deleteUserInProgress(user);
                                             writer.println("getUsersStores;" + user);
                                             writer.flush();
                                             String stores = reader.readLine();
                                             writer.println("appendStoreList;" + stores);
                                             writer.flush();
+                                            deleteUserInProgress(user);
                                             return;
                                         }
                                     }

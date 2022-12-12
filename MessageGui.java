@@ -980,7 +980,7 @@ public class MessageGui extends Client implements Runnable {
     }
 
     public void createPopUpSetting() {
-        glassFrame.setBounds(300, 10, 1000, 800);
+        glassFrame.setBounds(myFrame.getX(), myFrame.getY(), myFrame.getWidth(), myFrame.getHeight());
         glassFrame.setResizable(false);
         glassFrame.setBackground(Color.BLACK);
         JButton filter = new JButton("Message Filter");
@@ -1024,7 +1024,7 @@ public class MessageGui extends Client implements Runnable {
         popUpSetting.add(filter);
         popUpSetting.add(vanish);
         popUpSetting.add(exit);
-        popUpSetting.setLocation(700, 300);
+        popUpSetting.setLocation(myFrame.getX() + 400, myFrame.getY() + 290);
         popUpSetting.setMaximumSize(new Dimension(800, 50));
         popUpSetting.setMinimumSize(new Dimension(800, 50));
         popUpSetting.setVisible(true);
