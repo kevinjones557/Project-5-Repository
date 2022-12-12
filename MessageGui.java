@@ -61,6 +61,9 @@ public class MessageGui extends Client implements Runnable {
     private boolean isUserStore;
     private boolean initialSetup = true;
 
+    /**
+     * creates GUI for the filtering system, allows users to add, delete, and edit filters
+     */
     public void createFilterMain() {
         popUpSetting.removeAll();
         popUpSetting.setVisible(false);
@@ -270,6 +273,10 @@ public class MessageGui extends Client implements Runnable {
 
     }
 
+    /**
+     * creates the panel on the left side of the GUI that displays messages that have
+     * already been initiated
+     */
     private void createLeftPanel() {
         ToolTipManager.sharedInstance().setInitialDelay(0);
         ToolTipManager.sharedInstance().setLightWeightPopupEnabled(true);
@@ -318,10 +325,6 @@ public class MessageGui extends Client implements Runnable {
         placeholder.setToolTipText("Right click to use block/invisible button");
         //placeholder.setVisible(false);
         myFrame.add(placeholder);
-
-        //info.setIcon(i);
-        //topLeft.add(info, Component.RIGHT_ALIGNMENT);
-        //userPanel.add(topLeft);
 
         // this is run for buyers and sellers, gets personal conversations
         for (String user : allMessages) {
@@ -579,7 +582,9 @@ public class MessageGui extends Client implements Runnable {
         c.add(topTextPanel); //xyz
         c.add(bottomButtonPanel);
     }
-
+    /**
+     * creates the message box where a user can type a message and press send and clear button
+     */
     public void createMessageBox() {
         popupMenu1.setVisible(false);
         Container c = myFrame.getContentPane();
@@ -676,6 +681,10 @@ public class MessageGui extends Client implements Runnable {
         c.add(textPanel);
     }
 
+    /**
+     * creates the top panel of the GUI that displays who has been connected with
+     * also contains the button for the settings
+     */
     public void createTopPanel() {
         popupMenu1.setVisible(false);
         popupMenu2.setVisible(false);
@@ -801,7 +810,8 @@ public class MessageGui extends Client implements Runnable {
                 if (result == JFileChooser.APPROVE_OPTION) {
                     String directory = directoryChooser.getSelectedFile().getAbsolutePath();
                     if (recipient != null) {
-                        MessageGui.super.exportFile(recipient, username, isUserSeller, isUserStore, directory);
+                        MessageGui.super.exportFile(isRecipientStore ? storeName : recipient
+                                , isUserStore ? storeName : username, isUserSeller, isUserStore, directory);
                         JOptionPane.showMessageDialog(null, "Export Successful");
                     } else {
                         JOptionPane.showMessageDialog(null, "Please choose a recipient first"
