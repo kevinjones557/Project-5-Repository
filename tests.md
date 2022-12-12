@@ -1,6 +1,9 @@
 Project 5 Test Cases
+
 All of these tests assume the server is running.
+
 Test 1: User sign up
+
 Steps:
 User launches application.
 User selects the sign up button.
