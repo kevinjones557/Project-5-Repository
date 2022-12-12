@@ -5,7 +5,7 @@ To run the program, compile and run Server.java first. This creates a server wit
 
 ## Submission
 John Brooks submitted the write-up and the test-cases.
-
+Kevin submitted the program through vocareum
 
 ## Classes
 ###### Server
