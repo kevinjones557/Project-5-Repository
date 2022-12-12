@@ -949,6 +949,7 @@ public class MessageGui extends Client implements Runnable {
 
     public MessageGui(String username, boolean isUserSeller, Socket socket) {
         super(socket);
+        System.out.println("boolean" + isUserSeller);
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception ignored) {
