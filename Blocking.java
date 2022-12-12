@@ -139,6 +139,7 @@ public class Blocking {
             } else {
                 File buyersDir = new File("data/buyers");
                 String[] buyers = buyersDir.list();
+                assert buyers != null;
                 for (String buyer : buyers) {
                     File blockedFilePath = new File("data/buyers/"
                             + buyer + "/hasBlocked.txt");
@@ -166,6 +167,14 @@ public class Blocking {
         return messageAble;
     }
 
+    /**
+     * returns if a given recipient is blocked
+     * @param currentUser the current user
+     * @param isSeller if the user is a seller
+     * @param recipient the recipient
+     * @return returns a boolean
+     * @throws IOException if file can't be read
+     */
     public static boolean isRecipientBlocked(String currentUser, boolean isSeller, String recipient) throws IOException {
         synchronized (OBJ) {
             String[] blockList = blockedList(currentUser, isSeller);
@@ -178,12 +187,19 @@ public class Blocking {
         }
     }
 
+    /**
+     * returns an array of Strings of stores that can be accessed
+     * @param currentUser
+     * @return
+     * @throws IOException
+     */
     public static String[] getMessageAbleStores(String currentUser) throws IOException {
         synchronized (OBJ) {
             String[] possibleSellers = Blocking.getMessageAbleUser(currentUser, false);
             File sellers = new File("data/sellers");
             ArrayList<String> possibleStores = new ArrayList<>();
             String[] sellerNames = sellers.list();
+            assert sellerNames != null;
             for (String name : sellerNames) { //Loop through all sellers
                 for (String seller : possibleSellers) { //Loop through message-able sellers
                     if (seller.equals(name)) { //If matched then break loop then add stores

@@ -276,6 +276,7 @@ public class MessageGui extends Client implements Runnable {
     /**
      * creates the panel on the left side of the GUI that displays messages that have
      * already been initiated
+     * also contains buttons that let you refresh chats, start new chats, and view statistics
      */
     private void createLeftPanel() {
         ToolTipManager.sharedInstance().setInitialDelay(0);
@@ -921,6 +922,10 @@ public class MessageGui extends Client implements Runnable {
         }
     }
 
+    /**
+     * a helper method to show window to choose a path
+     * @return is the path selected in String form
+     */
     public String getImportFile() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
@@ -931,6 +936,11 @@ public class MessageGui extends Client implements Runnable {
         return null;
     }
 
+    /**
+     * this method just sets the recipient to right value and adjusts other values
+     * @param recipient the new recipient
+     * @param storeName the new storename (null if store is not involved)
+     */
     public void chooseRecipient(String recipient, String storeName) {
         if (isUserSeller) {
             this.storeName = null;
@@ -958,6 +968,12 @@ public class MessageGui extends Client implements Runnable {
 
     }
 
+    /**
+     * a constructor used to set up the message gui and the client
+     * @param username the user name
+     * @param isUserSeller whether or not user is a seller
+     * @param socket the socket used to connect with server
+     */
     public MessageGui(String username, boolean isUserSeller, Socket socket) {
         super(socket);
         try {
@@ -979,6 +995,9 @@ public class MessageGui extends Client implements Runnable {
         // if not username is seller's name and storeName = null
     }
 
+    /**
+     * a helper method to create the popup for the filter
+     */
     public void createPopUpSetting() {
         glassFrame.setBounds(myFrame.getX(), myFrame.getY(), myFrame.getWidth(), myFrame.getHeight());
         glassFrame.setResizable(false);
@@ -1037,6 +1056,11 @@ public class MessageGui extends Client implements Runnable {
         //myFrame.add(popUpSetting);
     }
 
+    /**
+     * a helper method to create a popup for blocking and invisible
+     * @param e the mouse event
+     * @param receiver the receiver
+     */
     public void createPopUpBlockInvisible(MouseEvent e, String receiver) {
         popupMenu1.setVisible(false);
         invisibleOption.setMaximumSize(new Dimension(200, 28));
@@ -1428,6 +1452,9 @@ public class MessageGui extends Client implements Runnable {
         metricsFrame.setVisible(true);
     }
 
+    /**
+     * the run method that creates the initial GUI
+     */
     public void run() {
         createLeftPanel();
         createMessageBox();
@@ -1436,12 +1463,6 @@ public class MessageGui extends Client implements Runnable {
         myFrame.setVisible(true);
         initialSetup = false;
     }
-
-
-    public static void main(String[] args) throws IOException {
-        SwingUtilities.invokeLater(new MessageGui("Buyer", false, new Socket("localhost", 2000)));
-    }
-
 }
 /*
 Possible Interactions:

@@ -151,6 +151,11 @@ public class UserManager {
         username, go through files and change all the names and rename files */
     }
 
+    /**
+     * a method to change the name of a store
+     * @param oldStoreName
+     * @param newStoreName
+     */
     public synchronized static void changeStoreName(String oldStoreName, String newStoreName) {
         File sellerDirectories = new File("data/sellers/");
         File buyerDirectories = new File("data/buyers/");
