@@ -329,6 +329,8 @@ public class Server extends Thread {
                     String storename = spiltMessage[2];
                     FileManager.generateStoreForSeller(username, storename);
 
+                } else if (instruction.equals("generate")) {
+                    FileManager.generateConversation(request.split(";")[1], request.split(";")[2]);
                 }
             }
         } catch (IOException e) {

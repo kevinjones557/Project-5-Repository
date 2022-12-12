@@ -326,4 +326,8 @@ public class Client {
         throw new RuntimeException("An error occurred parsing metric data");
     }
 
+    public void generateMessageFile(String command, String info) {
+        writer.println(command + ";" + info);
+        writer.flush();
+    }
 }
