@@ -4,6 +4,8 @@
 To run the program, compile and run Server.java first. This creates a server with connections on port 2000 by default. Then, compile and run LogInGui. This connects to the server on port 2000. Then, use the user interface to log in or create an account. After successfully logging in, the user can choose to edit account details or proceed to messaging.
 
 ## Submission
+John Brooks submitted the write-up and the test-cases.
+
 
 ## Classes
 ###### Server
@@ -18,9 +20,6 @@ The MessageGui class contains the GUI used to message and interact with the othe
 ###### Message
 The Message class contains static methods used to handle messages sent by users on the server. It calls MetricManager, and is called in Server.
 
-###### MetricManager
-The MetricManager class contains static methods used to handle user metrics and writing and changing files accordingly. It calls FileManager and is called in Message.
-
 ###### Blocking
 The Blocking class contains static methods used to get and edit data regarding Blocking features.
 
@@ -34,17 +33,14 @@ The Filtering class contains static methods used to change data in files relatin
 The FileManager class contains static methods used to handle creation and changes of the project's data files.
 
 ###### StatisticsManager
-/Write something here Kevin
+The StatisticsManager class contains static methods used to handle user metrics and statistics.
 
 ###### UserManager
-/Write something here Kevin
+The UserManager class contains static methods related to changing user file directories. It is used in the main Server thread.
 
 ###### LogIn
-/Write something here Aden
+The LogIn class contains static methods related to login and is called in the Server's main threads.
 
 ###### LogInGUI
-/Write something here Aden
-
-###### UserNotFoundException
-/Write something here Destin or remove it if found unnecessary
+The LogInGUI class contains the main method used to log in and create accounts. It calls MessageGUI after a successful login, and calls UserManager and FileManager to create new accounts.
 
