@@ -1,5 +1,5 @@
-Project 5 Test Cases\n
-All of these tests assume the server is running.\n
+Project 5 Test Cases
+All of these tests assume the server is running.
 Test 1: User sign up
 Steps:
 User launches application.
@@ -24,6 +24,7 @@ User is prompted again and enters a valid email.
 User selects the user interaction button.
 Expected result: Application prompts user logging in for credentials that match the requirements until suitable ones are entered, and the application successfully opens their messaging interface. 
 Test Status: Passed. 
+
 Test 2: Other User Sign Up (Seller)
 (features that have already been tested will be condensed)
 Steps:
