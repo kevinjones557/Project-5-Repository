@@ -16,6 +16,7 @@ public class Invisible {
             if (!isSeller) {
                 File sellersDir = new File("data/sellers");
                 String[] sellers = sellersDir.list();
+                assert sellers != null;
                 for (String seller : sellers) {
                     File sellerFolder = new File("data/sellers/" + seller);
                     File invisibleFilePath = new File("data/sellers/"
@@ -37,6 +38,7 @@ public class Invisible {
             } else {
                 File buyersDir = new File("data/buyers");
                 String[] buyers = buyersDir.list();
+                assert buyers != null;
                 for (String buyer : buyers) {
                     File invisibleFilePath = new File("data/buyers/" +
                             buyer + "/isInvisible.txt");
@@ -192,6 +194,14 @@ public class Invisible {
         }
     }
 
+    /**
+     * a method to return if a recipient can see the user or not
+     * @param currentUser
+     * @param isSeller
+     * @param recipient
+     * @return
+     * @throws IOException
+     */
     public static boolean recipientCantSeeMe(String currentUser, boolean isSeller, String recipient) throws IOException {
         synchronized (OBJ) {
             String[] blockList = invisibleList(currentUser, isSeller);

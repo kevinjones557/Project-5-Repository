@@ -18,6 +18,10 @@ public class Client {
 
     private final Socket socket;
 
+    /**
+     * a constructor to create the client and set up input/output streams
+     * @param socket
+     */
     public Client (Socket socket) {
         try {
             this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -30,9 +34,12 @@ public class Client {
         this.socket = socket;
 
     }
-    public void sendMessage() {
-        //System.out.println(name);
-    }
+
+    /**
+     * a method that writes to the server and returns a seller if given a store
+     * @param store
+     * @return
+     */
     public String getSellerFromStore(String store) {
         try {
             writer.println("GetSeller;" + store);
@@ -44,6 +51,11 @@ public class Client {
         return null;
     }
 
+    /**
+     * a method that writes to the server and returns an arrayList of all stores that a seller has
+     * @param seller
+     * @return
+     */
     public ArrayList<String> getStoresFromSeller(String seller) {
         try {
             writer.println("getStoresFromSellers;" + seller);
@@ -56,6 +68,11 @@ public class Client {
         return null;
     }
 
+    /**
+     * a method that returns a boolean according to if a recipient is a store
+     * @param storeName
+     * @return
+     */
     public boolean isRecipientStore(String storeName) {
         try {
             writer.println("isRecipientStore;" + storeName);
@@ -67,6 +84,14 @@ public class Client {
         return false;
     }
 
+    /**
+     * a method that writes to the server and gets returned an arraylist of metrics data
+     * sorted according to the index
+     * @param username
+     * @param index
+     * @param isSeller
+     * @return
+     */
     public ArrayList<String[]> sortMetricsData(String username, int index, boolean isSeller) {
         writer.println("sortMetrics;" + username + ";" + index + ";" + isSeller);
         writer.flush();
@@ -79,6 +104,13 @@ public class Client {
         }
     }
 
+    /**
+     * a method that writes to server and gets most common words
+     * for the seller statistics GUI
+     * @param sellerName
+     * @param index
+     * @return
+     */
     public String[] getMostCommonWords(String sellerName, int index) {
         writer.println("getMostCommonWords;" + sellerName + ";" + index);
         writer.flush();
@@ -90,6 +122,16 @@ public class Client {
             return new String[0];
         }
     }
+
+    /**
+     * a method to write to server to see if a message exists
+     * if not it creates those files in server
+     * @param recipient
+     * @param isRecipientStore
+     * @param isSeller
+     * @param username
+     * @param isUserStore
+     */
     public void checkIfMessageExists(String recipient, boolean isRecipientStore, boolean isSeller,
                                      String username, boolean isUserStore) {
         writer.println("CheckIfMessageExists;" + recipient + ";" + isRecipientStore + ";" + isSeller + ";" +
@@ -218,6 +260,15 @@ public class Client {
 
     }
 
+    /**
+     * a method that writes data to the server to import a file
+     * @param path
+     * @param recipient
+     * @param username
+     * @param isSeller
+     * @param isUserStore
+     * @param isRecipientStore
+     */
     public void importFile(String path, String recipient, String username, boolean isSeller,
                            boolean isUserStore, boolean isRecipientStore) {
         writer.println("importFile;" + path + ";" + recipient + ";" + username + ";" + isSeller + ";" +
@@ -225,6 +276,14 @@ public class Client {
         writer.flush();
     }
 
+    /**
+     * a method that writes data to a server to export a file
+     * @param recipient
+     * @param username
+     * @param isSeller
+     * @param isUserStore
+     * @param path
+     */
     public void exportFile(String recipient, String username, boolean isSeller, boolean isUserStore,
                            String path) {
         writer.println("exportFile;" + recipient + ";" + username + ";" + isSeller + ";" + isUserStore
@@ -232,6 +291,13 @@ public class Client {
         writer.flush();
     }
 
+    /**
+     * a method that writes to server and returns an arrayList of
+     * all the conversations from a store
+     * @param seller
+     * @param storeName
+     * @return
+     */
     public ArrayList<String> getConversationsFromStore(String seller, String storeName) {
         writer.println("getConversationsFromStore;" + seller + ";" + storeName);
         writer.flush();
@@ -243,6 +309,12 @@ public class Client {
         return null;
     }
 
+    /**
+     * a method that writes to a server and returns an arrayList of all conversations
+     * from a buyer or seller
+     * @param username
+     * @return
+     */
     public ArrayList<String> getConversationsFromUser(String username) {
         writer.println("getConversationsFromUser;" + username);
         writer.flush();
@@ -254,11 +326,27 @@ public class Client {
         return null;
     }
 
+    /**
+     * a method that sends data to server to block or make invisible
+     * @param command
+     * @param currentUser
+     * @param isSeller
+     * @param victim
+     */
     public void sendBlockInvisibleSignal(String command, String currentUser, String isSeller, String victim ) {
         writer.println(command + ";" + currentUser + ";" + isSeller + ";" + victim);
         writer.flush();
     }
 
+    /**
+     * a method to write to the server to see if given user is blocked or invisible
+     * @param option
+     * @param currentUser
+     * @param isSeller
+     * @param isStore
+     * @param recipient
+     * @return
+     */
     public boolean isBlockedOrCannotSee(int option, String currentUser, String isSeller, String isStore,
                                         String recipient) {
         String[] options = {"isRecipientBlocked", "recipientCantSeeMe"};
@@ -272,6 +360,14 @@ public class Client {
         return false;
     }
 
+    /**
+     * a method to write to the server to get an ArrayList of
+     * either messagable or available stores or sellers
+     * @param command
+     * @param currentUser
+     * @param isSeller
+     * @return
+     */
     public ArrayList<String> getUsersSignal(int command, String currentUser, boolean isSeller) {
         String[] commands = {"getAvailableUsers", "getMessageAbleUsers", "getAvailableStores", "getMessageAbleStores"};
         writer.println(commands[command] + ";" + currentUser + ";" + isSeller);
@@ -284,6 +380,11 @@ public class Client {
 
     }
 
+    /**
+     * a method to get the filtering list
+     * @param username
+     * @return
+     */
     public ArrayList<String> getFilteringList(String username) {
         writer.println("getFilteringList;" + username);
         writer.flush();
@@ -294,6 +395,14 @@ public class Client {
         }
     }
 
+    /**
+     * a method that writes to teh sever and replaces a filtered word
+     * @param option
+     * @param username
+     * @param censoredWord
+     * @param replacement
+     * @return
+     */
     public boolean filteringSignal(int option, String username, String censoredWord, String replacement) {
         String[] options = {"addFilter", "deleteFilter", "editFilter"};
         writer.println(options[option] + ";" + username + ";" + censoredWord + ";" + replacement);
@@ -305,6 +414,11 @@ public class Client {
         }
     }
 
+    /**
+     * a method that writes to server and gets a censored list
+     * @param username
+     * @return
+     */
     public ArrayList<String> getCensoredList(String username) {
         writer.println("getCensoredList;" + username);
         writer.flush();
@@ -315,17 +429,11 @@ public class Client {
         }
     }
 
-   public ArrayList<String[]> parseMetricData() {
-        try {
-            ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
-            ArrayList<String[]> recievedData = (ArrayList<String[]>) objectInputStream.readObject();
-            return recievedData;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        throw new RuntimeException("An error occurred parsing metric data");
-    }
-
+    /**
+     * a method to generate message file
+     * @param command
+     * @param info
+     */
     public void generateMessageFile(String command, String info) {
         writer.println(command + ";" + info);
         writer.flush();
