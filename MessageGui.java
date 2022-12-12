@@ -376,9 +376,10 @@ public class MessageGui extends Client implements Runnable {
                     storeLabel.setHorizontalAlignment(JLabel.CENTER);
                     userPanel.add(storeLabel);
                     for (String buyer : buyerConversations) {
-                        if (!availableMessages.contains(buyer)) {
+                        if (!availableMessages.contains(buyer) || buyer.length() == 0) {
                             continue;
                         }
+                        System.out.println("this buyer name is " + buyer + "and length is " + buyer.length());
                         JButton tempButton = new JButton(buyer);
                         tempButton.setFocusable(false);
                         ActionListener tempListener = e -> {
