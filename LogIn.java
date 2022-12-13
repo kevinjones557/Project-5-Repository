@@ -6,6 +6,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * A class that includes the static methods related to LogInGUI that are called
+ * via server requests
+ *
+ * @author riley197
+ * @version 12/12/22
+ */
 public class LogIn {
 
     /**

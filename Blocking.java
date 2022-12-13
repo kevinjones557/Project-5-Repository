@@ -4,6 +4,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Objects;
 
+/**
+ * A class that handles user blocking
+ *
+ * @author Vinh Pham Ngoc Thanh LC2
+ * @version December 12 2022
+ */
 public class Blocking {
     public static final Object OBJ = new Object();
 

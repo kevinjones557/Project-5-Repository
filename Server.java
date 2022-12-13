@@ -7,9 +7,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * This will be a class that sets up the server for the messaging system
- * It will read data from the clients, process it and then make calls to the Message class and other static
- * classes in order to preform functionality
+ * This is a class that sets up the server for the messaging system
+ * It reads data from the clients, process it and then make calls to
+ * the Message class and other static classes in order to perform functionality
  *
  * @author Kevin Jones
  * @version 11/20
@@ -146,8 +146,6 @@ public class Server extends Thread {
                     handleDeleteUserInProgress(contents, socket, writer);
                 } else if (instruction.equals("createUser")) {
                     handleCreateUser(contents, socket, writer);
-                } else if (instruction.equals("checkPassword")) {
-                    handleCheckPassword(contents, socket, writer);
                 } else if (instruction.equals("moveUsername")) {
                     handleMoveUsername(contents, socket, writer);
                 } else if (instruction.equals("changeStoreName")) {
@@ -451,10 +449,6 @@ public class Server extends Thread {
         LogIn.moveUsername(user, newUser);
     }
 
-    private static void handleCheckPassword(String request, Socket socket, PrintWriter pw) {
-
-    }
-
     private static void handleCreateUser(String contents, Socket socket, PrintWriter pw) {
         LogIn.createUser(contents);
     }
@@ -544,7 +538,7 @@ public class Server extends Thread {
     }
 
     public synchronized static void checkIfMessageExists(String recipient, boolean isRecipientStore, boolean isSeller,
-                                            String username, boolean isUserStore, LinkedHashMap storeNameMap) {
+                                                         String username, boolean isUserStore, LinkedHashMap storeNameMap) {
         // check if <username><recipient>.txt exits in directory or not
         if (!isRecipientStore) {
             String path1 = "";
@@ -767,7 +761,7 @@ public class Server extends Thread {
     }
 
     public synchronized void exportFile(String recipient, String username, boolean isSeller, boolean isUserStore,
-                           String path, LinkedHashMap<String, String> storeNameMap) {
+                                        String path, LinkedHashMap<String, String> storeNameMap) {
         if (!path.endsWith("/")) {
             path += "/";
         }

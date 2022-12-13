@@ -80,15 +80,12 @@ public class MessageGui extends Client implements Runnable {
             @Override
             public void actionPerformed(ActionEvent e) {
                 filterMain.setVisible(false);
-                String toDisplay = """
-                        Warning: intentionally messing with the filtering system may result
-                        in messages being extremely hard to read!
-                                                
-                        There are 3 options:
-                        1. Add filter: Add a word/phrase to censored and its replacement
-                        2. Delete filter: Remove the censoring of a word/phrase
-                        3. Edit filter: Edit a replacement of a censored word/phrase
-                        """;
+                String toDisplay = "Warning: intentionally messing with the filtering system may result\n" +
+                        "in messages being extremely hard to read!\n\n" +
+                        "There are 3 options:\n" +
+                        "1. Add filter: Add a word/phrase to censored and its replacement\n" +
+                        "2. Delete filter: Remove the censoring of a word/phrase\n" +
+                        "3. Edit filter: Edit a replacement of a censored word/phrase\n";
                 JOptionPane.showConfirmDialog(myFrame, toDisplay, "Instructions",
                         JOptionPane.DEFAULT_OPTION);
                 filterMain.setVisible(true);
@@ -133,11 +130,9 @@ public class MessageGui extends Client implements Runnable {
                     }
                     boolean success = filteringSignal(0, username, censoredWord, replacement);
                     if (!success) {
-                        String failMessage = """
-                                Add filter failed because either
-                                1. Word/Phrase to censor already existed
-                                2. Unexpected error occurred
-                                """;
+                        String failMessage = "Add filter failed because either:\n\n" +
+                                "1. Word/Phrase to censor already existed\n" +
+                                "2. Unexpected error occurred";
                         JOptionPane.showMessageDialog(myFrame, failMessage, "Error", JOptionPane.ERROR_MESSAGE);
                     } else {
                         JOptionPane.showMessageDialog(myFrame,

@@ -2,6 +2,12 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+/**
+ * This is a class that manages the statistics for user messaging
+ *
+ * @author Kevin Jones
+ * @version 12/12/2022
+ */
 public class StatisticsManager {
     /**
      * this method keeps count of messages sent

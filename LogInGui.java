@@ -216,10 +216,10 @@ public class LogInGui {
                     if (user == null) {
                         return;
                     }
-                    if (user.equals("")) {
-                        while (user.equals("")) {
+                    if (user.equals("") || user.contains(" ")) {
+                        while (user.equals("") || user.contains(" ")) {
                             JOptionPane.showMessageDialog(null,
-                                    "Username cannot be blank!",
+                                    "Username cannot be blank or have spaces!",
                                     "Messaging program", JOptionPane.ERROR_MESSAGE);
                             user = JOptionPane.showInputDialog(null,
                                     "Enter your username.",

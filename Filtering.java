@@ -7,9 +7,8 @@ import java.util.Scanner;
  * Filtering class with static functions
  * to deal with filtering words
  *
- *
  * @author Vinh Pham Ngoc Thanh LC2
- * @version November 7 2022
+ * @version December 12 2022
  */
 public class Filtering{
     public static final Object OBJ = new Object();

@@ -6,6 +6,7 @@ import java.util.ArrayList;
  * This Message class handles all file actions when messagine, editing, or deleting
  *
  * @author John Brooks
+ * @version December 12, 2022
  */
 public class Message {
 
@@ -63,7 +64,7 @@ public class Message {
      * @author John Brooks
      */
     public static void appendMessageExecute(String sender, String recipient, boolean isBuyer, String fileSender,
-                                     String fileRecipient, String message) {
+                                            String fileRecipient, String message) {
 
         File senderF = new File(fileSender);
         File recipientF = new File(fileRecipient);
@@ -146,7 +147,7 @@ public class Message {
      * @author John Brooks
      */
     public static void editMessageExecute(String sender, String recipient, boolean isBuyer, String fileSender,
-                                   String fileRecipient, String message, String edit) {
+                                          String fileRecipient, String message, String edit) {
         String printFile;
         String extractNameAndTime = message.substring(0, message.indexOf("-") + 2);
         String editedMessage;

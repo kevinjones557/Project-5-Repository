@@ -1,6 +1,12 @@
 import java.io.*;
 import java.util.ArrayList;
 
+/**
+ * A class that handles making users invisible
+ *
+ * @author Vinh Pham Ngoc Thanh LC2
+ * @version December 12 2022
+ */
 public class Invisible {
     public static final Object OBJ = new Object();
 
